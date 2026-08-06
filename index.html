@@ -170,8 +170,8 @@
   }
   .distort-btn:hover { border-color: #c055ff; box-shadow: 0 0 12px rgba(192,85,255,.35); }
   #distortStatus { color: #c055ff; font-weight: 700; }
-  .cheat { color: #ffd33d; border-color: #30363d; }
-  .cheat:hover { border-color: #ffd33d; box-shadow: 0 0 12px rgba(255,211,61,.35); }
+  .adv { color: #58a6ff; border-color: #30363d; }
+  .adv:hover { border-color: #58a6ff; box-shadow: 0 0 12px rgba(88,166,255,.35); }
   .god { color: #ffd33d; border-color: #8b5cf6; }
   .god:hover { border-color: #ffd33d; box-shadow: 0 0 12px rgba(255,211,61,.35); }
   .god:disabled { color: #8b949e; border-color: #30363d; cursor: not-allowed; box-shadow: none; }
@@ -274,7 +274,7 @@
   <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
   <p id="godStatus" class="sub"></p>
   <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
-  <button id="cheatBtn" class="distort-btn cheat">🦸 Чит: +9999999999999999999 🪙</button>
+  <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
   <div class="menu-cols">
     <div class="block">
@@ -429,6 +429,7 @@ function setStore(k, v) {
 let coins = parseInt(getStore('bf_coins') || '0', 10);
 let hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
 let dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+let advCount = parseInt(getStore('bf_advCount') || '0', 10);
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
@@ -735,13 +736,39 @@ document.getElementById('godBtn').onclick = () => {
 
 document.getElementById('maxBtn').onclick = maxUpgrade;
 
-document.getElementById('cheatBtn').onclick = () => {
-  coins = 9999999999999999999;
+function advReward() { return 10000 * (advCount + 1); }
+function updateAdvBtn() {
+  const btn = document.getElementById('advBtn');
+  if (!btn) return;
+  btn.textContent = '🎬 Реклама: +' + advReward() + ' 🪙';
+}
+function grantAdReward() {
+  const reward = advReward();
+  coins += reward;
+  advCount++;
+  setStore('bf_advCount', advCount);
   saveProgress();
   refreshShop();
-  const btn = document.getElementById('cheatBtn');
-  btn.textContent = '✅ Монеты добавлены!';
-  setTimeout(() => { btn.textContent = '🦸 Чит: +9999999999999999999 🪙'; }, 1500);
+  const btn = document.getElementById('advBtn');
+  if (btn) {
+    btn.textContent = '✅ +' + reward + ' монет!';
+    setTimeout(updateAdvBtn, 1500);
+  }
+}
+document.getElementById('advBtn').onclick = () => {
+  const btn = document.getElementById('advBtn');
+  if (YSDK && YSDK.adv) {
+    btn.textContent = '⏳ Загрузка рекламы...';
+    YSDK.adv.showRewardedVideo({
+      callbacks: {
+        onRewarded: () => { grantAdReward(); },
+        onClose: () => { setTimeout(updateAdvBtn, 500); },
+        onError: () => { if (btn) { btn.textContent = '❌ Ошибка рекламы'; setTimeout(updateAdvBtn, 1500); } }
+      }
+    });
+  } else {
+    grantAdReward();
+  }
 };
 
 function startFight() {
@@ -2216,12 +2243,13 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_distorted', 'bf_godUnlocked', 'bf_god']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   coins = parseInt(getStore('bf_coins') || '0', 10);
   hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
   dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+  advCount = parseInt(getStore('bf_advCount') || '0', 10);
   distorted = getStore('bf_distorted') === '1';
   godUnlocked = getStore('bf_godUnlocked') === '1';
   godMode = getStore('bf_god') === '1';
@@ -2232,6 +2260,7 @@ function applyCloudData(data) {
     updateDistortUI();
     updateGodUI();
     updateDistortOverlay();
+    updateAdvBtn();
   } catch (e) {}
 }
 
@@ -2256,6 +2285,7 @@ document.getElementById('fsBtnMenu').onclick = toggleFullscreen;
 
 initYandexSDK();
 buildMenu();
+updateAdvBtn();
 loop();
 </script>
 </body>
