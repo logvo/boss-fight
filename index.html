@@ -111,6 +111,7 @@
   }
   #startBtn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(248,81,73,.4); }
 
+  #fight { display: flex; flex-direction: column; align-items: center; }
   .wrap {
     background: #161b22;
     border: 1px solid #30363d;
@@ -208,7 +209,7 @@
   #atkBtn:active { transform: scale(.93); background: rgba(248,81,73,.6); }
 
   @media (max-width: 900px) {
-    body { padding: 10px; }
+    body { padding: 0; }
     h1 { font-size: 26px; }
     #menu { padding: 18px; border-radius: 14px; }
     .menu-cols { flex-direction: column; gap: 12px; }
@@ -218,10 +219,32 @@
     .cards.vertical .card { padding: 14px 14px; gap: 12px; }
     .card { min-width: 0; }
     .card h3 { font-size: 16px; }
-    .ui { flex-wrap: wrap; }
-    .bar { width: 100%; }
-    .hint { font-size: 12px; line-height: 1.7; }
     #startBtn { padding: 16px; font-size: 20px; }
+
+    #fight {
+      position: fixed; inset: 0;
+      height: 100vh; height: 100dvh;
+      overflow: hidden;
+    }
+    .wrap {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column-reverse;
+      width: 100%; padding: 4px;
+      border: none; border-radius: 0; box-shadow: none;
+      gap: 4px;
+    }
+    canvas { flex: 1; min-height: 0; width: 100%; height: 100%; object-fit: contain; border: none; }
+    .ui { flex-wrap: nowrap; gap: 8px; margin: 0; font-size: 12px; }
+    .col { flex: 1; min-width: 0; }
+    .bar { width: 100%; height: 14px; }
+    .bar span { font-size: 10px; }
+    .label { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #menuBtn { padding: 6px 10px; font-size: 12px; }
+    .hint {
+      position: absolute; top: 48px; left: 0; right: 0; margin: 0;
+      font-size: 11px; pointer-events: none; z-index: 5;
+      text-shadow: 0 1px 3px rgba(0,0,0,.8);
+    }
   }
 </style>
 </head>
