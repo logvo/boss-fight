@@ -573,6 +573,7 @@ let waveNum = 0;
 let waveState = 'idle';
 let waveTimer = 0;
 let waveReward = 0;
+let showCode = null;
 let activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
 const CODES = {
   CHOCO50: { name: '50 шоколадок', apply() { chocolates += 50; } },
@@ -584,6 +585,18 @@ const CODES = {
   GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } },
   BELOCHKA: { repeatable: true, name: '9999999999999999999 🪙 и 9999999999999999999 🍫', apply() { coins += 9999999999999999999; chocolates += 9999999999999999999; } }
 };
+const BOSS_NAMES = {};
+const CODE_BY_BOSS = {};
+BOSSES.forEach(b => {
+  BOSS_NAMES[b.id] = b.name;
+  const code = (b.id + (b.stars * 15)).toUpperCase();
+  CODE_BY_BOSS[b.id] = code;
+  CODES[code] = {
+    bossId: b.id,
+    name: 'Награда за победу над «' + b.name + '»',
+    apply() { coins += b.stars * 15; chocolates += b.stars * 2; }
+  };
+});
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
@@ -1215,10 +1228,22 @@ function reset() {
   boss.type = bdef.type;
   boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0;
   boss.name = bdef.name; boss.stars = bdef.stars; boss.color = bdef.color; boss.accent = bdef.accent; boss.talk = bdef.talk; boss.win = bdef.win; boss.lose = bdef.lose;
-  gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false;
+  gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false; showCode = null;
   particles.length = 0; projs.length = 0;
   bossNameLabel.textContent = boss.name;
   updateBars();
+}
+
+function registerBossDefeat() {
+  const beaten = (getStore('bf_beaten') || '').split(',').filter(Boolean);
+  if (beaten.indexOf(boss.id) === -1) {
+    beaten.push(boss.id);
+    setStore('bf_beaten', beaten.join(','));
+  }
+  if (boss.id === 'chaos') chaosBeaten = true;
+  if (boss.id === 'god') godBeaten = true;
+  const c = CODE_BY_BOSS[boss.id];
+  if (c && activatedCodes.indexOf(c) === -1) showCode = c;
 }
 
 function hurtPlayer(dmg) {
@@ -1329,6 +1354,7 @@ function update() {
     if (Math.random() < 0.4) burst(boss.x + (Math.random() - 0.5) * boss.r * 2, boss.y + (Math.random() - 0.5) * boss.r * 2, boss.color, 2);
     if (boss.deathT <= 0) {
       gameOver = true; win = true;
+      registerBossDefeat();
       burst(boss.x, boss.y, boss.color, 50);
       burst(boss.x, boss.y, '#ffffff', 40);
       shake = 10;
@@ -1947,7 +1973,7 @@ function startWaveRun() {
   player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
   enemies.length = 0; particles.length = 0; projs.length = 0;
   waveNum = 0; waveState = 'intermission'; waveTimer = 180; waveReward = 0;
-  gameOver = false; win = false; shake = 0;
+  gameOver = false; win = false; shake = 0; showCode = null;
   updateBars();
 }
 
@@ -2921,6 +2947,31 @@ function drawGameOver() {
     ctx.font = 'bold 24px Segoe UI, Arial';
     ctx.fillText('🪙 + ' + coinDrop + ' монет', canvas.width / 2, canvas.height / 2 + nY + 10);
   }
+  if (win && showCode && CODES[showCode]) {
+    const cw = 460, ch = 84;
+    const bx = canvas.width / 2 - cw / 2, by = canvas.height / 2 - 175;
+    ctx.fillStyle = 'rgba(24,14,6,.95)';
+    rr(bx, by, cw, ch, 14);
+    ctx.strokeStyle = '#ffd33d';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(bx + 14, by);
+    ctx.arcTo(bx + cw, by, bx + cw, by + ch, 14);
+    ctx.arcTo(bx + cw, by + ch, bx, by + ch, 14);
+    ctx.arcTo(bx, by + ch, bx, by, 14);
+    ctx.arcTo(bx, by, bx + cw, by, 14);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = '#ffd33d';
+    ctx.font = 'bold 16px Segoe UI, Arial';
+    ctx.fillText('🎁 ТЫ ПОЛУЧИЛ ПРОМО-КОД!', canvas.width / 2, by + 24);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 34px Segoe UI, Arial';
+    ctx.fillText(showCode, canvas.width / 2, by + 56);
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '13px Segoe UI, Arial';
+    ctx.fillText('Введи его в меню → раздел «Промо-коды»', canvas.width / 2, by + 74);
+  }
   ctx.font = '16px Segoe UI, Arial';
   ctx.fillStyle = '#8b949e';
   ctx.fillText('Нажми R — реванш, Esc — меню', canvas.width / 2, canvas.height / 2 + 75);
@@ -2995,6 +3046,10 @@ function activateCode(raw) {
   const c = CODES[code];
   if (!c) { st.textContent = '❌ Неверный код'; st.style.color = '#f85149'; return; }
   if (!c.repeatable && activatedCodes.indexOf(code) !== -1) { st.textContent = '⚠️ Код уже активирован'; st.style.color = '#f0883e'; return; }
+  if (c.bossId) {
+    const beaten = (getStore('bf_beaten') || '').split(',').filter(Boolean);
+    if (beaten.indexOf(c.bossId) === -1) { st.textContent = '❌ Сначала победи «' + (BOSS_NAMES[c.bossId] || 'этого босса') + '»!'; st.style.color = '#f85149'; return; }
+  }
   try {
     c.apply();
     if (!c.repeatable) activatedCodes.push(code);
@@ -3026,7 +3081,7 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
   }
 });
 
-const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes'];
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten'];
 
 function resetProgress() {
   RESET_KEYS.forEach(k => {
@@ -3137,7 +3192,7 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
