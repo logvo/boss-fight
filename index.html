@@ -885,7 +885,7 @@ function drawDashCd() {
 const DEATH_TIME = 80;
 
 function dropCoins() {
-  coinDrop = Math.round(boss.stars * 120 * (speedMode ? 1.5 : 1) * (boomMode ? 1.25 : 1) * (nightMode ? 1.5 : 1));
+  coinDrop = Math.round(boss.stars * 360 * (speedMode ? 1.5 : 1) * (boomMode ? 1.25 : 1) * (nightMode ? 1.5 : 1));
   coins += coinDrop;
   saveProgress();
   for (let i = 0; i < 40; i++) {
