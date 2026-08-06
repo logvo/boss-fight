@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Бой с боссом</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -117,8 +117,9 @@
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 8px 30px rgba(0,0,0,.5);
+    max-width: 100%;
   }
-  canvas { display: block; background: #10151c; border: 1px solid #30363d; border-radius: 8px; }
+  canvas { display: block; background: #10151c; border: 1px solid #30363d; border-radius: 8px; max-width: 100%; height: auto; touch-action: none; }
   .ui { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 12px; font-size: 15px; }
   .col { display: flex; flex-direction: column; gap: 4px; }
   .bar {
@@ -184,6 +185,44 @@
     animation: distortFloat linear infinite;
   }
   @keyframes distortFloat { from { transform: translateY(10vh); } to { transform: translateY(-110vh); } }
+
+  #touchControls { display: none; position: fixed; inset: 0; z-index: 40; pointer-events: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+  #touchControls.on { display: block; }
+  #joyZone { position: absolute; left: 14px; bottom: 14px; width: 170px; height: 170px; pointer-events: auto; }
+  #joyBase {
+    position: absolute; left: 15px; bottom: 15px; width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.28);
+    box-shadow: inset 0 0 24px rgba(0,0,0,.35);
+  }
+  #joyKnob {
+    position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%;
+    background: rgba(255,255,255,.55); box-shadow: 0 3px 10px rgba(0,0,0,.45); will-change: transform;
+  }
+  #atkZone { position: absolute; right: 14px; bottom: 14px; width: 170px; height: 170px; pointer-events: auto; }
+  #atkBtn {
+    position: absolute; right: 15px; bottom: 15px; width: 120px; height: 120px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4); background: rgba(248,81,73,.38);
+    color: #fff; font-size: 44px; cursor: pointer; touch-action: none;
+    box-shadow: 0 4px 18px rgba(0,0,0,.5), inset 0 0 22px rgba(255,255,255,.12);
+  }
+  #atkBtn:active { transform: scale(.93); background: rgba(248,81,73,.6); }
+
+  @media (max-width: 900px) {
+    body { padding: 10px; }
+    h1 { font-size: 26px; }
+    #menu { padding: 18px; border-radius: 14px; }
+    .menu-cols { flex-direction: column; gap: 12px; }
+    .shop { flex-direction: column; }
+    .shop-card { padding: 14px; }
+    .shop-card button { padding: 12px 16px; font-size: 15px; }
+    .cards.vertical .card { padding: 14px 14px; gap: 12px; }
+    .card { min-width: 0; }
+    .card h3 { font-size: 16px; }
+    .ui { flex-wrap: wrap; }
+    .bar { width: 100%; }
+    .hint { font-size: 12px; line-height: 1.7; }
+    #startBtn { padding: 16px; font-size: 20px; }
+  }
 </style>
 </head>
 <body>
@@ -259,11 +298,12 @@
       <button id="menuBtn">← Меню</button>
     </div>
   </div>
-  <div class="hint">
-    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;
-    <kbd>Пробел</kbd> или <kbd>Shift</kbd> — атака &nbsp;·&nbsp;
-    <kbd>R</kbd> — рестарт &nbsp;·&nbsp;
-    <kbd>Esc</kbd> — меню
+  <div class="hint" id="hint"></div>
+  <div id="touchControls">
+    <div id="joyZone">
+      <div id="joyBase"><div id="joyKnob"></div></div>
+    </div>
+    <div id="atkZone"><button id="atkBtn">⚔️</button></div>
   </div>
 </div>
 
@@ -326,6 +366,10 @@ let cracks = [];
 const keys = {};
 const particles = [];
 const projs = [];
+
+let tMoveX = 0, tMoveY = 0;
+let touchAttack = false;
+const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
 let coins = parseInt(localStorage.getItem('bf_coins') || '0', 10);
 let hpLevel = parseInt(localStorage.getItem('bf_hpLevel') || '0', 10);
@@ -640,12 +684,18 @@ function startFight() {
   screen = 'fight';
   menuEl.classList.add('hidden');
   fightEl.classList.remove('hidden');
+  const hint = document.getElementById('hint');
+  hint.innerHTML = isTouch
+    ? '🕹️ Левый джойстик — движение &nbsp;·&nbsp; ⚔️ Кнопка — атака &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
+    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> или <kbd>Shift</kbd> — атака &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
+  document.getElementById('touchControls').classList.toggle('on', isTouch);
 }
 
 function toMenu() {
   screen = 'menu';
   fightEl.classList.add('hidden');
   menuEl.classList.remove('hidden');
+  document.getElementById('touchControls').classList.remove('on');
   buildBossList();
   refreshShop();
 }
@@ -710,10 +760,15 @@ function update() {
   if (keys['ArrowRight'] || keys['d']) { player.x += player.speed; player.facing = 1; }
   if (keys['ArrowUp'] || keys['w']) player.y -= player.speed;
   if (keys['ArrowDown'] || keys['s']) player.y += player.speed;
+  if (tMoveX !== 0 || tMoveY !== 0) {
+    player.x += tMoveX * player.speed;
+    player.y += tMoveY * player.speed;
+    if (Math.abs(tMoveX) > 0.3) player.facing = tMoveX > 0 ? 1 : -1;
+  }
   player.x = clamp(player.x, 0, canvas.width - player.w);
   player.y = clamp(player.y, 0, canvas.height - player.h);
 
-  if ((keys[' '] || keys['Shift']) && player.atkCd <= 0) {
+  if (((keys[' '] || keys['Shift']) || touchAttack) && player.atkCd <= 0) {
     player.atkCd = weapon.cd;
     player.atkAnim = 12;
     if (weapon.proj) {
@@ -1080,7 +1135,7 @@ function drawFloor() {
 
 function drawPlayer() {
   const t = performance.now() / 1000;
-  const moving = keys['ArrowLeft'] || keys['a'] || keys['ArrowRight'] || keys['d'] || keys['ArrowUp'] || keys['w'] || keys['ArrowDown'] || keys['s'];
+  const moving = keys['ArrowLeft'] || keys['a'] || keys['ArrowRight'] || keys['d'] || keys['ArrowUp'] || keys['w'] || keys['ArrowDown'] || keys['s'] || tMoveX !== 0 || tMoveY !== 0;
   const bob = Math.sin(t * 10) * 2 * (moving ? 1 : 0.4);
   const lean = moving ? Math.cos(t * 10) * 0.06 : Math.sin(t * 2) * 0.03;
   ctx.save();
@@ -1646,6 +1701,60 @@ document.addEventListener('keydown', e => {
   if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
 });
 document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+const joyZone = document.getElementById('joyZone');
+const joyKnob = document.getElementById('joyKnob');
+const atkBtn = document.getElementById('atkBtn');
+const JOY_MAX = 55;
+let joyActive = false;
+let joyId = null;
+
+function setJoy(dx, dy) {
+  const d = Math.hypot(dx, dy);
+  if (d === 0) { tMoveX = 0; tMoveY = 0; joyKnob.style.transform = 'translate(0, 0)'; return; }
+  const cl = Math.min(d, JOY_MAX);
+  tMoveX = (cl / JOY_MAX) * (dx / d);
+  tMoveY = (cl / JOY_MAX) * (dy / d);
+  joyKnob.style.transform = 'translate(' + (cl * dx / d) + 'px, ' + (cl * dy / d) + 'px)';
+}
+function resetJoy() {
+  joyActive = false; joyId = null;
+  tMoveX = 0; tMoveY = 0;
+  joyKnob.style.transform = 'translate(0, 0)';
+}
+
+joyZone.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const r = joyZone.getBoundingClientRect();
+  const t = e.changedTouches[0];
+  joyId = t.identifier;
+  joyActive = true;
+  setJoy(t.clientX - r.left - r.width / 2, t.clientY - r.top - r.height / 2);
+}, { passive: false });
+
+joyZone.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!joyActive) return;
+  let t = null;
+  for (let i = 0; i < e.touches.length; i++) {
+    if (e.touches[i].identifier === joyId) { t = e.touches[i]; break; }
+  }
+  if (!t) return;
+  const r = joyZone.getBoundingClientRect();
+  setJoy(t.clientX - r.left - r.width / 2, t.clientY - r.top - r.height / 2);
+}, { passive: false });
+
+joyZone.addEventListener('touchend', e => {
+  e.preventDefault();
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    if (e.changedTouches[i].identifier === joyId) resetJoy();
+  }
+}, { passive: false });
+joyZone.addEventListener('touchcancel', e => { if (joyActive) resetJoy(); }, { passive: false });
+
+atkBtn.addEventListener('touchstart', e => { e.preventDefault(); touchAttack = true; }, { passive: false });
+atkBtn.addEventListener('touchend', e => { e.preventDefault(); touchAttack = false; }, { passive: false });
+atkBtn.addEventListener('touchcancel', () => { touchAttack = false; }, { passive: false });
 
 buildMenu();
 loop();
