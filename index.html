@@ -188,6 +188,25 @@
     transition: transform .12s, box-shadow .12s;
   }
   .reset-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(248,81,73,.4); }
+  #achBanner {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-140%);
+    background: linear-gradient(135deg, #3fb950, #2d7d3a);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 8px 30px rgba(63,185,80,.45);
+    z-index: 999;
+    transition: transform .3s ease, opacity .3s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #achBanner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   #fight { display: flex; flex-direction: column; align-items: center; }
   .wrap {
@@ -305,6 +324,13 @@
     box-shadow: 0 4px 18px rgba(0,0,0,.5), inset 0 0 22px rgba(255,255,255,.12);
   }
   #atkBtn:active { transform: scale(.93); background: rgba(248,81,73,.6); }
+  #dashBtn {
+    position: absolute; left: 8px; bottom: 22px; width: 72px; height: 72px; border-radius: 50%;
+    border: 2px solid rgba(121,192,255,.5); background: rgba(56,139,253,.3);
+    color: #fff; font-size: 30px; cursor: pointer; touch-action: none;
+    box-shadow: 0 4px 18px rgba(0,0,0,.5), inset 0 0 18px rgba(121,192,255,.15);
+  }
+  #dashBtn:active { transform: scale(.93); background: rgba(56,139,253,.55); }
 
   @media (max-width: 900px) {
     body { padding: 0; }
@@ -370,6 +396,7 @@
     <button class="tab-btn active" data-tab="battle">⚔️ Бой</button>
     <button class="tab-btn" data-tab="shop">🛒 Магазин</button>
     <button class="tab-btn" data-tab="codes">🎁 Коды</button>
+    <button class="tab-btn" data-tab="ach">🏆 Достижения</button>
   </div>
 
   <div id="tab-battle" class="tab active">
@@ -431,6 +458,46 @@
           <button id="dmgBtn">+5 урона</button>
         </div>
         <div class="shop-card">
+          <div class="icon">🎯</div>
+          <div class="shop-info">
+            <h3>Крит. шанс</h3>
+            <div class="mini">Шанс: <b id="critStat">5%</b> · Урон ×2</div>
+          </div>
+          <button id="critBtn">+3% крита</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">🏹</div>
+          <div class="shop-info">
+            <h3>Скорость атаки</h3>
+            <div class="mini">Перезарядка: <b id="aspdStat">100%</b></div>
+          </div>
+          <button id="aspdBtn">-5% времени</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">🛡️</div>
+          <div class="shop-info">
+            <h3>Броня</h3>
+            <div class="mini">Поглощение: <b id="armorStat">0</b></div>
+          </div>
+          <button id="armorBtn">+3 к броне</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">👟</div>
+          <div class="shop-info">
+            <h3>Скорость</h3>
+            <div class="mini">Скорость: <b id="moveStat">0</b></div>
+          </div>
+          <button id="moveBtn">+0.12</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">💚</div>
+          <div class="shop-info">
+            <h3>Регенерация</h3>
+            <div class="mini">+<b id="regenStat">0</b> HP/сек</div>
+          </div>
+          <button id="regenBtn">+1 HP</button>
+        </div>
+        <div class="shop-card">
           <div class="icon">⚡</div>
           <div class="shop-info">
             <h3>Автопрокачка</h3>
@@ -475,7 +542,16 @@
       <div id="resetStatus" class="mini" style="margin-top:8px"></div>
     </div>
   </div>
+
+  <div id="tab-ach" class="tab">
+    <div class="block">
+      <h2>🏆 Достижения</h2>
+      <div class="mini" style="margin-bottom:10px">Выполняй задания, получай награды. Награды начисляются автоматически.</div>
+      <div id="achList" class="cards vertical"></div>
+    </div>
+  </div>
 </div>
+<div id="achBanner">🏆</div>
 
 <div id="fight" class="hidden">
   <div class="wrap">
@@ -498,7 +574,10 @@
     <div id="joyZone">
       <div id="joyBase"><div id="joyKnob"></div></div>
     </div>
-    <div id="atkZone"><button id="atkBtn">⚔️</button></div>
+    <div id="atkZone">
+      <button id="dashBtn">💨</button>
+      <button id="atkBtn">⚔️</button>
+    </div>
   </div>
 </div>
 
@@ -600,6 +679,11 @@ function setStore(k, v) {
 let coins = parseInt(getStore('bf_coins') || '0', 10);
 let hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
 let dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+let critLevel = parseInt(getStore('bf_critLevel') || '0', 10);
+let atkSpdLevel = parseInt(getStore('bf_atkSpdLevel') || '0', 10);
+let armorLevel = parseInt(getStore('bf_armorLevel') || '0', 10);
+let moveLevel = parseInt(getStore('bf_moveLevel') || '0', 10);
+let regenLevel = parseInt(getStore('bf_regenLevel') || '0', 10);
 let advCount = parseInt(getStore('bf_advCount') || '0', 10);
 let chocolates = parseInt(getStore('bf_choco') || '0', 10);
 let megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
@@ -645,21 +729,158 @@ speedMode = getStore('bf_speed') === '1';
 boomMode = getStore('bf_boom') === '1';
 nightMode = getStore('bf_night') === '1';
 if (godMode) distorted = true;
+let achBannerTO = null;
+const ACHIEVEMENTS = [
+  { id: 'win1', name: 'Первый шаг', desc: 'Победи любого босса', check: () => totalWins >= 1, coins: 100 },
+  { id: 'win10', name: 'Серийный убийца', desc: 'Победи 10 боссов', check: () => totalWins >= 10, coins: 300 },
+  { id: 'win50', name: 'Легенда арены', desc: 'Победи 50 боссов', check: () => totalWins >= 50, coins: 1500, choco: 15 },
+  { id: 'wave5', name: 'Выживший', desc: 'Пройди волну 5', check: () => waveBest >= 5, coins: 150 },
+  { id: 'wave15', name: 'Король волн', desc: 'Пройди все 15 волн', check: () => waveBest >= 15, coins: 800, choco: 20 },
+  { id: 'kills100', name: 'Машина для убийств', desc: 'Убей 100 врагов', check: () => totalKills >= 100, coins: 200 },
+  { id: 'kills1000', name: 'Безжалостный', desc: 'Убей 1000 врагов', check: () => totalKills >= 1000, coins: 1000, choco: 10 },
+  { id: 'godun', name: 'Пробуждение', desc: 'Открой режим бога', check: () => godUnlocked, coins: 500 },
+  { id: 'godwin', name: 'Богоубийца', desc: 'Победи ВСЕВЫШНЕГО', check: () => (getStore('bf_beaten') || '').split(',').indexOf('god') !== -1, coins: 1200, choco: 15 },
+  { id: 'finalwin', name: 'Финиш!', desc: 'Победи финального босса', check: () => (getStore('bf_beaten') || '').split(',').indexOf('ultimate') !== -1, coins: 2000, choco: 30 },
+  { id: 'rich', name: 'Богач', desc: 'Имей 100000 монет', check: () => coins >= 100000, coins: 300 },
+  { id: 'choco500', name: 'Сладкоежка', desc: 'Собери 500 шоколадок', check: () => chocolates >= 500, coins: 300, choco: 50 },
+  { id: 'mega5', name: 'Коллекционер', desc: 'Купи все мега-оружия', check: () => Object.keys(MEGA_WEAPONS).every(w => megaOwned.indexOf(w) !== -1), coins: 800, choco: 15 },
+  { id: 'codes10', name: 'Кодировщик', desc: 'Активируй 10 кодов', check: () => activatedCodes.length >= 10, coins: 200 },
+  { id: 'max50', name: 'Силач', desc: 'Прокачай HP и урон 50 раз', check: () => hpLevel + dmgLevel >= 50, coins: 400 },
+  { id: 'crit10', name: 'Удачливый', desc: 'Крит 10-го уровня', check: () => critLevel >= 10, coins: 300 },
+  { id: 'armor10', name: 'Неуязвимый', desc: 'Броня 10-го уровня', check: () => armorLevel >= 10, coins: 300 }
+];
+function grantAchievement(a) {
+  if (unlockedAch.indexOf(a.id) !== -1) return;
+  unlockedAch.push(a.id);
+  setStore('bf_ach', unlockedAch.join(','));
+  if (a.coins) coins += a.coins;
+  if (a.choco) chocolates += a.choco;
+  saveProgress();
+  refreshShop();
+  const el = document.getElementById('achBanner');
+  if (el) {
+    el.textContent = '🏆 «' + a.name + '»' + (a.coins ? ' · +' + a.coins + ' 🪙' : '') + (a.choco ? ' · +' + a.choco + ' 🍫' : '');
+    el.classList.add('show');
+    clearTimeout(achBannerTO);
+    achBannerTO = setTimeout(() => el.classList.remove('show'), 4200);
+  }
+  if (document.getElementById('achList')) buildAchievements();
+}
+function checkAchievements() {
+  for (const a of ACHIEVEMENTS) {
+    if (unlockedAch.indexOf(a.id) !== -1) continue;
+    try { if (a.check()) grantAchievement(a); } catch (e) {}
+  }
+}
+function buildAchievements() {
+  const el = document.getElementById('achList');
+  if (!el) return;
+  el.innerHTML = '';
+  const doneCount = ACHIEVEMENTS.filter(a => unlockedAch.indexOf(a.id) !== -1).length;
+  const head = document.createElement('div');
+  head.className = 'mini';
+  head.style.marginBottom = '10px';
+  head.textContent = 'Выполнено: ' + doneCount + ' / ' + ACHIEVEMENTS.length;
+  el.appendChild(head);
+  ACHIEVEMENTS.forEach(a => {
+    const done = unlockedAch.indexOf(a.id) !== -1;
+    const d = document.createElement('div');
+    d.className = 'card' + (done ? ' selected' : '');
+    d.style.borderColor = done ? '#3fb950' : '';
+    const reward = (a.coins ? a.coins + ' 🪙' : '') + (a.choco ? (a.coins ? ' + ' : '') + a.choco + ' 🍫' : '');
+    d.innerHTML = `<div><h3>${done ? '✅' : '🔒'} ${a.name}</h3><div class="mini">${a.desc}</div></div><div class="mini">${done ? 'Выполнено!' : 'Награда: ' + reward}</div>`;
+    el.appendChild(d);
+  });
+}
 let coinDrop = 0;
 const UP_HP_COST = l => 50 + l * 30;
 const UP_DMG_COST = l => 40 + l * 25;
+const UP_CRIT_COST = l => 300 + l * 200;
+const UP_ASPD_COST = l => 350 + l * 250;
+const UP_ARMOR_COST = l => 450 + l * 300;
+const UP_MOVE_COST = l => 500 + l * 350;
+const UP_REG_COST = l => 600 + l * 400;
+const MAX_CRIT = 12, MAX_ASPD = 10, MAX_ARMOR = 10, MAX_MOVE = 10, MAX_REG = 10;
+let combo = 0;
+let lastCrit = false;
+let dashCd = 0, dashTimer = 0, dashInv = 0, dashVX = 0, dashVY = 0;
+let touchDash = false;
+let floatTexts = [];
+let frameCount = 0;
+let totalWins = parseInt(getStore('bf_wins') || '0', 10);
+let totalKills = parseInt(getStore('bf_kills') || '0', 10);
+let waveBest = parseInt(getStore('bf_waveBest') || '0', 10);
+let unlockedAch = (getStore('bf_ach') || '').split(',').filter(Boolean);
 
 function saveProgress() {
   setStore('bf_coins', coins);
   setStore('bf_hpLevel', hpLevel);
   setStore('bf_dmgLevel', dmgLevel);
+  setStore('bf_critLevel', critLevel);
+  setStore('bf_atkSpdLevel', atkSpdLevel);
+  setStore('bf_armorLevel', armorLevel);
+  setStore('bf_moveLevel', moveLevel);
+  setStore('bf_regenLevel', regenLevel);
   setStore('bf_choco', chocolates);
   setStore('bf_chocoWeapons', chocoWeaponsOwned.join(','));
   setStore('bf_skins', skinsOwned.join(','));
   setStore('bf_skin', selectedSkin);
   setStore('bf_codes', activatedCodes.join(','));
+  setStore('bf_wins', totalWins);
+  setStore('bf_kills', totalKills);
+  setStore('bf_waveBest', waveBest);
+  setStore('bf_ach', unlockedAch.join(','));
 }
-function weaponDmg() { return weapon.dmg + dmgLevel * 5; }
+function weaponDmg() {
+  lastCrit = Math.random() < 0.05 + critLevel * 0.03;
+  const dmg = (weapon.dmg + dmgLevel * 5) * (lastCrit ? 2 : 1) * (1 + combo * 0.02);
+  return Math.max(1, Math.round(dmg));
+}
+function playerAtkCd() { return Math.max(4, Math.round(weapon.cd * (1 - atkSpdLevel * 0.04))); }
+function playerBaseSpeed() { return (3.2 * (speedMode ? 1.3 : 1)) + moveLevel * 0.12; }
+function addFloat(x, y, text, color) {
+  floatTexts.push({ x, y, text, color, life: 55 });
+  if (floatTexts.length > 24) floatTexts.shift();
+}
+function drawFloatTexts() {
+  for (let i = floatTexts.length - 1; i >= 0; i--) {
+    const f = floatTexts[i];
+    f.life--; f.y -= 0.7;
+    if (f.life <= 0) { floatTexts.splice(i, 1); continue; }
+    ctx.globalAlpha = Math.min(1, f.life / 25);
+    ctx.font = 'bold 17px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(0,0,0,.7)';
+    ctx.lineWidth = 3;
+    ctx.strokeText(f.text, f.x, f.y);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+    ctx.globalAlpha = 1;
+  }
+}
+function drawComboHud() {
+  if (combo < 2) return;
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 22px Segoe UI, Arial';
+  ctx.strokeStyle = 'rgba(0,0,0,.65)';
+  ctx.lineWidth = 4;
+  ctx.strokeText('COMBO x' + combo, canvas.width - 14, 30);
+  ctx.fillStyle = combo >= 10 ? '#ff6b6b' : '#ffd33d';
+  ctx.fillText('COMBO x' + combo, canvas.width - 14, 30);
+}
+function drawDashCd() {
+  const cx = 24, cy = canvas.height - 24;
+  ctx.fillStyle = 'rgba(0,0,0,.55)';
+  ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI * 2); ctx.fill();
+  const frac = dashCd <= 0 ? 1 : 1 - dashCd / 45;
+  ctx.strokeStyle = dashCd <= 0 ? '#79c0ff' : '#8b949e';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke();
+  ctx.fillStyle = dashCd <= 0 ? '#79c0ff' : '#8b949e';
+  ctx.font = 'bold 11px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('E', cx, cy + 4);
+}
 
 const DEATH_TIME = 80;
 
@@ -1100,20 +1321,34 @@ function buildMenu() {
   buildBossList();
   buildMegaShop();
   buildChocoShop();
+  buildAchievements();
   refreshShop();
 }
 
 function maxUpgrade() {
   let guards = 0;
-  while (guards < 100000) {
+  while (guards < 1000000) {
     guards++;
-    const hc = UP_HP_COST(hpLevel);
-    const dc = UP_DMG_COST(dmgLevel);
-    if (coins >= hc && hc <= dc) { coins -= hc; hpLevel++; continue; }
-    if (coins >= dc && dc < hc) { coins -= dc; dmgLevel++; continue; }
-    if (coins >= hc) { coins -= hc; hpLevel++; continue; }
-    if (coins >= dc) { coins -= dc; dmgLevel++; continue; }
-    break;
+    const ups = [
+      { lvl: hpLevel, cost: UP_HP_COST(hpLevel), max: 999 },
+      { lvl: dmgLevel, cost: UP_DMG_COST(dmgLevel), max: 999 },
+      { lvl: critLevel, cost: UP_CRIT_COST(critLevel), max: MAX_CRIT },
+      { lvl: atkSpdLevel, cost: UP_ASPD_COST(atkSpdLevel), max: MAX_ASPD },
+      { lvl: armorLevel, cost: UP_ARMOR_COST(armorLevel), max: MAX_ARMOR },
+      { lvl: moveLevel, cost: UP_MOVE_COST(moveLevel), max: MAX_MOVE },
+      { lvl: regenLevel, cost: UP_REG_COST(regenLevel), max: MAX_REG }
+    ].filter(u => u.lvl < u.max);
+    let best = null;
+    for (const u of ups) if (coins >= u.cost && (!best || u.cost < best.cost)) best = u;
+    if (!best) break;
+    coins -= best.cost;
+    if (best === ups[0]) hpLevel++;
+    else if (best === ups[1]) dmgLevel++;
+    else if (best === ups[2]) critLevel++;
+    else if (best === ups[3]) atkSpdLevel++;
+    else if (best === ups[4]) armorLevel++;
+    else if (best === ups[5]) moveLevel++;
+    else regenLevel++;
   }
   saveProgress();
   refreshShop();
@@ -1125,14 +1360,40 @@ function refreshShop() {
   if (cb) cb.textContent = chocolates;
   document.getElementById('hpStat').textContent = 100 + hpLevel * 25;
   document.getElementById('dmgStat').textContent = '+' + dmgLevel * 5;
+  document.getElementById('critStat').textContent = Math.min(41, Math.round((5 + critLevel * 3) * 100) / 100) + '%';
+  document.getElementById('aspdStat').textContent = Math.round(playerAtkCd() / weapon.cd * 100) + '%';
+  document.getElementById('armorStat').textContent = armorLevel * 3;
+  document.getElementById('moveStat').textContent = moveLevel * 0.12;
+  document.getElementById('regenStat').textContent = regenLevel;
   const hpBtn = document.getElementById('hpBtn');
   const dmgBtn = document.getElementById('dmgBtn');
   const maxBtn = document.getElementById('maxBtn');
+  const critBtn = document.getElementById('critBtn');
+  const aspdBtn = document.getElementById('aspdBtn');
+  const armorBtn = document.getElementById('armorBtn');
+  const moveBtn = document.getElementById('moveBtn');
+  const regenBtn = document.getElementById('regenBtn');
   hpBtn.textContent = `+25 HP (${UP_HP_COST(hpLevel)} 🪙)`;
   dmgBtn.textContent = `+5 урона (${UP_DMG_COST(dmgLevel)} 🪙)`;
+  critBtn.textContent = critLevel >= MAX_CRIT ? 'МАКС' : `+3% крита (${UP_CRIT_COST(critLevel)} 🪙)`;
+  aspdBtn.textContent = atkSpdLevel >= MAX_ASPD ? 'МАКС' : `-5% времени (${UP_ASPD_COST(atkSpdLevel)} 🪙)`;
+  armorBtn.textContent = armorLevel >= MAX_ARMOR ? 'МАКС' : `+3 брони (${UP_ARMOR_COST(armorLevel)} 🪙)`;
+  moveBtn.textContent = moveLevel >= MAX_MOVE ? 'МАКС' : `+0.12 (${UP_MOVE_COST(moveLevel)} 🪙)`;
+  regenBtn.textContent = regenLevel >= MAX_REG ? 'МАКС' : `+1 HP (${UP_REG_COST(regenLevel)} 🪙)`;
+  const one = [UP_HP_COST(hpLevel), UP_DMG_COST(dmgLevel)];
+  if (critLevel < MAX_CRIT) one.push(UP_CRIT_COST(critLevel));
+  if (atkSpdLevel < MAX_ASPD) one.push(UP_ASPD_COST(atkSpdLevel));
+  if (armorLevel < MAX_ARMOR) one.push(UP_ARMOR_COST(armorLevel));
+  if (moveLevel < MAX_MOVE) one.push(UP_MOVE_COST(moveLevel));
+  if (regenLevel < MAX_REG) one.push(UP_REG_COST(regenLevel));
+  maxBtn.disabled = coins < Math.min.apply(null, one);
   hpBtn.disabled = coins < UP_HP_COST(hpLevel);
   dmgBtn.disabled = coins < UP_DMG_COST(dmgLevel);
-  maxBtn.disabled = coins < Math.min(UP_HP_COST(hpLevel), UP_DMG_COST(dmgLevel));
+  critBtn.disabled = critLevel >= MAX_CRIT || coins < UP_CRIT_COST(critLevel);
+  aspdBtn.disabled = atkSpdLevel >= MAX_ASPD || coins < UP_ASPD_COST(atkSpdLevel);
+  armorBtn.disabled = armorLevel >= MAX_ARMOR || coins < UP_ARMOR_COST(armorLevel);
+  moveBtn.disabled = moveLevel >= MAX_MOVE || coins < UP_MOVE_COST(moveLevel);
+  regenBtn.disabled = regenLevel >= MAX_REG || coins < UP_REG_COST(regenLevel);
 }
 
 document.getElementById('hpBtn').onclick = () => {
@@ -1142,6 +1403,31 @@ document.getElementById('hpBtn').onclick = () => {
 document.getElementById('dmgBtn').onclick = () => {
   const cost = UP_DMG_COST(dmgLevel);
   if (coins >= cost) { coins -= cost; dmgLevel++; saveProgress(); refreshShop(); }
+};
+document.getElementById('critBtn').onclick = () => {
+  if (critLevel >= MAX_CRIT) return;
+  const cost = UP_CRIT_COST(critLevel);
+  if (coins >= cost) { coins -= cost; critLevel++; saveProgress(); refreshShop(); }
+};
+document.getElementById('aspdBtn').onclick = () => {
+  if (atkSpdLevel >= MAX_ASPD) return;
+  const cost = UP_ASPD_COST(atkSpdLevel);
+  if (coins >= cost) { coins -= cost; atkSpdLevel++; saveProgress(); refreshShop(); }
+};
+document.getElementById('armorBtn').onclick = () => {
+  if (armorLevel >= MAX_ARMOR) return;
+  const cost = UP_ARMOR_COST(armorLevel);
+  if (coins >= cost) { coins -= cost; armorLevel++; saveProgress(); refreshShop(); }
+};
+document.getElementById('moveBtn').onclick = () => {
+  if (moveLevel >= MAX_MOVE) return;
+  const cost = UP_MOVE_COST(moveLevel);
+  if (coins >= cost) { coins -= cost; moveLevel++; saveProgress(); refreshShop(); }
+};
+document.getElementById('regenBtn').onclick = () => {
+  if (regenLevel >= MAX_REG) return;
+  const cost = UP_REG_COST(regenLevel);
+  if (coins >= cost) { coins -= cost; regenLevel++; saveProgress(); refreshShop(); }
 };
 
 document.getElementById('distortBtn').onclick = () => {
@@ -1233,8 +1519,8 @@ function startFight() {
   fightEl.classList.remove('hidden');
   const hint = document.getElementById('hint');
   hint.innerHTML = isTouch
-    ? '🕹️ Левый джойстик — движение &nbsp;·&nbsp; ⚔️ Кнопка — атака &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
-    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> или <kbd>Shift</kbd> — атака &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
+    ? '🕹️ Джойстик — движение &nbsp;·&nbsp; ⚔️ — атака &nbsp;·&nbsp; 💨 — рывок &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
+    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> или <kbd>Shift</kbd> — атака &nbsp;·&nbsp;<kbd>E</kbd> — рывок &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
   document.getElementById('touchControls').classList.toggle('on', isTouch);
 }
 
@@ -1260,7 +1546,7 @@ function reset() {
   player.x = 150; player.y = 340;
   player.maxHp = (100 + hpLevel * 25) * (boomMode ? 0.75 : 1) * (nightMode ? 1.15 : 1);
   player.hp = player.maxHp;
-  player.speed = 3.2 * (speedMode ? 1.3 : 1);
+  player.speed = playerBaseSpeed();
   player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
   boss.x = 730; boss.y = 330; boss.r = bdef.r;
   boss.hp = boss.maxHp = bdef.hp * godHpMult * nightHpMult;
@@ -1282,26 +1568,35 @@ function registerBossDefeat() {
     beaten.push(boss.id);
     setStore('bf_beaten', beaten.join(','));
   }
+  totalWins++;
+  setStore('bf_wins', totalWins);
   if (boss.id === 'chaos') chaosBeaten = true;
   if (boss.id === 'god') { godBeaten = true; if (godMode) { ultimateUnlocked = true; setStore('bf_ultimateUnlocked', '1'); } }
   if (boss.id === 'ultimate') letterShown = true;
   const c = CODE_BY_BOSS[boss.id];
   if (c && activatedCodes.indexOf(c) === -1) showCode = c;
+  checkAchievements();
 }
 
 function hurtPlayer(dmg) {
   if (player.hp <= 0) return;
-  player.hp -= dmg;
+  if (dashInv > 0) return;
+  const real = Math.max(1, dmg - armorLevel * 3);
+  player.hp -= real;
+  combo = 0;
   player.hitFx = 10;
   shake = 8;
+  addFloat(player.x + player.w / 2, player.y, '-' + real, '#f85149');
   burst(player.x + player.w / 2, player.y + player.h / 2, '#f85149', 12);
   if (player.hp <= 0 && !boss.dying) { gameOver = true; win = false; }
 }
 
 function damageBoss(dmg) {
   if (boss.hp <= 0) return;
+  combo = Math.min(25, combo + 1);
   boss.hp -= dmg;
   boss.hitFx = 8;
+  if (lastCrit) addFloat(boss.x, boss.y - boss.r - 18, 'КРИТ! ' + dmg, '#ffd33d');
   burst(boss.x, boss.y, '#ffffff', 12);
   shake = 6;
   if (boomMode) {
@@ -1350,8 +1645,39 @@ function update() {
   player.x = clamp(player.x, 0, canvas.width - player.w);
   player.y = clamp(player.y, 0, canvas.height - player.h);
 
+  frameCount++;
+  if (regenLevel > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
+    player.hp = Math.min(player.maxHp, player.hp + regenLevel);
+  }
+  dashCd--; if (dashInv > 0) dashInv--;
+  if ((keys['e'] || keys['E'] || keys['у'] || keys['У'] || touchDash) && dashCd <= 0 && dashTimer <= 0) {
+    dashCd = 45; dashTimer = 7; dashInv = 16;
+    let dx = 0, dy = 0;
+    if (tMoveX !== 0 || tMoveY !== 0) { dx = tMoveX; dy = tMoveY; }
+    else {
+      if (keys['ArrowLeft'] || keys['a']) dx = -1;
+      else if (keys['ArrowRight'] || keys['d']) dx = 1;
+      else if (keys['ArrowUp'] || keys['w']) dy = -1;
+      else if (keys['ArrowDown'] || keys['s']) dy = 1;
+      else dx = player.facing;
+    }
+    const dl = Math.hypot(dx, dy) || 1;
+    dashVX = dx / dl * 12;
+    dashVY = dy / dl * 12;
+    burst(player.x + player.w / 2, player.y + player.h / 2, '#79c0ff', 12);
+    burst(player.x + player.w / 2, player.y + player.h / 2, '#ffffff', 6);
+  }
+  if (dashTimer > 0) {
+    dashTimer--;
+    player.x += dashVX;
+    player.y += dashVY;
+    particles.push({ x: player.x + player.w / 2, y: player.y + player.h / 2, vx: 0, vy: 0, size: 7, color: '#79c0ff', life: 18, maxLife: 18 });
+  }
+  player.x = clamp(player.x, 0, canvas.width - player.w);
+  player.y = clamp(player.y, 0, canvas.height - player.h);
+
   if (((keys[' '] || keys['Shift']) || touchAttack) && player.atkCd <= 0) {
-    player.atkCd = weapon.cd;
+    player.atkCd = playerAtkCd();
     player.atkAnim = 12;
     if (weapon.proj) {
       const sx = player.x + player.w / 2;
@@ -2032,7 +2358,9 @@ const WAVE_TYPES = [
   { t: 'blob', r: 22, hp: 30, dmg: 8, speed: 0.9, color: '#9c5f32' },
   { t: 'bug', r: 16, hp: 18, dmg: 6, speed: 1.5, color: '#7b4a2b' },
   { t: 'ghost', r: 20, hp: 42, dmg: 10, speed: 1.15, color: '#c68a4e' },
-  { t: 'knight', r: 26, hp: 72, dmg: 14, speed: 0.72, color: '#5d3a1e' }
+  { t: 'knight', r: 26, hp: 72, dmg: 14, speed: 0.72, color: '#5d3a1e' },
+  { t: 'archer', r: 20, hp: 45, dmg: 10, speed: 1.1, color: '#79c0ff', shotT: 0 },
+  { t: 'brute', r: 34, hp: 160, dmg: 24, speed: 0.5, color: '#8a4f2b' }
 ];
 
 function makeEnemy(base, wave) {
@@ -2043,7 +2371,7 @@ function makeEnemy(base, wave) {
   else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 40; }
   else { x = -40; y = Math.random() * canvas.height; }
   const hpMul = 1 + wave * 0.5;
-  return { type: base.t, x, y, r: base.r, hp: Math.round(base.hp * hpMul), maxHp: Math.round(base.hp * hpMul), dmg: base.dmg, speed: Math.min(3, base.speed + wave * 0.03), color: base.color, atkCd: 0, burnT: 0, burnTick: 0, hitFx: 0, t: Math.random() * 10, dead: false };
+  return { type: base.t, x, y, r: base.r, hp: Math.round(base.hp * hpMul), maxHp: Math.round(base.hp * hpMul), dmg: base.dmg, speed: Math.min(3, base.speed + wave * 0.03), color: base.color, atkCd: 0, shotT: base.shotT || 0, burnT: 0, burnTick: 0, hitFx: 0, t: Math.random() * 10, dead: false };
 }
 
 function spawnWave(n) {
@@ -2051,9 +2379,20 @@ function spawnWave(n) {
     enemies.push({ type: 'king', x: 700, y: 280, r: 52, hp: 8000, maxHp: 8000, dmg: 25, speed: 0.8, color: '#6b4226', atkCd: 0, shotT: 0, burnT: 0, burnTick: 0, hitFx: 0, t: 0, dead: false });
     return;
   }
+  if (n === 5) {
+    enemies.push({ type: 'elite', x: 700, y: 280, r: 46, hp: Math.round(1800 * (1 + n * 0.3)), maxHp: Math.round(1800 * (1 + n * 0.3)), dmg: 20, speed: 0.6, color: '#ff6b6b', atkCd: 0, shotT: 0, burnT: 0, burnTick: 0, hitFx: 0, t: 0, dead: false });
+  }
+  if (n === 10) {
+    enemies.push({ type: 'elite', x: 700, y: 280, r: 54, hp: Math.round(3200 * (1 + n * 0.2)), maxHp: Math.round(3200 * (1 + n * 0.2)), dmg: 28, speed: 0.6, color: '#ff9eb1', atkCd: 0, shotT: 0, burnT: 0, burnTick: 0, hitFx: 0, t: 0, dead: false });
+  }
   const count = 5 + n * 2;
   for (let i = 0; i < count; i++) {
-    const idx = n < 3 ? 0 : n < 6 ? Math.floor(Math.random() * 2) : n < 10 ? Math.floor(Math.random() * 3) : Math.floor(Math.random() * 4);
+    let idx;
+    if (n < 3) idx = 0;
+    else if (n < 5) idx = Math.floor(Math.random() * 2);
+    else if (n < 7) idx = 2 + Math.floor(Math.random() * 2);
+    else if (n < 11) idx = Math.floor(Math.random() * 4);
+    else idx = 2 + Math.floor(Math.random() * 4);
     enemies.push(makeEnemy(WAVE_TYPES[idx], n));
   }
 }
@@ -2069,8 +2408,8 @@ function startWaves() {
   fightEl.classList.remove('hidden');
   const hint = document.getElementById('hint');
   hint.innerHTML = isTouch
-    ? '🕹️ Левый джойстик — движение &nbsp;·&nbsp; ⚔️ Кнопка — атака &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
-    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> — атака &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
+    ? '🕹️ Джойстик — движение &nbsp;·&nbsp; ⚔️ — атака &nbsp;·&nbsp; 💨 — рывок &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
+    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> — атака &nbsp;·&nbsp;<kbd>E</kbd> — рывок &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
   document.getElementById('touchControls').classList.toggle('on', isTouch);
   bossNameLabel.textContent = '🍫 Волновой режим';
 }
@@ -2079,7 +2418,7 @@ function startWaveRun() {
   player.x = 150; player.y = 340;
   player.maxHp = 100 + hpLevel * 25;
   player.hp = player.maxHp;
-  player.speed = 3.2;
+  player.speed = playerBaseSpeed();
   player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
   enemies.length = 0; particles.length = 0; projs.length = 0;
   waveNum = 0; waveState = 'intermission'; waveTimer = 180; waveReward = 0;
@@ -2099,15 +2438,17 @@ function nearestEnemy() {
 
 function damageEnemy(e, dmg) {
   if (e.hp <= 0) return;
+  combo = Math.min(25, combo + 1);
   e.hp -= dmg;
   e.hitFx = 8;
+  if (lastCrit) addFloat(e.x, e.y - e.r - 12, 'КРИТ! ' + dmg, '#ffd33d');
   burst(e.x, e.y, e.color, 8);
-  if (e.hp <= 0) { burst(e.x, e.y, '#ffffff', 12); e.dead = true; }
+  if (e.hp <= 0) { burst(e.x, e.y, '#ffffff', 12); e.dead = true; totalKills++; }
 }
 
 function playerAttackWave() {
   if (!((keys[' '] || keys['Shift']) || touchAttack) || player.atkCd > 0) return;
-  player.atkCd = weapon.cd;
+  player.atkCd = playerAtkCd();
   player.atkAnim = 12;
   const sx = player.x + player.w / 2;
   const sy = player.y + 26;
@@ -2196,6 +2537,45 @@ function updateEnemies() {
       if (d < 80 && e.atkCd <= 0) { e.atkCd = 45; hurtPlayer(e.dmg); e.hitFx = 8; }
       continue;
     }
+    if (e.type === 'elite') {
+      if (d > 120) { e.x += dx / d * e.speed; e.y += dy / d * e.speed; }
+      e.atkCd--;
+      e.shotT--;
+      if (e.shotT <= 0) {
+        e.shotT = 55;
+        const base = Math.atan2(dy, dx);
+        for (let s = -1; s <= 1; s++) projs.push({ x: e.x, y: e.y, vx: Math.cos(base + s * 0.35) * 3.6, vy: Math.sin(base + s * 0.35) * 3.6, dmg: 12, r: 8, friendly: false, color: e.color });
+      }
+      if (d < 90 && e.atkCd <= 0) { e.atkCd = 50; hurtPlayer(e.dmg); e.hitFx = 8; }
+      e.t += 0.15;
+      continue;
+    }
+    if (e.type === 'archer') {
+      if (d > 240) { e.x += dx / d * e.speed; e.y += dy / d * e.speed; }
+      else if (d < 140) { e.x -= dx / d * e.speed; e.y -= dy / d * e.speed; }
+      e.shotT--;
+      if (e.shotT <= 0) {
+        e.shotT = 62;
+        const base = Math.atan2(dy, dx);
+        projs.push({ x: e.x, y: e.y, vx: Math.cos(base) * 5, vy: Math.sin(base) * 5, dmg: e.dmg, r: 6, friendly: false, color: '#79c0ff' });
+      }
+      e.t += 0.15;
+      e.atkCd--;
+      if (d < e.r + 18 && e.atkCd <= 0) { e.atkCd = 45; hurtPlayer(e.dmg); e.hitFx = 8; }
+      continue;
+    }
+    if (e.type === 'brute') {
+      e.x += dx / d * e.speed;
+      e.y += dy / d * e.speed;
+      e.t += 0.12;
+      e.atkCd--;
+      if (d < e.r + 30 && e.atkCd <= 0) {
+        e.atkCd = 60; e.hitFx = 10;
+        hurtPlayer(e.dmg);
+        burst(e.x + dx / d * 30, e.y + dy / d * 30, '#f0883e', 14);
+      }
+      continue;
+    }
     e.x += dx / d * e.speed;
     e.y += dy / d * e.speed;
     e.t += 0.15;
@@ -2224,6 +2604,36 @@ function updateWaves() {
     player.x += tMoveX * player.speed;
     player.y += tMoveY * player.speed;
     if (Math.abs(tMoveX) > 0.3) player.facing = tMoveX > 0 ? 1 : -1;
+  }
+  player.x = clamp(player.x, 0, canvas.width - player.w);
+  player.y = clamp(player.y, 0, canvas.height - player.h);
+  frameCount++;
+  if (regenLevel > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
+    player.hp = Math.min(player.maxHp, player.hp + regenLevel);
+  }
+  dashCd--; if (dashInv > 0) dashInv--;
+  if ((keys['e'] || keys['E'] || keys['у'] || keys['У'] || touchDash) && dashCd <= 0 && dashTimer <= 0) {
+    dashCd = 45; dashTimer = 7; dashInv = 16;
+    let dx = 0, dy = 0;
+    if (tMoveX !== 0 || tMoveY !== 0) { dx = tMoveX; dy = tMoveY; }
+    else {
+      if (keys['ArrowLeft'] || keys['a']) dx = -1;
+      else if (keys['ArrowRight'] || keys['d']) dx = 1;
+      else if (keys['ArrowUp'] || keys['w']) dy = -1;
+      else if (keys['ArrowDown'] || keys['s']) dy = 1;
+      else dx = player.facing;
+    }
+    const dl = Math.hypot(dx, dy) || 1;
+    dashVX = dx / dl * 12;
+    dashVY = dy / dl * 12;
+    burst(player.x + player.w / 2, player.y + player.h / 2, '#79c0ff', 12);
+    burst(player.x + player.w / 2, player.y + player.h / 2, '#ffffff', 6);
+  }
+  if (dashTimer > 0) {
+    dashTimer--;
+    player.x += dashVX;
+    player.y += dashVY;
+    particles.push({ x: player.x + player.w / 2, y: player.y + player.h / 2, vx: 0, vy: 0, size: 7, color: '#79c0ff', life: 18, maxLife: 18 });
   }
   player.x = clamp(player.x, 0, canvas.width - player.w);
   player.y = clamp(player.y, 0, canvas.height - player.h);
@@ -2287,6 +2697,9 @@ function drawWaves() {
   ctx.fillStyle = '#e6edf3';
   if (waveState === 'active') ctx.fillText('Врагов: ' + enemies.length + ' · награда: +' + (waveNum === 15 ? 25 : 1 + waveNum) + ' 🍫', canvas.width / 2, 50);
   else ctx.fillText('🍫 заработано: ' + waveReward, canvas.width / 2, 50);
+  drawFloatTexts();
+  drawComboHud();
+  drawDashCd();
   if (gameOver) drawWaveGameOver();
   if (nightMode) drawNight();
 }
@@ -2368,6 +2781,43 @@ function drawEnemy(e) {
     ctx.fillStyle = '#3c2412';
     ctx.beginPath(); ctx.arc(-e.r * 0.3, -e.r * 0.2, e.r * 0.08, 0, Math.PI * 2); ctx.arc(e.r * 0.3, -e.r * 0.2, e.r * 0.08, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(0, e.r * 0.1, e.r * 0.18, 0.2, Math.PI - 0.2); ctx.fill();
+  } else if (e.type === 'archer') {
+    ctx.rotate(Math.sin(e.t) * 0.15);
+    ctx.fillStyle = e.color;
+    ctx.beginPath(); ctx.arc(0, 0, e.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-e.r * 0.5, -e.r * 0.4); ctx.lineTo(e.r * 0.9, -e.r * 0.4); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-e.r * 0.3, -e.r * 0.35, e.r * 0.12, 0, Math.PI * 2); ctx.arc(e.r * 0.1, -e.r * 0.35, e.r * 0.12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3c2412';
+    ctx.beginPath(); ctx.arc(-e.r * 0.3, -e.r * 0.35, e.r * 0.06, 0, Math.PI * 2); ctx.arc(e.r * 0.1, -e.r * 0.35, e.r * 0.06, 0, Math.PI * 2); ctx.fill();
+  } else if (e.type === 'brute') {
+    ctx.rotate(Math.sin(e.t * 0.5) * 0.05);
+    ctx.fillStyle = e.color;
+    ctx.beginPath(); ctx.arc(0, 0, e.r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#5d3a1e';
+    ctx.beginPath(); ctx.arc(-e.r * 0.5, -e.r * 0.5, e.r * 0.5, 0, Math.PI * 2); ctx.arc(e.r * 0.5, -e.r * 0.5, e.r * 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff6b6b';
+    ctx.beginPath(); ctx.arc(-e.r * 0.45, -e.r * 0.5, e.r * 0.18, 0, Math.PI * 2); ctx.arc(e.r * 0.45, -e.r * 0.5, e.r * 0.18, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-e.r * 0.45, -e.r * 0.55, 6, 0, Math.PI * 2); ctx.arc(e.r * 0.45, -e.r * 0.55, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3c2412'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, e.r * 0.2, e.r * 0.3, 0.2, Math.PI - 0.2); ctx.stroke();
+  } else if (e.type === 'elite') {
+    const pulse = 1 + Math.sin(performance.now() / 250) * 0.06;
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = e.color;
+    ctx.beginPath(); ctx.arc(0, 0, e.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffd33d'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, 0, e.r * 1.25, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#3c2412';
+    ctx.beginPath(); ctx.arc(-e.r * 0.35, -e.r * 0.2, e.r * 0.13, 0, Math.PI * 2); ctx.arc(e.r * 0.35, -e.r * 0.2, e.r * 0.13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-e.r * 0.35, -e.r * 0.2, e.r * 0.07, 0, Math.PI * 2); ctx.arc(e.r * 0.35, -e.r * 0.2, e.r * 0.07, 0, Math.PI * 2); ctx.fill();
+    ctx.font = 'bold 13px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd33d';
+    ctx.fillText('ЭЛИТА', 0, -e.r - 14);
   } else {
     ctx.rotate(wob * 0.5);
     ctx.fillStyle = e.color;
@@ -3261,6 +3711,9 @@ function draw() {
   }
 
   if (gameOver) drawGameOver();
+  drawFloatTexts();
+  drawComboHud();
+  drawDashCd();
 }
 
 function drawNight() {
@@ -3278,6 +3731,8 @@ function drawNight() {
 
 function loop() {
   updateMusic();
+  frameCount++;
+  if (frameCount % 30 === 0) checkAchievements();
   if (screen === 'fight') {
     try { update(); draw(); }
     catch (e) { console.error(e); }
@@ -3328,7 +3783,7 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
   }
 });
 
-const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked'];
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
 
 function resetProgress() {
   RESET_KEYS.forEach(k => {
@@ -3336,6 +3791,8 @@ function resetProgress() {
     if (SDKPlayer) SDKPlayer.setData({ [k]: '' }).catch(() => {});
   });
   coins = 0; hpLevel = 0; dmgLevel = 0; advCount = 0; chocolates = 0;
+  critLevel = 0; atkSpdLevel = 0; armorLevel = 0; moveLevel = 0; regenLevel = 0;
+  totalWins = 0; totalKills = 0; waveBest = 0; unlockedAch = []; combo = 0;
   megaOwned = []; chocoWeaponsOwned = []; skinsOwned = ['classic']; selectedSkin = 'classic';
   activatedCodes = [];
   distorted = false; godUnlocked = false; godMode = false;
@@ -3344,6 +3801,7 @@ function resetProgress() {
   try { buildMenu(); } catch (e) {}
   updateAdvBtn();
   refreshShop();
+  buildAchievements();
   const st = document.getElementById('resetStatus');
   if (st) { st.textContent = '✅ Прогресс полностью сброшен'; st.style.color = '#3fb950'; }
 }
@@ -3360,6 +3818,7 @@ document.getElementById('menuBtn').onclick = toMenu;
 function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  if (name === 'ach') buildAchievements();
 }
 document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
@@ -3427,6 +3886,10 @@ joyZone.addEventListener('touchcancel', e => { if (joyActive) resetJoy(); }, { p
 atkBtn.addEventListener('touchstart', e => { e.preventDefault(); touchAttack = true; }, { passive: false });
 atkBtn.addEventListener('touchend', e => { e.preventDefault(); touchAttack = false; }, { passive: false });
 atkBtn.addEventListener('touchcancel', () => { touchAttack = false; }, { passive: false });
+const dashBtn = document.getElementById('dashBtn');
+dashBtn.addEventListener('touchstart', e => { e.preventDefault(); touchDash = true; }, { passive: false });
+dashBtn.addEventListener('touchend', e => { e.preventDefault(); touchDash = false; }, { passive: false });
+dashBtn.addEventListener('touchcancel', () => { touchDash = false; }, { passive: false });
 
 function toggleFullscreen() {
   if (YSDK && YSDK.screen && YSDK.screen.fullscreen) {
@@ -3447,13 +3910,22 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
   coins = parseInt(getStore('bf_coins') || '0', 10);
   hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
   dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+  critLevel = parseInt(getStore('bf_critLevel') || '0', 10);
+  atkSpdLevel = parseInt(getStore('bf_atkSpdLevel') || '0', 10);
+  armorLevel = parseInt(getStore('bf_armorLevel') || '0', 10);
+  moveLevel = parseInt(getStore('bf_moveLevel') || '0', 10);
+  regenLevel = parseInt(getStore('bf_regenLevel') || '0', 10);
+  totalWins = parseInt(getStore('bf_wins') || '0', 10);
+  totalKills = parseInt(getStore('bf_kills') || '0', 10);
+  waveBest = parseInt(getStore('bf_waveBest') || '0', 10);
+  unlockedAch = (getStore('bf_ach') || '').split(',').filter(Boolean);
   advCount = parseInt(getStore('bf_advCount') || '0', 10);
   chocolates = parseInt(getStore('bf_choco') || '0', 10);
   megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
