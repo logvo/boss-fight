@@ -68,7 +68,7 @@
   .coin-box b { color: #ffd33d; font-size: 26px; }
   .menu-cols { display: flex; gap: 26px; }
   .menu-cols .block { flex: 1; }
-  .shop { display: flex; gap: 14px; }
+  .shop { display: flex; gap: 14px; flex-wrap: wrap; }
   .shop-card {
     display: flex;
     align-items: center;
@@ -78,7 +78,10 @@
     border-radius: 12px;
     padding: 18px;
     flex: 1;
+    min-width: 300px;
   }
+  .shop-card.owned { border-color: #3fb950; }
+  .shop-card button:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
   .shop-card .icon { font-size: 34px; }
   .shop-info { flex: 1; }
   .shop-info h3 { font-size: 17px; margin-bottom: 4px; }
@@ -345,6 +348,12 @@
     </div>
   </div>
 
+  <div class="block">
+    <h2>⚡ Мега-оружие</h2>
+    <div class="mini" style="margin-bottom:10px">Мощнейшие орудия навсегда. Покупаются за монеты и добавляются в список оружия.</div>
+    <div id="megaShop" class="shop"></div>
+  </div>
+
   <button id="startBtn">В бой!</button>
 </div>
 
@@ -384,6 +393,14 @@ const WEAPONS = {
   cross:   { id: 'cross',   name: 'Арбалет',       icon: '🔫', dmg: 20, cd: 38,  range: 0,   speed: 14, color: '#79c0ff', proj: true,  desc: 'Скоростные болты' },
   staff:   { id: 'staff',   name: 'Посох',         icon: '🪄', dmg: 14, cd: 40,  range: 0,   speed: 7,  color: '#d2a8ff', proj: true,  homing: true, desc: 'Самонаводящиеся сгустки магии' },
   daggers: { id: 'daggers', name: 'Кинжалы',       icon: '🔪', dmg: 6,  cd: 12,  range: 55,  speed: 0,  color: '#e6edf3', proj: false, count: 2, desc: 'Молниеносные двойные удары' }
+};
+
+const MEGA_WEAPONS = {
+  storm:     { id: 'storm',     name: 'Шторм-бластер', icon: '🌩️', dmg: 28, cd: 24, speed: 13, color: '#58a6ff', proj: true, count: 3, homing: true, price: 2000,  desc: 'Тройной самонаводящийся залп плазмы' },
+  nova:      { id: 'nova',      name: 'Ледяная буря',   icon: '❄️', dmg: 40, cd: 50, speed: 11, color: '#79c0ff', proj: true, count: 5, price: 3000,  desc: 'Веер из пяти ледяных осколков' },
+  meteor:    { id: 'meteor',    name: 'Метеор',         icon: '☄️', dmg: 60, cd: 70, speed: 8,  color: '#f0883e', proj: true, count: 2, burn: true, price: 5000,  desc: 'Раскалённые метеоры с поджогом' },
+  gigahammer:{ id: 'gigahammer',name: 'Гига-молот',     icon: '⚒️', dmg: 120, cd: 90, range: 130, speed: 0, color: '#ff6b6b', proj: false, aoe: 100, price: 7000,  desc: 'Сокрушительный удар с взрывной волной' },
+  godray:    { id: 'godray',    name: 'Луч правосудия', icon: '⚡', dmg: 50, cd: 40, speed: 16, color: '#fde047', proj: true, homing: true, price: 10000, desc: 'Молниеносный самонаводящийся разряд' }
 };
 
 const BOSSES = [
@@ -461,6 +478,7 @@ let coins = parseInt(getStore('bf_coins') || '0', 10);
 let hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
 let dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
 let advCount = parseInt(getStore('bf_advCount') || '0', 10);
+let megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
@@ -768,10 +786,42 @@ function activateGodMode() {
   burst(boss.x, boss.y, '#ffd33d', 60);
 }
 
+function allWeapons() {
+  return Object.values(WEAPONS).concat(Object.values(MEGA_WEAPONS).filter(w => megaOwned.indexOf(w.id) !== -1));
+}
+
+function isMegaOwned(id) { return megaOwned.indexOf(id) !== -1; }
+
+function buildMegaShop() {
+  const el = document.getElementById('megaShop');
+  if (!el) return;
+  el.innerHTML = '';
+  Object.values(MEGA_WEAPONS).forEach(w => {
+    const owned = isMegaOwned(w.id);
+    const d = document.createElement('div');
+    d.className = 'shop-card' + (owned ? ' owned' : '');
+    d.innerHTML = `<div class="icon">${w.icon}</div><div class="shop-info"><h3>${w.name}</h3><div class="mini">💥 <b>${w.dmg}</b> · ${w.desc}</div></div><button ${owned ? 'disabled' : ''}>${owned ? '✅ Куплено' : w.price + ' 🪙'}</button>`;
+    if (!owned) d.querySelector('button').onclick = () => buyMega(w.id);
+    el.appendChild(d);
+  });
+}
+
+function buyMega(id) {
+  const w = MEGA_WEAPONS[id];
+  if (!w || isMegaOwned(id) || coins < w.price) return;
+  coins -= w.price;
+  megaOwned.push(id);
+  setStore('bf_megaOwned', megaOwned.join(','));
+  saveProgress();
+  buildWeaponList();
+  buildMegaShop();
+  refreshShop();
+}
+
 function buildWeaponList() {
   const wl = document.getElementById('weaponList');
   wl.innerHTML = '';
-  Object.values(WEAPONS).forEach((w, i) => {
+  allWeapons().forEach((w, i) => {
     const d = document.createElement('div');
     d.className = 'card' + (i === selectedWeapon ? ' selected' : '');
     d.innerHTML = `<div class="icon">${w.icon}</div><div><h3>${w.name}</h3><div class="mini">💥 урон <b>${w.dmg + dmgLevel * 5}</b></div><div class="mini">${w.desc}</div></div>`;
@@ -813,6 +863,7 @@ function buildMenu() {
   updateDistortOverlay();
   buildWeaponList();
   buildBossList();
+  buildMegaShop();
   refreshShop();
 }
 
@@ -935,7 +986,8 @@ document.getElementById('advBtn').onclick = () => {
 };
 
 function startFight() {
-  weapon = Object.values(WEAPONS)[selectedWeapon];
+  const list = allWeapons();
+  weapon = list[selectedWeapon] || list[0];
   reset();
   weaponLabel.textContent = weapon.name;
   screen = 'fight';
@@ -2442,13 +2494,14 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   coins = parseInt(getStore('bf_coins') || '0', 10);
   hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
   dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
   advCount = parseInt(getStore('bf_advCount') || '0', 10);
+  megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
   distorted = getStore('bf_distorted') === '1';
   godUnlocked = getStore('bf_godUnlocked') === '1';
   godMode = getStore('bf_god') === '1';
