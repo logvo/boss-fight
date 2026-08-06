@@ -3481,14 +3481,14 @@ let musicMuted = getStore(MUSIC_KEY) === '1';
 
 const TRACKS = {
   menu: { bpm: 88, lead: 'sine', melody: [69,72,74,76,74,72,69,0,67,69,72,74,72,69,67,0], bass: [45,0,45,0,45,0,45,0,43,0,43,0,43,0,43,0] },
-  wave: { bpm: 128, lead: 'square', melody: [60,64,67,72,67,64,60,64,62,65,69,74,69,65,62,0], bass: [36,0,43,0,36,0,43,0,38,0,45,0,38,0,45,0] },
+  wave: { bpm: 128, lead: 'triangle', melody: [60,64,67,72,67,64,60,64,62,65,69,74,69,65,62,0], bass: [36,0,43,0,36,0,43,0,38,0,45,0,38,0,45,0] },
   light: { bpm: 118, lead: 'triangle', melody: [76,0,74,0,72,0,74,0,76,76,74,0,72,0,71,0], bass: [50,0,47,0,45,0,47,0,45,0,47,0,50,0,52,0] },
-  hero: { bpm: 112, lead: 'square', melody: [60,60,64,60,67,64,0,0,62,62,65,62,69,67,0,0], bass: [36,0,36,0,43,0,36,0,38,0,38,0,45,0,38,0] },
-  epic: { bpm: 100, lead: 'square', melody: [57,0,60,0,64,0,67,0,65,0,64,0,60,0,0,0], bass: [33,0,33,0,36,0,36,0,33,0,33,0,36,0,36,0] },
+  hero: { bpm: 112, lead: 'triangle', melody: [60,60,64,60,67,64,0,0,62,62,65,62,69,67,0,0], bass: [36,0,36,0,43,0,36,0,38,0,38,0,45,0,38,0] },
+  epic: { bpm: 100, lead: 'triangle', melody: [57,0,60,0,64,0,67,0,65,0,64,0,60,0,0,0], bass: [33,0,33,0,36,0,36,0,33,0,33,0,36,0,36,0] },
   dark: { bpm: 92, lead: 'triangle', melody: [64,67,71,74,71,67,64,0,62,65,69,72,69,65,62,0], bass: [40,0,40,0,38,0,38,0,36,0,36,0,38,0,38,0] },
-  boss: { bpm: 124, lead: 'square', melody: [55,0,59,62,66,0,62,59,58,0,62,65,69,0,65,62], bass: [31,0,31,0,43,0,31,0,33,0,33,0,43,0,33,0] },
-  god: { bpm: 108, lead: 'square', melody: [72,76,79,83,84,79,76,72,74,77,81,84,85,81,77,74], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] },
-  final: { bpm: 132, lead: 'square', melody: [76,79,84,79,76,79,84,0,77,81,84,81,77,81,84,0], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] }
+  boss: { bpm: 124, lead: 'triangle', melody: [55,0,59,62,66,0,62,59,58,0,62,65,69,0,65,62], bass: [31,0,31,0,43,0,31,0,33,0,33,0,43,0,33,0] },
+  god: { bpm: 108, lead: 'triangle', melody: [72,76,79,83,84,79,76,72,74,77,81,84,85,81,77,74], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] },
+  final: { bpm: 132, lead: 'triangle', melody: [76,79,84,79,76,79,84,0,77,81,84,81,77,81,84,0], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] }
 };
 
 const BOSS_TRACK = {
@@ -3510,13 +3510,18 @@ const Music = {
       this.ctx = new AC();
       this.master = this.ctx.createGain();
       this.master.gain.value = this.muted ? 0 : 0.5;
+      this.filter = this.ctx.createBiquadFilter();
+      this.filter.type = 'lowpass';
+      this.filter.frequency.value = 2400;
+      this.filter.Q.value = 0.4;
       this.delay = this.ctx.createDelay(1);
-      this.delay.delayTime.value = 0.27;
+      this.delay.delayTime.value = 0.3;
       const fb = this.ctx.createGain();
-      fb.gain.value = 0.32;
+      fb.gain.value = 0.3;
       this.delay.connect(fb); fb.connect(this.delay);
       this.delay.connect(this.master);
-      this.master.connect(this.ctx.destination);
+      this.master.connect(this.filter);
+      this.filter.connect(this.ctx.destination);
       if (this.curKey) this.startTrack();
     } catch (e) {}
   },
@@ -3526,29 +3531,34 @@ const Music = {
     if (this.master) this.master.gain.value = this.muted ? 0 : 0.5;
     updateMusicBtn();
   },
+  fadeTo(target, speed) {
+    if (!this.master) return;
+    const cur = this.master.gain.value;
+    this.master.gain.value = cur + (target - cur) * (speed || 0.06);
+  },
   note(midi, t, dur, type, vol) {
     if (!this.ctx) return;
     const o = this.ctx.createOscillator();
-    o.type = type || 'square';
+    o.type = 'sine';
     o.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
     const g = this.ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.015);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.gain.linearRampToValueAtTime(vol, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
     o.connect(g); g.connect(this.master);
-    if (type === 'square' || type === 'sawtooth') {
-      const o2 = this.ctx.createOscillator();
-      o2.type = 'triangle';
-      o2.frequency.value = o.frequency.value * 2.001;
-      const g2 = this.ctx.createGain();
-      g2.gain.value = 0.3 * vol;
-      o2.connect(g2); g2.connect(this.master);
-      o2.start(t); o2.stop(t + dur + 0.05);
-    }
+    const o2 = this.ctx.createOscillator();
+    o2.type = type === 'sine' ? 'sine' : 'triangle';
+    o2.frequency.value = o.frequency.value * 1.004;
+    const g2 = this.ctx.createGain();
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.linearRampToValueAtTime(0.22 * vol, t + 0.05);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.08);
+    o2.connect(g2); g2.connect(this.master);
     const es = this.ctx.createGain();
-    es.gain.value = 0.22;
+    es.gain.value = 0.16;
     o.connect(es); es.connect(this.delay);
-    o.start(t); o.stop(t + dur + 0.05);
+    o.start(t); o.stop(t + dur + 0.1);
+    o2.start(t); o2.stop(t + dur + 0.1);
   },
   startTrack() {
     if (this.timer) clearInterval(this.timer);
@@ -3559,7 +3569,7 @@ const Music = {
     const tick = () => {
       const tr = self.track;
       if (!tr || !self.ctx) return;
-      const stepDur = (60 / tr.bpm) / 4;
+      const stepDur = (60 / tr.bpm) / 2;
       while (self.nextStepAt < self.ctx.currentTime + 0.15) {
         const i = self.step % tr.melody.length;
         const m = tr.melody[i];
@@ -3588,6 +3598,7 @@ function updateMusicBtn() {
 }
 
 function updateMusic() {
+  if (!Music.muted) Music.fadeTo((screen === 'fight' && win) ? 0.12 : 0.5);
   let trackName = 'menu';
   let bpmMul = 1, transpose = 0, lead = '';
   if (screen === 'fight') {
