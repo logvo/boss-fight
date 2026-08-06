@@ -155,6 +155,19 @@
     white-space: nowrap;
   }
   .code-row button:hover { filter: brightness(1.1); }
+  .reset-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #f85149, #b42318);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform .12s, box-shadow .12s;
+  }
+  .reset-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(248,81,73,.4); }
 
   #fight { display: flex; flex-direction: column; align-items: center; }
   .wrap {
@@ -416,6 +429,13 @@
     <div id="codeStatus" class="mini" style="margin-top:8px"></div>
   </div>
 
+  <div class="block">
+    <h2>⚠️ Опасная зона</h2>
+    <div class="mini" style="margin-bottom:10px">Полностью очищает весь прогресс: монеты, шоколадки, прокачку, скины, оружие, режимы и коды.</div>
+    <button id="resetBtn" class="reset-btn">🗑️ Сбросить весь прогресс</button>
+    <div id="resetStatus" class="mini" style="margin-top:8px"></div>
+  </div>
+
   <button id="startBtn">В бой!</button>
   <button id="wavesBtn" class="waves-btn">🍫 Волновой режим: 14 волн + босс</button>
 </div>
@@ -561,7 +581,8 @@ const CODES = {
   NINJA: { name: 'Скин «Ниндзя»', apply() { if (skinsOwned.indexOf('ninja') === -1) skinsOwned.push('ninja'); } },
   PUMPKIN: { name: 'Скин «Тыква»', apply() { if (skinsOwned.indexOf('pumpkin') === -1) skinsOwned.push('pumpkin'); } },
   MEGASTORM: { name: 'Мега-оружие «Шторм-бластер»', apply() { if (megaOwned.indexOf('storm') === -1) megaOwned.push('storm'); } },
-  GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } }
+  GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } },
+  BELOCHKA: { repeatable: true, name: '9999999999999999999 🪙 и 9999999999999999999 🍫', apply() { coins += 9999999999999999999; chocolates += 9999999999999999999; } }
 };
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
@@ -2973,10 +2994,10 @@ function activateCode(raw) {
   if (!code) { st.textContent = 'Введи код в поле выше'; st.style.color = '#8b949e'; return; }
   const c = CODES[code];
   if (!c) { st.textContent = '❌ Неверный код'; st.style.color = '#f85149'; return; }
-  if (activatedCodes.indexOf(code) !== -1) { st.textContent = '⚠️ Код уже активирован'; st.style.color = '#f0883e'; return; }
+  if (!c.repeatable && activatedCodes.indexOf(code) !== -1) { st.textContent = '⚠️ Код уже активирован'; st.style.color = '#f0883e'; return; }
   try {
     c.apply();
-    activatedCodes.push(code);
+    if (!c.repeatable) activatedCodes.push(code);
     setStore('bf_codes', activatedCodes.join(','));
     saveProgress();
     buildWeaponList();
@@ -3004,6 +3025,30 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
     inp.value = '';
   }
 });
+
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes'];
+
+function resetProgress() {
+  RESET_KEYS.forEach(k => {
+    try { localStorage.removeItem(k); } catch (e) {}
+    if (SDKPlayer) SDKPlayer.setData({ [k]: '' }).catch(() => {});
+  });
+  coins = 0; hpLevel = 0; dmgLevel = 0; advCount = 0; chocolates = 0;
+  megaOwned = []; chocoWeaponsOwned = []; skinsOwned = ['classic']; selectedSkin = 'classic';
+  activatedCodes = [];
+  distorted = false; godUnlocked = false; godMode = false;
+  speedMode = false; boomMode = false; nightMode = false;
+  try { buildMenu(); } catch (e) {}
+  updateAdvBtn();
+  refreshShop();
+  const st = document.getElementById('resetStatus');
+  if (st) { st.textContent = '✅ Прогресс полностью сброшен'; st.style.color = '#3fb950'; }
+}
+
+document.getElementById('resetBtn').onclick = () => {
+  if (!confirm('⚠️ ВНИМАНИЕ! Это действие БЕЗВОЗВРАТНО удалит весь твой прогресс:\nмонеты, шоколадки, прокачка, скины, оружие, открытые режимы и активированные коды.\n\nТочно сбросить всё?')) return;
+  resetProgress();
+};
 
 document.getElementById('startBtn').onclick = startFight;
 document.getElementById('wavesBtn').onclick = startWaves;
