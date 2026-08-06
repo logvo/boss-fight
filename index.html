@@ -145,6 +145,16 @@
     cursor: pointer;
   }
   #menuBtn:hover { background: #30363d; }
+  #fsBtn {
+    padding: 7px 12px;
+    font-size: 14px;
+    background: #21262d;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #fsBtn:hover { background: #30363d; }
   .distort-btn {
     display: block;
     margin: 10px auto 0;
@@ -249,11 +259,15 @@
 </style>
 </head>
 <body>
+<script>
+  window.YaGames || document.write('<script src="https://yandex.ru/games/sdk/v2"><\/script>');
+</script>
 
 <div id="menu">
   <div class="menu-head">
     <h1>⚔️ Бой с <span>боссом</span></h1>
     <p class="sub">Выбери оружие и босса, потом сразись. За победу падают монеты!</p>
+    <button id="fsBtnMenu" class="distort-btn">⛶ Полный экран</button>
   </div>
   <div class="coin-box">🪙 <b id="coinBalance">0</b> монет</div>
   <p id="distortStatus" class="sub"></p>
@@ -318,6 +332,7 @@
         <div class="label">Босс: <b id="bossNameLabel">—</b></div>
         <div class="bar" id="bossBar"><div style="width:100%"></div><span>0 / 0</span></div>
       </div>
+      <button id="fsBtn">⛶</button>
       <button id="menuBtn">← Меню</button>
     </div>
   </div>
@@ -401,21 +416,31 @@ let tMoveX = 0, tMoveY = 0;
 let touchAttack = false;
 const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-let coins = parseInt(localStorage.getItem('bf_coins') || '0', 10);
-let hpLevel = parseInt(localStorage.getItem('bf_hpLevel') || '0', 10);
-let dmgLevel = parseInt(localStorage.getItem('bf_dmgLevel') || '0', 10);
-distorted = localStorage.getItem('bf_distorted') === '1';
-godUnlocked = localStorage.getItem('bf_godUnlocked') === '1';
-godMode = localStorage.getItem('bf_god') === '1';
+let YSDK = null;
+let SDKPlayer = null;
+function getStore(k) {
+  try { return localStorage.getItem(k); } catch (e) { return null; }
+}
+function setStore(k, v) {
+  try { localStorage.setItem(k, v); } catch (e) {}
+  if (SDKPlayer) SDKPlayer.setData({ [k]: v }).catch(() => {});
+}
+
+let coins = parseInt(getStore('bf_coins') || '0', 10);
+let hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
+let dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+distorted = getStore('bf_distorted') === '1';
+godUnlocked = getStore('bf_godUnlocked') === '1';
+godMode = getStore('bf_god') === '1';
 if (godMode) distorted = true;
 let coinDrop = 0;
 const UP_HP_COST = l => 50 + l * 30;
 const UP_DMG_COST = l => 40 + l * 25;
 
 function saveProgress() {
-  localStorage.setItem('bf_coins', coins);
-  localStorage.setItem('bf_hpLevel', hpLevel);
-  localStorage.setItem('bf_dmgLevel', dmgLevel);
+  setStore('bf_coins', coins);
+  setStore('bf_hpLevel', hpLevel);
+  setStore('bf_dmgLevel', dmgLevel);
 }
 function weaponDmg() { return weapon.dmg + dmgLevel * 5; }
 
@@ -562,7 +587,7 @@ function activateDistortion() {
   distorted = true;
   chaosBeaten = true;
   distortFlash = 45;
-  localStorage.setItem('bf_distorted', '1');
+  setStore('bf_distorted', '1');
   genCracks();
   updateDistortOverlay();
   updateDistortUI();
@@ -596,9 +621,9 @@ function activateGodMode() {
   godBeaten = true;
   distorted = true;
   distortFlash = 45;
-  localStorage.setItem('bf_godUnlocked', '1');
-  localStorage.setItem('bf_god', '1');
-  localStorage.setItem('bf_distorted', '1');
+  setStore('bf_godUnlocked', '1');
+  setStore('bf_god', '1');
+  setStore('bf_distorted', '1');
   genCracks();
   updateDistortOverlay();
   updateDistortUI();
@@ -692,7 +717,7 @@ document.getElementById('dmgBtn').onclick = () => {
 
 document.getElementById('distortBtn').onclick = () => {
   distorted = !distorted;
-  localStorage.setItem('bf_distorted', distorted ? '1' : '0');
+  setStore('bf_distorted', distorted ? '1' : '0');
   if (distorted) genCracks();
   updateDistortOverlay();
   updateDistortUI();
@@ -701,8 +726,8 @@ document.getElementById('distortBtn').onclick = () => {
 document.getElementById('godBtn').onclick = () => {
   if (!godUnlocked) return;
   godMode = !godMode;
-  localStorage.setItem('bf_god', godMode ? '1' : '0');
-  if (godMode) { distorted = true; localStorage.setItem('bf_distorted', '1'); genCracks(); }
+  setStore('bf_god', godMode ? '1' : '0');
+  if (godMode) { distorted = true; setStore('bf_distorted', '1'); genCracks(); }
   updateDistortUI();
   updateGodUI();
   updateDistortOverlay();
@@ -2172,6 +2197,64 @@ atkBtn.addEventListener('touchstart', e => { e.preventDefault(); touchAttack = t
 atkBtn.addEventListener('touchend', e => { e.preventDefault(); touchAttack = false; }, { passive: false });
 atkBtn.addEventListener('touchcancel', () => { touchAttack = false; }, { passive: false });
 
+function toggleFullscreen() {
+  if (YSDK && YSDK.screen && YSDK.screen.fullscreen) {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      try { YSDK.screen.fullscreen.exit(); } catch (e) {}
+    } else {
+      try { YSDK.screen.fullscreen.request(); } catch (e) {}
+    }
+    return;
+  }
+  const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  } else {
+    (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+  }
+}
+
+function applyCloudData(data) {
+  if (!data || typeof data !== 'object') return;
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_distorted', 'bf_godUnlocked', 'bf_god']) {
+    if (data[k] !== undefined) setStore(k, String(data[k]));
+  }
+  coins = parseInt(getStore('bf_coins') || '0', 10);
+  hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
+  dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
+  distorted = getStore('bf_distorted') === '1';
+  godUnlocked = getStore('bf_godUnlocked') === '1';
+  godMode = getStore('bf_god') === '1';
+  if (godMode) distorted = true;
+  try {
+    refreshShop();
+    buildMenu();
+    updateDistortUI();
+    updateGodUI();
+    updateDistortOverlay();
+  } catch (e) {}
+}
+
+function initYandexSDK() {
+  if (!window.YaGames) return;
+  YaGames.init({}).then(ysdk => {
+    YSDK = ysdk;
+    if (ysdk.features && ysdk.features.LoadingAPI && ysdk.features.LoadingAPI.ready) {
+      ysdk.features.LoadingAPI.ready();
+    }
+    if (ysdk.getPlayer) {
+      ysdk.getPlayer().then(p => {
+        SDKPlayer = p;
+        return p.getData();
+      }).then(applyCloudData).catch(() => {});
+    }
+  }).catch(() => {});
+}
+
+document.getElementById('fsBtn').onclick = toggleFullscreen;
+document.getElementById('fsBtnMenu').onclick = toggleFullscreen;
+
+initYandexSDK();
 buildMenu();
 loop();
 </script>
