@@ -169,6 +169,16 @@
     transition: border-color .12s, box-shadow .12s;
   }
   .distort-btn:hover { border-color: #c055ff; box-shadow: 0 0 12px rgba(192,85,255,.35); }
+  .mode-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 10px auto 0;
+    flex-wrap: wrap;
+  }
+  .mode-row .distort-btn { margin: 0; flex: 0 0 auto; }
+  .mode-desc { color: #8b949e; font-size: 13px; line-height: 1.45; max-width: 540px; text-align: left; }
   #distortStatus { color: #c055ff; font-weight: 700; }
   .adv { color: #58a6ff; border-color: #30363d; }
   .adv:hover { border-color: #58a6ff; box-shadow: 0 0 12px rgba(88,166,255,.35); }
@@ -222,6 +232,8 @@
     body { padding: 0; }
     h1 { font-size: 26px; }
     #menu { padding: 18px; border-radius: 14px; }
+    .mode-row { flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+    .mode-desc { max-width: 100%; text-align: center; }
     .menu-cols { flex-direction: column; gap: 12px; }
     .shop { flex-direction: column; }
     .shop-card { padding: 14px; }
@@ -270,16 +282,26 @@
     <button id="fsBtnMenu" class="distort-btn">⛶ Полный экран</button>
   </div>
   <div class="coin-box">🪙 <b id="coinBalance">0</b> монет</div>
-  <p id="distortStatus" class="sub"></p>
-  <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
-  <p id="godStatus" class="sub"></p>
-  <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
-  <p id="speedStatus" class="sub"></p>
-  <button id="speedBtn" class="distort-btn">Режим скорости: ВЫКЛ</button>
-  <p id="boomStatus" class="sub"></p>
-  <button id="boomBtn" class="distort-btn">Взрывной режим: ВЫКЛ</button>
-  <p id="nightStatus" class="sub"></p>
-  <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
+  <div class="mode-row">
+    <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
+    <span id="distortStatus" class="mode-desc"></span>
+  </div>
+  <div class="mode-row">
+    <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
+    <span id="godStatus" class="mode-desc"></span>
+  </div>
+  <div class="mode-row">
+    <button id="speedBtn" class="distort-btn">Режим скорости: ВЫКЛ</button>
+    <span id="speedStatus" class="mode-desc"></span>
+  </div>
+  <div class="mode-row">
+    <button id="boomBtn" class="distort-btn">Взрывной режим: ВЫКЛ</button>
+    <span id="boomStatus" class="mode-desc"></span>
+  </div>
+  <div class="mode-row">
+    <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
+    <span id="nightStatus" class="mode-desc"></span>
+  </div>
   <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
   <div class="menu-cols">
