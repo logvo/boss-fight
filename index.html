@@ -274,6 +274,12 @@
   <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
   <p id="godStatus" class="sub"></p>
   <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
+  <p id="speedStatus" class="sub"></p>
+  <button id="speedBtn" class="distort-btn">Режим скорости: ВЫКЛ</button>
+  <p id="boomStatus" class="sub"></p>
+  <button id="boomBtn" class="distort-btn">Взрывной режим: ВЫКЛ</button>
+  <p id="nightStatus" class="sub"></p>
+  <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
   <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
   <div class="menu-cols">
@@ -375,7 +381,7 @@ const BOSSES = [
   { id: 'kingdragon', name: 'Король Драконов', type: 'kingdragon', stars: 14, hp: 8000, dmg: 70, projDmg: 25, speed: 1.0, r: 70, color: '#e3b341', accent: '#e3b341', desc: 'Повелитель неба: кольца огня и королевский рёв.', win: 'Король Драконов низвергнут!', lose: 'Ты сгорел в королевском огне.', talk: ['НА КОЛЕНИ!', 'Я ПОВЕЛИТЕЛЬ НЕБА!'] },
   { id: 'annihilator', name: 'Аннигилятор',    type: 'annihilator', stars: 15, hp: 11500, dmg: 75, projDmg: 25, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ff9eb1', desc: 'Машина уничтожения: стены огня и телепорты.', win: 'АННИГИЛЯТОР УНИЧТОЖЕН!', lose: 'Аннигилятор стёр тебя в пыль.', talk: ['ОШИБКА: ЦЕЛЬ ЖИВА.', 'УНИЧТОЖИТЬ.', 'СИСТЕМА ЗАПУЩЕНА.'] },
   { id: 'chaos',  name: 'Хаос-Сущность',       type: 'chaos',  stars: 16, hp: 9500, dmg: 70, projDmg: 22, speed: 1.1, r: 65, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Изначальный хаос. Уклоняйся от всего!', win: 'ХАОС ПОБЕЖДЁН! ТЫ ЛЕГЕНДА!', lose: 'Хаос поглотил тебя навсегда.', talk: ['ВСЁ — ХАОС.', 'КОНЕЦ БЛИЗОК.'] },
-  { id: 'god',    name: 'ВСЕВЫШНИЙ',            type: 'god',    stars: 17, hp: 9999999999999, dmg: 500, projDmg: 250, speed: 0.6, r: 95, color: '#ffd33d', accent: '#ffd33d', desc: 'Божественный суд неминуем. Только в режиме бога.', win: 'БОГ ПОВЕРЖЕН?! НЕВОЗМОЖНО!', lose: 'Всевышний низверг тебя во тьму.', talk: ['ТЫ ОСМЕЛИЛСЯ?', 'МОЯ СИЛА БЕСКОНЕЧНА.', 'НА КОЛЕНИ, СМЕРТНЫЙ!'] }
+  { id: 'god',    name: 'ВСЕВЫШНИЙ',            type: 'god',    stars: 17, hp: 8000, dmg: 45, projDmg: 22, speed: 0.6, r: 95, color: '#ffd33d', accent: '#ffd33d', desc: 'Божественный суд неминуем. Только в режиме бога.', win: 'БОГ ПОВЕРЖЕН?! НЕВОЗМОЖНО!', lose: 'Всевышний низверг тебя во тьму.', talk: ['ТЫ ОСМЕЛИЛСЯ?', 'МОЯ СИЛА БЕСКОНЕЧНА.', 'НА КОЛЕНИ, СМЕРТНЫЙ!'] }
 ];
 
 const canvas = document.getElementById('game');
@@ -404,6 +410,9 @@ let talkTimer = 0;
 let distorted = false;
 let godUnlocked = false;
 let godMode = false;
+let speedMode = false;
+let boomMode = false;
+let nightMode = false;
 let chaosBeaten = false;
 let godBeaten = false;
 let distortFlash = 0;
@@ -433,6 +442,9 @@ let advCount = parseInt(getStore('bf_advCount') || '0', 10);
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
+speedMode = getStore('bf_speed') === '1';
+boomMode = getStore('bf_boom') === '1';
+nightMode = getStore('bf_night') === '1';
 if (godMode) distorted = true;
 let coinDrop = 0;
 const UP_HP_COST = l => 50 + l * 30;
@@ -448,7 +460,7 @@ function weaponDmg() { return weapon.dmg + dmgLevel * 5; }
 const DEATH_TIME = 80;
 
 function dropCoins() {
-  coinDrop = boss.stars * 50;
+  coinDrop = Math.round(boss.stars * 50 * (speedMode ? 1.5 : 1) * (boomMode ? 1.25 : 1) * (nightMode ? 1.5 : 1));
   coins += coinDrop;
   saveProgress();
   for (let i = 0; i < 40; i++) {
@@ -469,12 +481,20 @@ function rr(x, y, w, h, r, color) {
   ctx.fill();
 }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function modeColors() {
+  if (godMode) return { vig: 'rgba(255,211,61,.32)', crack: '#ffd33d', crack2: '#ffffff', glowFill: 'rgba(255,211,61,.16)', glowStroke: 'rgba(255,211,61,.7)', floor: 'rgba(255,211,61,.35)', flashBase: '255,211,61', amb: ['#ffd33d', '#e3b341'] };
+  if (speedMode) return { vig: 'rgba(34,211,238,.28)', crack: '#22d3ee', crack2: '#a5f3fc', glowFill: 'rgba(34,211,238,.14)', glowStroke: 'rgba(34,211,238,.6)', floor: 'rgba(34,211,238,.35)', flashBase: '34,211,238', amb: ['#22d3ee', '#67e8f9'] };
+  if (boomMode) return { vig: 'rgba(251,146,60,.3)', crack: '#fb923c', crack2: '#fde68a', glowFill: 'rgba(251,146,60,.15)', glowStroke: 'rgba(251,146,60,.65)', floor: 'rgba(251,146,60,.35)', flashBase: '251,146,60', amb: ['#fb923c', '#fde047'] };
+  if (nightMode) return { vig: 'rgba(59,130,246,.32)', crack: '#3b82f6', crack2: '#93c5fd', glowFill: 'rgba(59,130,246,.16)', glowStroke: 'rgba(59,130,246,.65)', floor: 'rgba(59,130,246,.35)', flashBase: '59,130,246', amb: ['#3b82f6', '#60a5fa'] };
+  return { vig: 'rgba(124,77,255,.28)', crack: '#c055ff', crack2: '#ff6bc1', glowFill: 'rgba(192,85,255,.14)', glowStroke: 'rgba(192,85,255,.6)', floor: 'rgba(192,85,255,.35)', flashBase: '192,85,255', amb: ['#c055ff', '#ff6bc1'] };
+}
+function anyMode() { return distorted || speedMode || boomMode || nightMode; }
 function burst(x, y, color, n) {
   for (let i = 0; i < n; i++) particles.push({ x, y, vx: (Math.random() - 0.5) * 8, vy: -Math.random() * 6, size: Math.random() * 5 + 2, color, life: 40 + Math.random() * 20, maxLife: 60 });
 }
 
 function corrupt(c) {
-  if (!distorted) return c;
+  if (!distorted && !speedMode && !boomMode && !nightMode) return c;
   if (godMode) {
     const godMap = {
       '#7ec850': '#fde047', '#a8e07c': '#fef08a', '#4a6e2a': '#a16207',
@@ -492,6 +512,60 @@ function corrupt(c) {
       '#ff4d6d': '#f59e0b', '#ff9eb1': '#fbbf24'
     };
     return godMap[c] || '#facc15';
+  }
+  if (speedMode) {
+    const m = {
+      '#7ec850': '#22d3ee', '#a8e07c': '#67e8f9', '#4a6e2a': '#0e7490',
+      '#7cc45e': '#22d3ee', '#5a9a42': '#0891b2', '#8a5a2b': '#0e7490', '#5a3a1b': '#155e75',
+      '#8b949e': '#67e8f9', '#6b7686': '#0e7490', '#c9d1d9': '#a5f3fc',
+      '#9aa7b5': '#22d3ee', '#b42318': '#06b6d4', '#f85149': '#22d3ee', '#f0883e': '#67e8f9',
+      '#ffd33d': '#a5f3fc', '#e3b341': '#22d3ee', '#c9a227': '#06b6d4',
+      '#6f42c1': '#0e7490', '#9d6bff': '#22d3ee', '#d0d7de': '#a5f3fc', '#5a6a75': '#155e75',
+      '#a371f7': '#22d3ee', '#e6edf3': '#cffafe', '#b18cff': '#22d3ee',
+      '#6bd48a': '#22d3ee', '#b7e4c7': '#a5f3fc',
+      '#d17d9e': '#22d3ee', '#e8b7c9': '#a5f3fc',
+      '#5ad1e0': '#22d3ee', '#b7ecf5': '#cffafe',
+      '#c8e3ff': '#cffafe', '#b0875b': '#0e7490', '#d8b98a': '#67e8f9',
+      '#ff7b72': '#22d3ee', '#ffb3ae': '#67e8f9',
+      '#ff4d6d': '#06b6d4', '#ff9eb1': '#67e8f9'
+    };
+    return m[c] || '#22d3ee';
+  }
+  if (boomMode) {
+    const m = {
+      '#7ec850': '#fb923c', '#a8e07c': '#fbbf24', '#4a6e2a': '#9a3412',
+      '#7cc45e': '#fb923c', '#5a9a42': '#c2410c', '#8a5a2b': '#9a3412', '#5a3a1b': '#7c2d12',
+      '#8b949e': '#fdba74', '#6b7686': '#9a3412', '#c9d1d9': '#fde68a',
+      '#9aa7b5': '#fb923c', '#b42318': '#ea580c', '#f85149': '#f97316', '#f0883e': '#fb923c',
+      '#ffd33d': '#fde68a', '#e3b341': '#fb923c', '#c9a227': '#ea580c',
+      '#6f42c1': '#9a3412', '#9d6bff': '#fb923c', '#d0d7de': '#fde68a', '#5a6a75': '#7c2d12',
+      '#a371f7': '#fb923c', '#e6edf3': '#fffbeb', '#b18cff': '#fb923c',
+      '#6bd48a': '#fb923c', '#b7e4c7': '#fde68a',
+      '#d17d9e': '#fb923c', '#e8b7c9': '#fdba74',
+      '#5ad1e0': '#fb923c', '#b7ecf5': '#fde68a',
+      '#c8e3ff': '#fde68a', '#b0875b': '#ea580c', '#d8b98a': '#fdba74',
+      '#ff7b72': '#f97316', '#ffb3ae': '#fdba74',
+      '#ff4d6d': '#ef4444', '#ff9eb1': '#fca5a5'
+    };
+    return m[c] || '#fb923c';
+  }
+  if (nightMode) {
+    const m = {
+      '#7ec850': '#3b82f6', '#a8e07c': '#60a5fa', '#4a6e2a': '#1e3a8a',
+      '#7cc45e': '#3b82f6', '#5a9a42': '#2563eb', '#8a5a2b': '#1e3a8a', '#5a3a1b': '#172554',
+      '#8b949e': '#93c5fd', '#6b7686': '#1e40af', '#c9d1d9': '#dbeafe',
+      '#9aa7b5': '#3b82f6', '#b42318': '#2563eb', '#f85149': '#3b82f6', '#f0883e': '#60a5fa',
+      '#ffd33d': '#bfdbfe', '#e3b341': '#3b82f6', '#c9a227': '#2563eb',
+      '#6f42c1': '#1e3a8a', '#9d6bff': '#3b82f6', '#d0d7de': '#dbeafe', '#5a6a75': '#172554',
+      '#a371f7': '#3b82f6', '#e6edf3': '#eff6ff', '#b18cff': '#3b82f6',
+      '#6bd48a': '#3b82f6', '#b7e4c7': '#93c5fd',
+      '#d17d9e': '#3b82f6', '#e8b7c9': '#93c5fd',
+      '#5ad1e0': '#3b82f6', '#b7ecf5': '#dbeafe',
+      '#c8e3ff': '#dbeafe', '#b0875b': '#1e40af', '#d8b98a': '#93c5fd',
+      '#ff7b72': '#3b82f6', '#ffb3ae': '#93c5fd',
+      '#ff4d6d': '#2563eb', '#ff9eb1': '#93c5fd'
+    };
+    return m[c] || '#3b82f6';
   }
   const map = {
     '#7ec850': '#b18cff', '#a8e07c': '#d2a8ff', '#4a6e2a': '#6f42c1',
@@ -564,10 +638,11 @@ function buildDistortOverlay() {
 function updateDistortOverlay() {
   const ov = document.getElementById('distortOverlay');
   if (ov) {
-    ov.style.setProperty('--vig', godMode ? 'rgba(255,211,61,.32)' : 'rgba(124,77,255,.28)');
-    ov.style.setProperty('--crack', godMode ? '#ffd33d' : '#c055ff');
-    ov.style.setProperty('--crack2', godMode ? '#ffffff' : '#ff6bc1');
-    ov.classList.toggle('on', distorted);
+    const mc = modeColors();
+    ov.style.setProperty('--vig', mc.vig);
+    ov.style.setProperty('--crack', mc.crack);
+    ov.style.setProperty('--crack2', mc.crack2);
+    ov.classList.toggle('on', anyMode());
   }
 }
 
@@ -608,11 +683,50 @@ function updateGodUI() {
   }
   b.disabled = false;
   if (godMode) {
-    s.textContent = '✨ Режим бога активен — все боссы усилены в 999 999 999 раз!';
+    s.textContent = '✨ Режим бога активен — боссы в 3 раза живучее и бьют в 2.5 раза сильнее!';
     b.textContent = 'Режим бога: ВКЛ';
   } else {
     s.textContent = '👑 Режим бога открыт. В списке появился ВСЕВЫШНИЙ!';
     b.textContent = 'Режим бога: ВЫКЛ';
+  }
+}
+
+function updateSpeedUI() {
+  const s = document.getElementById('speedStatus');
+  const b = document.getElementById('speedBtn');
+  if (!s || !b) return;
+  if (speedMode) {
+    s.textContent = '🌊 Скорость активна — боссы в 1.6× быстрее и атакуют вдвое чаще, ты быстрее, монеты ×1.5';
+    b.textContent = 'Режим скорости: ВКЛ';
+  } else {
+    s.textContent = 'Всё несётся быстрее, но и награда растёт.';
+    b.textContent = 'Режим скорости: ВЫКЛ';
+  }
+}
+
+function updateBoomUI() {
+  const s = document.getElementById('boomStatus');
+  const b = document.getElementById('boomBtn');
+  if (!s || !b) return;
+  if (boomMode) {
+    s.textContent = '💥 Взрывной активен — каждый удар создаёт взрыв (+25% урона), но твоё HP −25%, монеты ×1.25';
+    b.textContent = 'Взрывной режим: ВКЛ';
+  } else {
+    s.textContent = 'Удары вызывают взрывы, но ты хрупче.';
+    b.textContent = 'Взрывной режим: ВЫКЛ';
+  }
+}
+
+function updateNightUI() {
+  const s = document.getElementById('nightStatus');
+  const b = document.getElementById('nightBtn');
+  if (!s || !b) return;
+  if (nightMode) {
+    s.textContent = '🌑 Ночь активна — вокруг тебя лишь островок света, снаряды медленнее, боссы сильнее, монеты ×1.5';
+    b.textContent = 'Ночной режим: ВКЛ';
+  } else {
+    s.textContent = 'Темнота скрывает поле боя.';
+    b.textContent = 'Ночной режим: ВЫКЛ';
   }
 }
 
@@ -668,9 +782,12 @@ function buildBossList() {
 
 function buildMenu() {
   buildDistortOverlay();
-  if (distorted && !cracks.length) genCracks();
+  if (anyMode() && !cracks.length) genCracks();
   updateDistortUI();
   updateGodUI();
+  updateSpeedUI();
+  updateBoomUI();
+  updateNightUI();
   updateDistortOverlay();
   buildWeaponList();
   buildBossList();
@@ -731,6 +848,30 @@ document.getElementById('godBtn').onclick = () => {
   if (godMode) { distorted = true; setStore('bf_distorted', '1'); genCracks(); }
   updateDistortUI();
   updateGodUI();
+  updateDistortOverlay();
+};
+
+document.getElementById('speedBtn').onclick = () => {
+  speedMode = !speedMode;
+  setStore('bf_speed', speedMode ? '1' : '0');
+  if (speedMode) genCracks();
+  updateSpeedUI();
+  updateDistortOverlay();
+};
+
+document.getElementById('boomBtn').onclick = () => {
+  boomMode = !boomMode;
+  setStore('bf_boom', boomMode ? '1' : '0');
+  if (boomMode) genCracks();
+  updateBoomUI();
+  updateDistortOverlay();
+};
+
+document.getElementById('nightBtn').onclick = () => {
+  nightMode = !nightMode;
+  setStore('bf_night', nightMode ? '1' : '0');
+  if (nightMode) genCracks();
+  updateNightUI();
   updateDistortOverlay();
 };
 
@@ -796,10 +937,21 @@ function toMenu() {
 
 function reset() {
   const bdef = BOSSES[selectedBoss];
-  const godMult = godMode ? 999999999 / 30 : 1;
-  const godHpMult = godMode ? 99999999 / 100 : 1;
-  player.x = 150; player.y = 340; player.hp = player.maxHp = 100 + hpLevel * 25; player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
-  boss.x = 730; boss.y = 330; boss.r = bdef.r; boss.hp = boss.maxHp = bdef.id === 'god' ? (godMode ? Math.round(bdef.hp / 1000) : bdef.hp) : bdef.hp * godHpMult; boss.dmg = bdef.id === 'god' ? (godMode ? Math.round(bdef.dmg / 30) : bdef.dmg) : bdef.dmg * godMult; boss.projDmg = bdef.id === 'god' ? (godMode ? Math.round(bdef.projDmg / 30) : bdef.projDmg) : bdef.projDmg * godMult; boss.speed = bdef.speed * (godMode ? 1.4 : 1); boss.type = bdef.type;
+  const godDmgMult = godMode ? 2.5 : 1;
+  const godHpMult = godMode ? 3 : 1;
+  const nightHpMult = nightMode ? 1.25 : 1;
+  const nightDmgMult = nightMode ? 1.2 : 1;
+  player.x = 150; player.y = 340;
+  player.maxHp = (100 + hpLevel * 25) * (boomMode ? 0.75 : 1) * (nightMode ? 1.15 : 1);
+  player.hp = player.maxHp;
+  player.speed = 3.2 * (speedMode ? 1.3 : 1);
+  player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
+  boss.x = 730; boss.y = 330; boss.r = bdef.r;
+  boss.hp = boss.maxHp = bdef.hp * godHpMult * nightHpMult;
+  boss.dmg = bdef.dmg * godDmgMult * nightDmgMult;
+  boss.projDmg = bdef.projDmg * godDmgMult * nightDmgMult;
+  boss.speed = bdef.speed * (godMode ? 1.3 : 1) * (speedMode ? 1.6 : 1);
+  boss.type = bdef.type;
   boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0;
   boss.name = bdef.name; boss.stars = bdef.stars; boss.color = bdef.color; boss.accent = bdef.accent; boss.talk = bdef.talk; boss.win = bdef.win; boss.lose = bdef.lose;
   gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false;
@@ -823,6 +975,12 @@ function damageBoss(dmg) {
   boss.hitFx = 8;
   burst(boss.x, boss.y, '#ffffff', 12);
   shake = 6;
+  if (boomMode) {
+    burst(boss.x, boss.y, '#fb923c', 16);
+    burst(boss.x, boss.y, '#fde68a', 8);
+    boss.hp -= Math.max(1, Math.round(dmg * 0.25));
+    shake = 10;
+  }
   if (boss.type === 'slime') boss.mood = 'sad';
   if (boss.hp <= 0 && !boss.dying) {
     boss.dying = true;
@@ -919,13 +1077,15 @@ function update() {
     }
   }
 
-  if (distorted) {
+  if (anyMode()) {
+    const mc = modeColors();
     let amb = 0;
     for (const p of particles) if (p.ambient) amb++;
-    if (amb < 28) particles.push({ x: Math.random() * canvas.width, y: canvas.height + 10, vx: (Math.random() - 0.5) * 0.5, vy: -(0.3 + Math.random() * 0.8), size: 2 + Math.random() * 3, color: godMode ? (Math.random() < 0.5 ? '#ffd33d' : '#e3b341') : (Math.random() < 0.5 ? '#c055ff' : '#ff6bc1'), life: 150 + Math.random() * 90, maxLife: 240, ambient: true });
+    if (amb < 28) particles.push({ x: Math.random() * canvas.width, y: canvas.height + 10, vx: (Math.random() - 0.5) * 0.5, vy: -(0.3 + Math.random() * 0.8), size: 2 + Math.random() * 3, color: Math.random() < 0.5 ? mc.amb[0] : mc.amb[1], life: 150 + Math.random() * 90, maxLife: 240, ambient: true });
   }
 
   updateBoss();
+  if (speedMode) updateBoss();
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
@@ -943,7 +1103,7 @@ function update() {
       p.vx = Math.cos(a) * sp;
       p.vy = Math.sin(a) * sp;
     }
-    p.x += p.vx; p.y += p.vy;
+    p.x += p.vx * ((nightMode && !p.friendly) ? 0.8 : 1); p.y += p.vy * ((nightMode && !p.friendly) ? 0.8 : 1);
     let dead = p.x < -30 || p.x > canvas.width + 30 || p.y < -30 || p.y > canvas.height + 30;
     if (!dead && p.friendly && boss.hp > 0) {
       if (Math.hypot(p.x - boss.x, p.y - boss.y) < boss.r + 8) {
@@ -1458,7 +1618,7 @@ function updateBars() {
 }
 
 function drawFloor() {
-  ctx.strokeStyle = godMode ? 'rgba(255,211,61,.35)' : (distorted ? 'rgba(192,85,255,.35)' : 'rgba(120,140,160,.15)');
+  ctx.strokeStyle = anyMode() ? modeColors().floor : 'rgba(120,140,160,.15)';
   ctx.lineWidth = 1;
   for (let i = 0; i < canvas.width + 40; i += 40) { ctx.beginPath(); ctx.moveTo(i, canvas.height - 32); ctx.lineTo(i, canvas.height); ctx.stroke(); }
 }
@@ -1595,10 +1755,11 @@ function drawBoss() {
     else ctx.scale(1 - p * 0.4, 1 - p * 0.4);
   } else {
     ctx.translate(0, Math.sin(t * 2 + boss.x * 0.02) * 3);
-    if (distorted) {
-      ctx.fillStyle = godMode ? 'rgba(255,211,61,.16)' : 'rgba(192,85,255,.14)';
+    if (anyMode()) {
+      const mc = modeColors();
+      ctx.fillStyle = mc.glowFill;
       ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.6 + Math.sin(t * 4) * 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = godMode ? 'rgba(255,211,61,.7)' : 'rgba(192,85,255,.6)'; ctx.lineWidth = 2;
+      ctx.strokeStyle = mc.glowStroke; ctx.lineWidth = 2;
       for (let i = 0; i < 2; i++) {
         const a0 = t * 1.2 + i * Math.PI;
         ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.3, a0, a0 + Math.PI * 0.7); ctx.stroke();
@@ -2054,10 +2215,11 @@ function drawGodBackground() {
 }
 
 function drawCracks() {
-  if (!distorted || !cracks.length) return;
+  if (!anyMode() || !cracks.length) return;
   const t = performance.now() / 1000;
-  const c1 = godMode ? '#ffd33d' : '#c055ff';
-  const c2 = godMode ? '#ffffff' : '#ff6bc1';
+  const mc = modeColors();
+  const c1 = mc.crack;
+  const c2 = mc.crack2;
   ctx.globalAlpha = 0.35 + Math.sin(t * 6) * 0.2;
   ctx.strokeStyle = c1;
   ctx.lineWidth = 2;
@@ -2129,9 +2291,11 @@ function draw() {
   drawCracks();
   if (distortFlash > 0) {
     distortFlash--;
-    ctx.fillStyle = 'rgba(192,85,255,' + (distortFlash / 45) * 0.55 + ')';
+    ctx.fillStyle = 'rgba(' + modeColors().flashBase + ',' + (distortFlash / 45) * 0.55 + ')';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+
+  if (nightMode) drawNight();
 
   if (boss.hp > 0) {
     ctx.font = '16px Segoe UI, Arial';
@@ -2147,6 +2311,19 @@ function draw() {
   }
 
   if (gameOver) drawGameOver();
+}
+
+function drawNight() {
+  const px = player.x + player.w / 2;
+  const py = player.y + player.h / 2;
+  ctx.save();
+  const g = ctx.createRadialGradient(px, py, 50, px, py, 300);
+  g.addColorStop(0, 'rgba(2,6,23,0)');
+  g.addColorStop(0.6, 'rgba(2,6,23,0.65)');
+  g.addColorStop(1, 'rgba(2,6,23,0.95)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
 }
 
 function loop() {
@@ -2243,7 +2420,7 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   coins = parseInt(getStore('bf_coins') || '0', 10);
@@ -2253,13 +2430,13 @@ function applyCloudData(data) {
   distorted = getStore('bf_distorted') === '1';
   godUnlocked = getStore('bf_godUnlocked') === '1';
   godMode = getStore('bf_god') === '1';
+  speedMode = getStore('bf_speed') === '1';
+  boomMode = getStore('bf_boom') === '1';
+  nightMode = getStore('bf_night') === '1';
   if (godMode) distorted = true;
   try {
     refreshShop();
     buildMenu();
-    updateDistortUI();
-    updateGodUI();
-    updateDistortOverlay();
     updateAdvBtn();
   } catch (e) {}
 }
