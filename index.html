@@ -128,6 +128,33 @@
     letter-spacing: 1px;
   }
   #wavesBtn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(139,69,19,.5); }
+  .code-row { display: flex; gap: 8px; }
+  .code-row input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #e6edf3;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    outline: none;
+    text-transform: uppercase;
+  }
+  .code-row input:focus { border-color: #c68a4e; }
+  .code-row button {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #a9743f, #6b4226);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .code-row button:hover { filter: brightness(1.1); }
 
   #fight { display: flex; flex-direction: column; align-items: center; }
   .wrap {
@@ -379,6 +406,16 @@
     <div id="chocoWeapons" class="shop"></div>
   </div>
 
+  <div class="block">
+    <h2>🎁 Промо-коды</h2>
+    <div class="mini" style="margin-bottom:10px">Введи промо-код и получи награду. Каждый код можно активировать один раз.</div>
+    <div class="code-row">
+      <input id="codeInput" type="text" placeholder="ВВЕДИ КОД" autocomplete="off" spellcheck="false">
+      <button id="codeBtn">Активировать</button>
+    </div>
+    <div id="codeStatus" class="mini" style="margin-top:8px"></div>
+  </div>
+
   <button id="startBtn">В бой!</button>
   <button id="wavesBtn" class="waves-btn">🍫 Волновой режим: 14 волн + босс</button>
 </div>
@@ -516,6 +553,16 @@ let waveNum = 0;
 let waveState = 'idle';
 let waveTimer = 0;
 let waveReward = 0;
+let activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
+const CODES = {
+  CHOCO50: { name: '50 шоколадок', apply() { chocolates += 50; } },
+  GIFT100: { name: '100 монет', apply() { coins += 100; } },
+  WAVES30: { name: '30 шоколадок', apply() { chocolates += 30; } },
+  NINJA: { name: 'Скин «Ниндзя»', apply() { if (skinsOwned.indexOf('ninja') === -1) skinsOwned.push('ninja'); } },
+  PUMPKIN: { name: 'Скин «Тыква»', apply() { if (skinsOwned.indexOf('pumpkin') === -1) skinsOwned.push('pumpkin'); } },
+  MEGASTORM: { name: 'Мега-оружие «Шторм-бластер»', apply() { if (megaOwned.indexOf('storm') === -1) megaOwned.push('storm'); } },
+  GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } }
+};
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
@@ -535,6 +582,7 @@ function saveProgress() {
   setStore('bf_chocoWeapons', chocoWeaponsOwned.join(','));
   setStore('bf_skins', skinsOwned.join(','));
   setStore('bf_skin', selectedSkin);
+  setStore('bf_codes', activatedCodes.join(','));
 }
 function weaponDmg() { return weapon.dmg + dmgLevel * 5; }
 
@@ -2918,6 +2966,45 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
+function activateCode(raw) {
+  const code = (raw || '').trim().toUpperCase();
+  const st = document.getElementById('codeStatus');
+  if (!st) return;
+  if (!code) { st.textContent = 'Введи код в поле выше'; st.style.color = '#8b949e'; return; }
+  const c = CODES[code];
+  if (!c) { st.textContent = '❌ Неверный код'; st.style.color = '#f85149'; return; }
+  if (activatedCodes.indexOf(code) !== -1) { st.textContent = '⚠️ Код уже активирован'; st.style.color = '#f0883e'; return; }
+  try {
+    c.apply();
+    activatedCodes.push(code);
+    setStore('bf_codes', activatedCodes.join(','));
+    saveProgress();
+    buildWeaponList();
+    buildMegaShop();
+    buildChocoShop();
+    updateGodUI();
+    refreshShop();
+    st.textContent = '✅ Код активирован: ' + c.name;
+    st.style.color = '#3fb950';
+  } catch (e) {
+    st.textContent = '❌ Ошибка активации';
+    st.style.color = '#f85149';
+  }
+}
+
+document.getElementById('codeBtn').onclick = () => {
+  const inp = document.getElementById('codeInput');
+  activateCode(inp.value);
+  inp.value = '';
+};
+document.getElementById('codeInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const inp = document.getElementById('codeInput');
+    activateCode(inp.value);
+    inp.value = '';
+  }
+});
+
 document.getElementById('startBtn').onclick = startFight;
 document.getElementById('wavesBtn').onclick = startWaves;
 document.getElementById('menuBtn').onclick = toMenu;
@@ -3005,9 +3092,10 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
+  activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
   coins = parseInt(getStore('bf_coins') || '0', 10);
   hpLevel = parseInt(getStore('bf_hpLevel') || '0', 10);
   dmgLevel = parseInt(getStore('bf_dmgLevel') || '0', 10);
