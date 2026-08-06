@@ -346,14 +346,21 @@ const WEAPONS = {
 const BOSSES = [
   { id: 'slime',  name: 'Слайм-слабыш',        type: 'slime',  stars: 1, hp: 100,  dmg: 8,  projDmg: 8,  speed: 0.4, r: 40, color: '#7ec850', accent: '#7ec850', desc: 'Самый слабый босс. Мяукает.', win: 'Ты победил самого слабого босса. Тебе не стыдно?', lose: 'Тебя победил СЛАЙМ-СЛАБЫШ. Это позор.', talk: ['пожалуйста, не бей...', 'я слабенький...', 'мяу-мяу?'] },
   { id: 'wolf',   name: 'Грозный волк',        type: 'wolf',   stars: 2, hp: 200,  dmg: 15, projDmg: 0,  speed: 1.4, r: 30, color: '#8b949e', accent: '#d29922', desc: 'Быстрее слайма, кусает и делает прыжки.', win: 'Волк повержен!', lose: 'Грозный волк разорвал тебя.', talk: ['Р-р-р...', 'Ау-у-у!'] },
-  { id: 'goblin', name: 'Гоблин-громила',      type: 'goblin', stars: 3, hp: 300,  dmg: 12, projDmg: 10, speed: 1.2, r: 34, color: '#7cc45e', accent: '#58a6ff', desc: 'Быстрый, бегает и кидается камнями.', win: 'Гоблин повержен!', lose: 'Тебя забил гоблин палкой.', talk: ['чувак, ты чё?', 'сейчас получишь!', 'дай сюда меч!'] },
-  { id: 'knight', name: 'Тёмный рыцарь',       type: 'knight', stars: 4, hp: 700,  dmg: 22, projDmg: 0,  speed: 0.8, r: 44, color: '#9aa7b5', accent: '#d29922', desc: 'В броне, делает мощные рывки.', win: 'Рыцарь пал!', lose: 'Тёмный рыцарь одолел тебя.', talk: ['Ты не пройдёшь.', 'Моя броня крепка.'] },
-  { id: 'dragon', name: 'Дракон Огнедышащий',  type: 'dragon', stars: 5, hp: 1200, dmg: 30, projDmg: 12, speed: 0.8, r: 55, color: '#f85149', accent: '#f0883e', desc: 'Летает и плюётся веерами огня.', win: 'Дракон повержен!', lose: 'Ты сгорел дотла.', talk: ['Сгори!', 'Огнём!'] },
-  { id: 'void',   name: 'Повелитель Бездны',   type: 'void',   stars: 6, hp: 2000, dmg: 40, projDmg: 15, speed: 1.1, r: 60, color: '#b18cff', accent: '#bc8cff', desc: 'Телепортируется и стреляет кольцами тьмы.', win: 'Бездна поглощена!', lose: 'Тьма поглотила тебя.', talk: ['Пришёл твой час.', 'Смотри в бездну.'] },
-  { id: 'mega',   name: 'МЕГА-Босс',           type: 'mega',   stars: 7, hp: 5000, dmg: 60, projDmg: 20, speed: 0.9, r: 80, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Колоссальный гигант: землетрясение и дождь огня.', win: 'МЕГА-БОСС ПОВЕРЖЕН!!!', lose: 'МЕГА-Босс раздавил тебя.', talk: ['ТЫ МАЛЕНЬКИЙ!', 'ЗЕМЛЯ ДРОЖИТ!', 'СМОТРИ ПОД НОГИ!'] },
-  { id: 'kingdragon', name: 'Король Драконов', type: 'kingdragon', stars: 8, hp: 8000, dmg: 70, projDmg: 25, speed: 1.0, r: 70, color: '#e3b341', accent: '#e3b341', desc: 'Повелитель неба: кольца огня и королевский рёв.', win: 'Король Драконов низвергнут!', lose: 'Ты сгорел в королевском огне.', talk: ['НА КОЛЕНИ!', 'Я ПОВЕЛИТЕЛЬ НЕБА!'] },
-  { id: 'chaos',  name: 'Хаос-Сущность',       type: 'chaos',  stars: 9, hp: 9500, dmg: 70, projDmg: 22, speed: 1.1, r: 65, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Изначальный хаос. Уклоняйся от всего!', win: 'ХАОС ПОБЕЖДЁН! ТЫ ЛЕГЕНДА!', lose: 'Хаос поглотил тебя навсегда.', talk: ['ВСЁ — ХАОС.', 'КОНЕЦ БЛИЗОК.'] },
-  { id: 'god',    name: 'ВСЕВЫШНИЙ',            type: 'god',    stars: 10, hp: 9999999999999, dmg: 500, projDmg: 250, speed: 0.6, r: 95, color: '#ffd33d', accent: '#ffd33d', desc: 'Божественный суд неминуем. Только в режиме бога.', win: 'БОГ ПОВЕРЖЕН?! НЕВОЗМОЖНО!', lose: 'Всевышний низверг тебя во тьму.', talk: ['ТЫ ОСМЕЛИЛСЯ?', 'МОЯ СИЛА БЕСКОНЕЧНА.', 'НА КОЛЕНИ, СМЕРТНЫЙ!'] }
+  { id: 'snail',  name: 'Гигантская улитка',   type: 'snail',  stars: 3, hp: 500,  dmg: 12, projDmg: 12, speed: 0.35, r: 52, color: '#6bd48a', accent: '#b7e4c7', desc: 'Медленный, но очень живучий танк. Плюётся кислотой.', win: 'Улитка повержена!', lose: 'Улитка не спеша доползла до тебя.', talk: ['хлюп-хлюп...', 'я догоню...', 'медленно, но верно!'] },
+  { id: 'goblin', name: 'Гоблин-громила',      type: 'goblin', stars: 4, hp: 300,  dmg: 12, projDmg: 10, speed: 1.2, r: 34, color: '#7cc45e', accent: '#58a6ff', desc: 'Быстрый, бегает и кидается камнями.', win: 'Гоблин повержен!', lose: 'Тебя забил гоблин палкой.', talk: ['чувак, ты чё?', 'сейчас получишь!', 'дай сюда меч!'] },
+  { id: 'bat',    name: 'Кровожадный упырь',   type: 'bat',    stars: 5, hp: 850,  dmg: 18, projDmg: 10, speed: 2.0, r: 34, color: '#d17d9e', accent: '#e8b7c9', desc: 'Летает и пикирует на жертву клыками.', win: 'Упырь распался в прах!', lose: 'Упырь выпил всю твою кровь.', talk: ['ПИ-И!', 'я чую кровь!', 'смотри в небо!'] },
+  { id: 'knight', name: 'Тёмный рыцарь',       type: 'knight', stars: 6, hp: 700,  dmg: 22, projDmg: 0,  speed: 0.8, r: 44, color: '#9aa7b5', accent: '#d29922', desc: 'В броне, делает мощные рывки.', win: 'Рыцарь пал!', lose: 'Тёмный рыцарь одолел тебя.', talk: ['Ты не пройдёшь.', 'Моя броня крепка.'] },
+  { id: 'shaman', name: 'Безумный шаман',      type: 'shaman', stars: 7, hp: 1500, dmg: 18, projDmg: 12, speed: 1.0, r: 42, color: '#5ad1e0', accent: '#b7ecf5', desc: 'Телепортируется, крутит тотемы и призывает молнии.', win: 'Шаман потерял свою силу!', lose: 'Шаман сжёг тебя молниями.', talk: ['ТОТЕМ ЗОВЁТ!', 'СМОТРИ НА МОЛНИИ!', 'ТАНЦУЙ!'] },
+  { id: 'dragon', name: 'Дракон Огнедышащий',  type: 'dragon', stars: 8, hp: 1200, dmg: 30, projDmg: 12, speed: 0.8, r: 55, color: '#f85149', accent: '#f0883e', desc: 'Летает и плюётся веерами огня.', win: 'Дракон повержен!', lose: 'Ты сгорел дотла.', talk: ['Сгори!', 'Огнём!'] },
+  { id: 'frost',  name: 'Ледяной владыка',     type: 'frost',  stars: 9, hp: 3300, dmg: 40, projDmg: 16, speed: 1.0, r: 55, color: '#79c0ff', accent: '#c8e3ff', desc: 'Морозные кольца и ледяной шторм. Не дай себя заморозить.', win: 'Ледяной владыка растаял!', lose: 'Ты застыл в вечной мерзлоте.', talk: ['ЗАМЕРЗНИ!', 'ЛЁД ПОГЛОТИТ ВСЁ!', 'ХОЛОД ВЕЧЕН.'] },
+  { id: 'void',   name: 'Повелитель Бездны',   type: 'void',   stars: 10, hp: 2000, dmg: 40, projDmg: 15, speed: 1.1, r: 60, color: '#b18cff', accent: '#bc8cff', desc: 'Телепортируется и стреляет кольцами тьмы.', win: 'Бездна поглощена!', lose: 'Тьма поглотила тебя.', talk: ['Пришёл твой час.', 'Смотри в бездну.'] },
+  { id: 'titan',  name: 'Каменный титан',      type: 'titan',  stars: 11, hp: 6500, dmg: 45, projDmg: 18, speed: 0.5, r: 78, color: '#b0875b', accent: '#d8b98a', desc: 'Швыряет валуны и сотрясает землю топотом.', win: 'Титан рассыпался на камни!', lose: 'Титан раскрошил тебя в песок.', talk: ['ГОРА ИДЁТ!', 'КИРПИЧИ!', 'ХРУ-У-М!'] },
+  { id: 'mega',   name: 'МЕГА-Босс',           type: 'mega',   stars: 12, hp: 5000, dmg: 60, projDmg: 20, speed: 0.9, r: 80, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Колоссальный гигант: землетрясение и дождь огня.', win: 'МЕГА-БОСС ПОВЕРЖЕН!!!', lose: 'МЕГА-Босс раздавил тебя.', talk: ['ТЫ МАЛЕНЬКИЙ!', 'ЗЕМЛЯ ДРОЖИТ!', 'СМОТРИ ПОД НОГИ!'] },
+  { id: 'swarm',  name: 'Рой пожирателей',     type: 'swarm',  stars: 13, hp: 9000, dmg: 45, projDmg: 14, speed: 1.8, r: 62, color: '#ff7b72', accent: '#ffb3ae', desc: 'Миллионы жуков: носится и засыпает шипами.', win: 'Рой рассеялся!', lose: 'Рой съел тебя за секунды.', talk: ['ЖЖЖЖЖЖЖ!', 'НАС МНОГО!', 'НЕ УБЬЁШЬ ВСЕХ!'] },
+  { id: 'kingdragon', name: 'Король Драконов', type: 'kingdragon', stars: 14, hp: 8000, dmg: 70, projDmg: 25, speed: 1.0, r: 70, color: '#e3b341', accent: '#e3b341', desc: 'Повелитель неба: кольца огня и королевский рёв.', win: 'Король Драконов низвергнут!', lose: 'Ты сгорел в королевском огне.', talk: ['НА КОЛЕНИ!', 'Я ПОВЕЛИТЕЛЬ НЕБА!'] },
+  { id: 'annihilator', name: 'Аннигилятор',    type: 'annihilator', stars: 15, hp: 11500, dmg: 75, projDmg: 25, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ff9eb1', desc: 'Машина уничтожения: стены огня и телепорты.', win: 'АННИГИЛЯТОР УНИЧТОЖЕН!', lose: 'Аннигилятор стёр тебя в пыль.', talk: ['ОШИБКА: ЦЕЛЬ ЖИВА.', 'УНИЧТОЖИТЬ.', 'СИСТЕМА ЗАПУЩЕНА.'] },
+  { id: 'chaos',  name: 'Хаос-Сущность',       type: 'chaos',  stars: 16, hp: 9500, dmg: 70, projDmg: 22, speed: 1.1, r: 65, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Изначальный хаос. Уклоняйся от всего!', win: 'ХАОС ПОБЕЖДЁН! ТЫ ЛЕГЕНДА!', lose: 'Хаос поглотил тебя навсегда.', talk: ['ВСЁ — ХАОС.', 'КОНЕЦ БЛИЗОК.'] },
+  { id: 'god',    name: 'ВСЕВЫШНИЙ',            type: 'god',    stars: 17, hp: 9999999999999, dmg: 500, projDmg: 250, speed: 0.6, r: 95, color: '#ffd33d', accent: '#ffd33d', desc: 'Божественный суд неминуем. Только в режиме бога.', win: 'БОГ ПОВЕРЖЕН?! НЕВОЗМОЖНО!', lose: 'Всевышний низверг тебя во тьму.', talk: ['ТЫ ОСМЕЛИЛСЯ?', 'МОЯ СИЛА БЕСКОНЕЧНА.', 'НА КОЛЕНИ, СМЕРТНЫЙ!'] }
 ];
 
 const canvas = document.getElementById('game');
@@ -450,7 +457,13 @@ function corrupt(c) {
       '#9aa7b5': '#facc15', '#b42318': '#fbbf24', '#f85149': '#f59e0b', '#f0883e': '#fbbf24',
       '#ffd33d': '#fff7cc', '#e3b341': '#fde047', '#c9a227': '#fbbf24',
       '#6f42c1': '#ca8a04', '#9d6bff': '#fde047', '#d0d7de': '#fef9c3', '#5a6a75': '#854d0e',
-      '#a371f7': '#fbbf24', '#e6edf3': '#fffbea', '#b18cff': '#fde047'
+      '#a371f7': '#fbbf24', '#e6edf3': '#fffbea', '#b18cff': '#fde047',
+      '#6bd48a': '#fde047', '#b7e4c7': '#fef08a',
+      '#d17d9e': '#fbbf24', '#e8b7c9': '#fde68a',
+      '#5ad1e0': '#fde047', '#b7ecf5': '#fef9c3',
+      '#c8e3ff': '#fef9c3', '#b0875b': '#facc15', '#d8b98a': '#fde68a',
+      '#ff7b72': '#f59e0b', '#ffb3ae': '#fbbf24',
+      '#ff4d6d': '#f59e0b', '#ff9eb1': '#fbbf24'
     };
     return godMap[c] || '#facc15';
   }
@@ -461,7 +474,13 @@ function corrupt(c) {
     '#9aa7b5': '#a371f7', '#b42318': '#6f42c1', '#f85149': '#b18cff', '#f0883e': '#d2a8ff',
     '#ffd33d': '#ff6bc1', '#e3b341': '#c055ff', '#c9a227': '#8b5cf6',
     '#6f42c1': '#a371f7', '#9d6bff': '#d2a8ff', '#d0d7de': '#c9b1ff', '#5a6a75': '#4b3a75',
-    '#a371f7': '#d2a8ff', '#e6edf3': '#e6d9ff', '#b18cff': '#ff6bc1'
+    '#a371f7': '#d2a8ff', '#e6edf3': '#e6d9ff', '#b18cff': '#ff6bc1',
+    '#6bd48a': '#b18cff', '#b7e4c7': '#d2a8ff',
+    '#d17d9e': '#ff6bc1', '#e8b7c9': '#ffb0d8',
+    '#5ad1e0': '#c055ff', '#b7ecf5': '#e0c2ff',
+    '#c8e3ff': '#d2c8ff', '#b0875b': '#8256d0', '#d8b98a': '#c9b1ff',
+    '#ff7b72': '#b18cff', '#ffb3ae': '#e6d9ff',
+    '#ff4d6d': '#ff6bc1', '#ff9eb1': '#ffc3d4'
   };
   return map[c] || c;
 }
@@ -1109,6 +1128,242 @@ function updateBoss() {
     }
     boss.x = clamp(boss.x, 40, canvas.width - 40);
     boss.y = clamp(boss.y, 40, canvas.height - 80);
+  } else if (t === 'snail') {
+    boss.x += nx * boss.speed;
+    boss.y += ny * boss.speed;
+    boss.x = clamp(boss.x, 40, canvas.width - 40);
+    boss.y = clamp(boss.y, 40, canvas.height - 80);
+    if (d < 75 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    else if (boss.atkCd <= 0 && d < 240) {
+      boss.atkCd = D ? 90 : 110;
+      const n = D ? 3 : 1;
+      for (let i = 0; i < n; i++) {
+        const a = Math.atan2(dy, dx) + (i - (n - 1) / 2) * 0.25;
+        shootBossProj(Math.cos(a) * (D ? 2.7 : 2.9), Math.sin(a) * (D ? 2.7 : 2.9), boss.projDmg, 10, D ? '#b18cff' : '#a3e4c0');
+      }
+    }
+  } else if (t === 'bat') {
+    if (boss.state === 'fly') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * 0.5;
+      boss.timer--;
+      if (boss.timer <= 0 && d < 430) { boss.state = 'dive'; boss.timer = 30; boss.dirX = nx; boss.dirY = ny; }
+      if (d < 60 && boss.atkCd <= 0) { boss.atkCd = 45; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'dive') {
+      boss.x += boss.dirX * boss.speed * 3.1;
+      boss.y += boss.dirY * boss.speed * 3.1;
+      boss.timer--;
+      if (d < 55) {
+        if (D) for (let i = -1; i <= 1; i++) { const a = Math.atan2(dy, dx) + i * 0.4; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 6, '#b18cff'); }
+        hurtPlayer(boss.dmg); boss.hitFx = 8; boss.state = 'fly'; boss.timer = 100;
+      } else if (boss.timer <= 0) {
+        if (D) for (let i = -1; i <= 1; i++) { const a = Math.atan2(dy, dx) + i * 0.4; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 6, '#b18cff'); }
+        boss.state = 'fly'; boss.timer = 100;
+      }
+    }
+    boss.x = clamp(boss.x, 40, canvas.width - 40);
+    boss.y = clamp(boss.y, 50, canvas.height - 110);
+  } else if (t === 'shaman') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * boss.speed;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.5) { boss.state = 'totem'; boss.timer = 60; }
+        else { boss.state = 'storm'; boss.timer = 45; }
+      }
+      if (d < 75 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'totem') {
+      boss.timer--;
+      if (boss.timer % (D ? 5 : 7) === 0) {
+        const a = performance.now() / 500 + (60 - boss.timer) * 0.25;
+        shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 7, D ? '#c055ff' : '#5ad1e0');
+      }
+      if (boss.timer <= 0) {
+        boss.state = 'tele';
+        boss.timer = 45;
+        boss.tx = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 250, 60, canvas.width - 60);
+        boss.ty = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100);
+      }
+    } else if (boss.state === 'storm') {
+      boss.timer--;
+      if (boss.timer % 8 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 260 - 130), y: -20, vx: 0, vy: D ? 6.5 : 5.5, dmg: boss.projDmg, r: 9, friendly: false, color: D ? '#ff6bc1' : '#5ad1e0' });
+      }
+      if (boss.timer <= 0) {
+        boss.state = 'tele';
+        boss.timer = 45;
+        boss.tx = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 250, 60, canvas.width - 60);
+        boss.ty = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100);
+      }
+    } else if (boss.state === 'tele') {
+      boss.timer--;
+      if (boss.timer === 22) {
+        boss.x = boss.tx;
+        boss.y = boss.ty;
+        burst(boss.x, boss.y, '#5ad1e0', 16);
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 80, canvas.height - 120);
+  } else if (t === 'frost') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * boss.speed;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.4) { boss.state = 'ring'; boss.timer = 55; }
+        else if (roll < 0.75) { boss.state = 'storm'; boss.timer = 40; }
+        else { boss.state = 'nova'; boss.timer = 30; }
+      }
+      if (d < 80 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'ring') {
+      boss.timer--;
+      if (boss.timer % (D ? 5 : 6) === 0) {
+        const a = performance.now() / 600 + (55 - boss.timer) * 0.3;
+        shootBossProj(Math.cos(a) * 3, Math.sin(a) * 3, boss.projDmg, 8, D ? '#b18cff' : '#79c0ff');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'storm') {
+      boss.timer--;
+      if (boss.timer % 7 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 300 - 150), y: -20, vx: 0, vy: D ? 6 : 5, dmg: boss.projDmg, r: 8, friendly: false, color: D ? '#c055ff' : '#79c0ff' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'nova') {
+      boss.timer--;
+      if (boss.timer === 10) {
+        burst(boss.x, boss.y, '#79c0ff', 20);
+        const n = D ? 12 : 8;
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * Math.PI * 2;
+          shootBossProj(Math.cos(a) * 2.8, Math.sin(a) * 2.8, boss.projDmg, 8, D ? '#b18cff' : '#79c0ff');
+        }
+        if (d < 160) hurtPlayer(boss.dmg);
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 80, canvas.height - 120);
+  } else if (t === 'titan') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * boss.speed;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        boss.state = Math.random() < 0.5 ? 'throw' : 'stomp';
+        boss.timer = 45;
+      }
+      if (d < 110 && boss.atkCd <= 0) { boss.atkCd = 40; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'throw') {
+      boss.timer--;
+      if (boss.timer === 25) {
+        burst(boss.x, boss.y, '#8b949e', 12);
+        const n = D ? 4 : 3;
+        for (let i = 0; i < n; i++) {
+          const a = Math.atan2(dy, dx) + (i - (n - 1) / 2) * 0.15;
+          shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 16, D ? '#c055ff' : '#8b949e');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 130; }
+    } else if (boss.state === 'stomp') {
+      boss.timer--;
+      if (boss.timer === 15) {
+        shake = 14;
+        burst(boss.x, boss.y, '#8b949e', 20);
+        if (d < 150) hurtPlayer(boss.dmg);
+        const wy = canvas.height - 55;
+        projs.push({ x: boss.x - boss.r, y: wy, vx: -4, vy: 0, dmg: boss.projDmg, r: 15, friendly: false, color: '#8b949e', shock: true });
+        projs.push({ x: boss.x + boss.r, y: wy, vx: 4, vy: 0, dmg: boss.projDmg, r: 15, friendly: false, color: '#8b949e', shock: true });
+        if (D) {
+          projs.push({ x: boss.x - boss.r, y: wy, vx: -7, vy: 0, dmg: boss.projDmg, r: 12, friendly: false, color: '#c055ff', shock: true });
+          projs.push({ x: boss.x + boss.r, y: wy, vx: 7, vy: 0, dmg: boss.projDmg, r: 12, friendly: false, color: '#c055ff', shock: true });
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 130; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 40, canvas.height - 80);
+  } else if (t === 'swarm') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * boss.speed;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.45) { boss.state = 'dash'; boss.timer = 28; boss.dirX = nx; boss.dirY = ny; }
+        else { boss.state = 'barrage'; boss.timer = 40; }
+      }
+      if (d < 65 && boss.atkCd <= 0) { boss.atkCd = 35; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'barrage') {
+      boss.timer--;
+      if (boss.timer % (D ? 5 : 6) === 0) {
+        const a = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.6;
+        shootBossProj(Math.cos(a) * (D ? 7 : 6.2), Math.sin(a) * (D ? 7 : 6.2), boss.projDmg, 6, D ? '#c055ff' : '#ff7b72');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 100; }
+    } else if (boss.state === 'dash') {
+      boss.x += boss.dirX * boss.speed * 2.6;
+      boss.y += boss.dirY * boss.speed * 2.6;
+      boss.timer--;
+      if (d < 55) {
+        if (D) for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2 + performance.now() / 500; shootBossProj(Math.cos(a) * 3, Math.sin(a) * 3, boss.projDmg, 6, '#b18cff'); }
+        hurtPlayer(boss.dmg); boss.hitFx = 8; boss.state = 'idle'; boss.timer = 100;
+      } else if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 100; }
+    }
+    boss.x = clamp(boss.x, 40, canvas.width - 40);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'annihilator') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed;
+      boss.y += ny * boss.speed;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.35) { boss.state = 'spin'; boss.timer = 55; }
+        else if (roll < 0.7) { boss.state = 'laser'; boss.timer = 40; }
+        else { boss.state = 'tele'; boss.timer = 50; boss.tx = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 240, 60, canvas.width - 60); boss.ty = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100); }
+      }
+      if (d < 100 && boss.atkCd <= 0) { boss.atkCd = 40; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'spin') {
+      boss.timer--;
+      if (boss.timer % (D ? 4 : 5) === 0) {
+        const a = performance.now() / 350 + (55 - boss.timer) * 0.35;
+        shootBossProj(Math.cos(a) * 4.4, Math.sin(a) * 4.4, boss.projDmg, 8, D ? '#c055ff' : '#ff4d6d');
+        if (D) shootBossProj(Math.cos(-a) * 3.4, Math.sin(-a) * 3.4, boss.projDmg, 6, '#ff6bc1');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'laser') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 300 - 150), y: -20, vx: 0, vy: D ? 7 : 6, dmg: boss.projDmg, r: 11, friendly: false, color: D ? '#ff6bc1' : '#ff4d6d' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'tele') {
+      boss.timer--;
+      if (boss.timer === 25) {
+        boss.x = boss.tx;
+        boss.y = boss.ty;
+        burst(boss.x, boss.y, '#ff4d6d', 20);
+        if (D) for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.2, Math.sin(a) * 3.2, boss.projDmg, 7, '#ff6bc1'); }
+      }
+      if (boss.timer <= 0) { boss.state = 'burst'; boss.timer = 28; }
+    } else if (boss.state === 'burst') {
+      boss.timer--;
+      if (boss.timer === 14) {
+        const n = D ? 14 : 10;
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * Math.PI * 2 + performance.now() / 700;
+          shootBossProj(Math.cos(a) * (D ? 3.8 : 3.4), Math.sin(a) * (D ? 3.8 : 3.4), boss.projDmg, 9, D ? '#ff6bc1' : '#ff4d6d');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
   } else if (t === 'god') {
     if (boss.state === 'idle') {
       boss.x += nx * boss.speed;
@@ -1280,8 +1535,8 @@ function drawBoss() {
   if (boss.deathT > 0) {
     const p = 1 - boss.deathT / DEATH_TIME;
     ctx.globalAlpha = Math.max(0, 1 - p);
-    const fall = boss.type === 'knight' || boss.type === 'goblin' || boss.type === 'wolf' || boss.type === 'mega';
-    const sink = boss.type === 'dragon' || boss.type === 'void' || boss.type === 'kingdragon' || boss.type === 'chaos';
+    const fall = boss.type === 'knight' || boss.type === 'goblin' || boss.type === 'wolf' || boss.type === 'mega' || boss.type === 'snail' || boss.type === 'shaman' || boss.type === 'titan' || boss.type === 'frost';
+    const sink = boss.type === 'dragon' || boss.type === 'void' || boss.type === 'kingdragon' || boss.type === 'chaos' || boss.type === 'bat' || boss.type === 'swarm' || boss.type === 'annihilator';
     if (fall) ctx.rotate(p * 1.6);
     if (sink) ctx.translate(0, p * 120);
     if (boss.type === 'slime') ctx.scale(1 - p * 0.5, 1 - p * 0.9);
@@ -1500,6 +1755,142 @@ function drawBoss() {
     ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(0, 0, 7, 12, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(0, 3, 4, 0, Math.PI * 2); ctx.fill();
+  } else if (boss.type === 'snail') {
+    ctx.translate(0, 24);
+    const body = b ? '#ffffff' : corrupt('#6bd48a');
+    const belly = b ? '#ffffff' : corrupt('#b7e4c7');
+    const shell = b ? '#ffffff' : corrupt('#7ec850');
+    const dark = b ? '#ffffff' : corrupt('#4a6e2a');
+    ctx.fillStyle = belly;
+    ctx.beginPath(); ctx.ellipse(0, 6, 48, 18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, -4, 40, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = shell;
+    ctx.beginPath(); ctx.arc(8, -20, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = dark; ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let i = 1; i <= 4; i++) ctx.arc(8, -20, i * 6, 0.5, Math.PI * 1.5);
+    ctx.stroke();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.fillRect(36, -10, 12, 4);
+    ctx.beginPath(); ctx.arc(48, -8, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(42, -16, 2, 0, Math.PI * 2); ctx.fill();
+  } else if (boss.type === 'bat') {
+    const flap = Math.sin(performance.now() / 120) * 0.55;
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#d17d9e');
+    ctx.beginPath(); ctx.moveTo(0, -12); ctx.quadraticCurveTo(-46, -26 + flap * 16, -58, -4 + flap * 16); ctx.quadraticCurveTo(-36, -2, -20, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0, -12); ctx.quadraticCurveTo(46, -26 + flap * 16, 58, -4 + flap * 16); ctx.quadraticCurveTo(36, -2, 20, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#e8b7c9');
+    ctx.beginPath(); ctx.ellipse(0, -2, 22, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#d17d9e');
+    ctx.beginPath(); ctx.moveTo(-8, -18); ctx.lineTo(-14, -34); ctx.lineTo(-2, -22); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(8, -18); ctx.lineTo(14, -34); ctx.lineTo(2, -22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-8, -4, 3.5, 0, Math.PI * 2); ctx.arc(8, -4, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.moveTo(-5, 4); ctx.lineTo(0, 12); ctx.lineTo(5, 4); ctx.closePath(); ctx.fill();
+  } else if (boss.type === 'shaman') {
+    ctx.translate(0, 14);
+    const robe = b ? '#ffffff' : corrupt('#5ad1e0');
+    const skin = b ? '#ffffff' : corrupt('#f5d08c');
+    ctx.save(); ctx.rotate(0.5);
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#8a5a2b'); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(14, -30); ctx.lineTo(34, -2); ctx.stroke();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#ffd33d');
+    ctx.beginPath(); ctx.arc(38, 0, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = robe;
+    ctx.beginPath(); ctx.moveTo(-26, 26); ctx.quadraticCurveTo(-30, -14, 0, -24); ctx.quadraticCurveTo(30, -14, 26, 26); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.arc(0, -18, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#d17d9e');
+    ctx.beginPath(); ctx.moveTo(-13, -22); ctx.lineTo(-8, -42); ctx.lineTo(0, -34); ctx.lineTo(8, -42); ctx.lineTo(13, -22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-5, -20, 2.2, 0, Math.PI * 2); ctx.arc(5, -20, 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.moveTo(-4, -12); ctx.lineTo(0, -6); ctx.lineTo(4, -12); ctx.closePath(); ctx.fill();
+  } else if (boss.type === 'frost') {
+    ctx.translate(0, 14);
+    ctx.fillStyle = b ? 'rgba(255,255,255,.6)' : 'rgba(121,192,255,.18)';
+    ctx.beginPath(); ctx.arc(0, 0, 64 + Math.sin(performance.now() / 500) * 6, 0, Math.PI * 2); ctx.fill();
+    const robe = b ? '#ffffff' : corrupt('#79c0ff');
+    const dark = b ? '#ffffff' : corrupt('#5a6a75');
+    const skin = b ? '#ffffff' : corrupt('#c9d1d9');
+    ctx.fillStyle = robe;
+    ctx.beginPath(); ctx.moveTo(-30, 30); ctx.quadraticCurveTo(-34, -10, 0, -22); ctx.quadraticCurveTo(34, -10, 30, 30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = dark;
+    ctx.beginPath(); ctx.moveTo(-10, -14); ctx.lineTo(-24, 10); ctx.lineTo(-4, 4); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(10, -14); ctx.lineTo(24, 10); ctx.lineTo(4, 4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = skin;
+    ctx.beginPath(); ctx.arc(0, -20, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#e6edf3');
+    ctx.beginPath(); ctx.arc(0, -12, 8, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#79c0ff');
+    ctx.beginPath(); ctx.moveTo(-10, -30); ctx.lineTo(-14, -44); ctx.lineTo(-5, -36); ctx.lineTo(0, -46); ctx.lineTo(5, -36); ctx.lineTo(14, -44); ctx.lineTo(10, -30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-5, -22, 2.5, 0, Math.PI * 2); ctx.arc(5, -22, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#c8e3ff'); ctx.lineWidth = 3; ctx.globalAlpha = .7;
+    ctx.beginPath(); ctx.arc(0, -10, 18, 0.2, 0.9); ctx.arc(0, -10, 18, 1.2, 1.9); ctx.arc(0, -10, 18, 2.2, 2.9); ctx.stroke();
+    ctx.globalAlpha = 1;
+  } else if (boss.type === 'titan') {
+    ctx.translate(0, 24);
+    const rock = b ? '#ffffff' : corrupt('#b0875b');
+    const dark = b ? '#ffffff' : corrupt('#8a5a2b');
+    ctx.fillStyle = dark;
+    rr(-40, -4, 26, 34, 6);
+    rr(14, -4, 26, 34, 6);
+    ctx.fillStyle = rock;
+    rr(-44, -66, 88, 68, 14);
+    ctx.fillStyle = dark;
+    rr(-44, -66, 18, 68, 8);
+    ctx.fillStyle = rock;
+    rr(-64, -52, 22, 50, 8);
+    rr(42, -52, 22, 50, 8);
+    ctx.fillStyle = rock;
+    rr(-28, -98, 56, 40, 10);
+    ctx.fillStyle = corrupt('#ffd33d');
+    ctx.beginPath(); ctx.arc(-12, -84, 6, 0, Math.PI * 2); ctx.arc(12, -84, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-13, -84, 3, 0, Math.PI * 2); ctx.arc(11, -84, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    rr(-16, -68, 32, 6, 3);
+  } else if (boss.type === 'swarm') {
+    const col = b ? '#ffffff' : corrupt('#ff7b72');
+    const t2 = performance.now() / 80;
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      const rr2 = 30 + Math.sin(t2 + i * 1.7) * 12;
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * rr2, Math.sin(a) * rr2, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#2b2b2b';
+      ctx.beginPath(); ctx.arc(Math.cos(a) * rr2 - 2, Math.sin(a) * rr2 - 1, 2, 0, Math.PI * 2); ctx.arc(Math.cos(a) * rr2 + 2, Math.sin(a) * rr2 - 1, 2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#ffb3ae');
+    ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-8, -2, 3.5, 0, Math.PI * 2); ctx.arc(8, -2, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.moveTo(-6, 5); ctx.lineTo(0, 13); ctx.lineTo(6, 5); ctx.closePath(); ctx.fill();
+  } else if (boss.type === 'annihilator') {
+    const t2 = performance.now() / 1000;
+    const core = b ? '#ffffff' : corrupt('#ff4d6d');
+    ctx.rotate(Math.sin(t2 * 2) * 0.1);
+    ctx.fillStyle = b ? 'rgba(255,255,255,.5)' : 'rgba(255,77,109,.22)';
+    ctx.beginPath(); ctx.arc(0, 0, 82 + Math.sin(t2 * 3) * 6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#ff9eb1'); ctx.lineWidth = 4;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath(); ctx.arc(0, 0, 52 + i * 12, t2 * 2 + i, t2 * 2 + i + 1.6); ctx.stroke();
+    }
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#5a6a75');
+    rr(-38, -30, 20, 34, 6);
+    rr(18, -30, 20, 34, 6);
+    ctx.fillStyle = core;
+    rr(-46, -56, 92, 42, 12);
+    ctx.fillStyle = corrupt('#ff9eb1');
+    ctx.beginPath(); ctx.arc(-14, -36, 8, 0, Math.PI * 2); ctx.arc(14, -36, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    ctx.beginPath(); ctx.arc(-15, -36, 4, 0, Math.PI * 2); ctx.arc(13, -36, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2b2b2b';
+    rr(-16, -22, 32, 6, 3);
+    ctx.fillStyle = corrupt('#ff4d6d');
+    ctx.beginPath(); ctx.arc(0, 14 + Math.sin(t2 * 6) * 3, 6, 0, Math.PI * 2); ctx.fill();
   } else if (boss.type === 'god') {
     ctx.translate(0, Math.sin(performance.now() / 500) * 4);
     ctx.fillStyle = b ? 'rgba(255,255,255,.5)' : 'rgba(255,211,61,.18)';
@@ -1545,11 +1936,13 @@ function drawTeleportMarker() {
   if (boss.hp <= 0 || boss.deathT > 0) return;
   const isVoid = boss.type === 'void' && boss.state === 'windup';
   const isChaos = boss.type === 'chaos' && boss.state === 'tele';
-  if (!isVoid && !isChaos) return;
+  const isShaman = boss.type === 'shaman' && boss.state === 'tele';
+  const isAnni = boss.type === 'annihilator' && boss.state === 'tele';
+  if (!isVoid && !isChaos && !isShaman && !isAnni) return;
   const t = performance.now() / 1000;
   const pulse = 0.5 + Math.sin(t * 8) * 0.5;
   const x = boss.tx, y = boss.ty;
-  const color = boss.type === 'void' ? '#b18cff' : '#ff6b6b';
+  const color = boss.type === 'void' ? '#b18cff' : boss.type === 'chaos' ? '#ff6b6b' : boss.type === 'shaman' ? '#5ad1e0' : '#ff4d6d';
 
   ctx.globalAlpha = 0.25 + pulse * 0.2;
   ctx.fillStyle = color;
