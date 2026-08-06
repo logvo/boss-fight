@@ -58,14 +58,34 @@
   .mini b { color: #e6edf3; }
   .coin-box {
     text-align: center;
-    margin: 10px 0 24px;
-    font-size: 22px;
+    font-size: 17px;
     background: #0d1117;
     border: 1px solid #30363d;
     border-radius: 12px;
-    padding: 10px;
+    padding: 10px 14px;
+    white-space: nowrap;
   }
-  .coin-box b { color: #ffd33d; font-size: 26px; }
+  .coin-box b { color: #ffd33d; font-size: 19px; }
+  .coin-box.choco b { color: #c68a4e; }
+  .balances { display: flex; gap: 12px; margin-bottom: 20px; }
+  .balances .coin-box { flex: 1; margin: 0; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+  .tab-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #8b949e;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s, box-shadow .15s;
+  }
+  .tab-btn:hover { color: #e6edf3; border-color: #8b949e; }
+  .tab-btn.active { color: #fff; border-color: #c68a4e; background: #1c1410; box-shadow: 0 0 12px rgba(198,138,78,.25); }
+  .tab { display: none; }
+  .tab.active { display: block; }
   .menu-cols { display: flex; gap: 26px; }
   .menu-cols .block { flex: 1; }
   .shop { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -339,105 +359,121 @@
     <p class="sub">Выбери оружие и босса, потом сразись. За победу падают монеты!</p>
     <button id="fsBtnMenu" class="distort-btn">⛶ Полный экран</button>
   </div>
-  <div class="coin-box">🪙 <b id="coinBalance">0</b> монет</div>
-  <div class="coin-box choco">🍫 <b id="chocoBalance">0</b> шоколадок</div>
-  <div class="mode-row">
-    <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
-    <span id="distortStatus" class="mode-desc"></span>
-  </div>
-  <div class="mode-row">
-    <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
-    <span id="godStatus" class="mode-desc"></span>
-  </div>
-  <div class="mode-row">
-    <button id="speedBtn" class="distort-btn">Режим скорости: ВЫКЛ</button>
-    <span id="speedStatus" class="mode-desc"></span>
-  </div>
-  <div class="mode-row">
-    <button id="boomBtn" class="distort-btn">Взрывной режим: ВЫКЛ</button>
-    <span id="boomStatus" class="mode-desc"></span>
-  </div>
-  <div class="mode-row">
-    <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
-    <span id="nightStatus" class="mode-desc"></span>
-  </div>
-  <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
-  <div class="menu-cols">
+  <div class="balances">
+    <div class="coin-box">🪙 <b id="coinBalance">0</b> монет</div>
+    <div class="coin-box choco">🍫 <b id="chocoBalance">0</b> шоколадок</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="battle">⚔️ Бой</button>
+    <button class="tab-btn" data-tab="shop">🛒 Магазин</button>
+    <button class="tab-btn" data-tab="codes">🎁 Коды</button>
+  </div>
+
+  <div id="tab-battle" class="tab active">
+    <div class="mode-row">
+      <button id="distortBtn" class="distort-btn">Режим искажения: ВЫКЛ</button>
+      <span id="distortStatus" class="mode-desc"></span>
+    </div>
+    <div class="mode-row">
+      <button id="godBtn" class="distort-btn god">Режим бога: 🔒 ЗАКРЫТО</button>
+      <span id="godStatus" class="mode-desc"></span>
+    </div>
+    <div class="mode-row">
+      <button id="speedBtn" class="distort-btn">Режим скорости: ВЫКЛ</button>
+      <span id="speedStatus" class="mode-desc"></span>
+    </div>
+    <div class="mode-row">
+      <button id="boomBtn" class="distort-btn">Взрывной режим: ВЫКЛ</button>
+      <span id="boomStatus" class="mode-desc"></span>
+    </div>
+    <div class="mode-row">
+      <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
+      <span id="nightStatus" class="mode-desc"></span>
+    </div>
+    <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
+
+    <div class="menu-cols">
+      <div class="block">
+        <h2>🗡️ Оружие</h2>
+        <div id="weaponList" class="cards vertical"></div>
+      </div>
+      <div class="block">
+        <h2>👹 Выбор босса</h2>
+        <div id="bossList" class="cards vertical"></div>
+      </div>
+    </div>
+
+    <button id="startBtn">В бой!</button>
+    <button id="wavesBtn" class="waves-btn">🍫 Волновой режим: 14 волн + босс</button>
+  </div>
+
+  <div id="tab-shop" class="tab">
     <div class="block">
-      <h2>🗡️ Оружие</h2>
-      <div id="weaponList" class="cards vertical"></div>
+      <h2>🛒 Магазин улучшений</h2>
+      <div class="shop">
+        <div class="shop-card">
+          <div class="icon">❤️</div>
+          <div class="shop-info">
+            <h3>Здоровье</h3>
+            <div class="mini">Макс. HP: <b id="hpStat">100</b></div>
+          </div>
+          <button id="hpBtn">+25 HP</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">💥</div>
+          <div class="shop-info">
+            <h3>Урон оружия</h3>
+            <div class="mini">Бонус: <b id="dmgStat">+0</b></div>
+          </div>
+          <button id="dmgBtn">+5 урона</button>
+        </div>
+        <div class="shop-card">
+          <div class="icon">⚡</div>
+          <div class="shop-info">
+            <h3>Автопрокачка</h3>
+            <div class="mini">Купить максимум на все монеты</div>
+          </div>
+          <button id="maxBtn">Максимум</button>
+        </div>
+      </div>
     </div>
+
     <div class="block">
-      <h2>👹 Выбор босса</h2>
-      <div id="bossList" class="cards vertical"></div>
+      <h2>⚡ Мега-оружие</h2>
+      <div class="mini" style="margin-bottom:10px">Мощнейшие орудия навсегда. Покупаются за монеты и добавляются в список оружия.</div>
+      <div id="megaShop" class="shop"></div>
+    </div>
+
+    <div class="block">
+      <h2>🍫 Шоколадный магазин</h2>
+      <div class="mini" style="margin-bottom:10px">Шоколадки падают за волны в волновом режиме. Скины меняют героя, оружие добавляется в список.</div>
+      <h3 style="margin:10px 0 6px">🎨 Скины</h3>
+      <div id="chocoSkins" class="shop"></div>
+      <h3 style="margin:10px 0 6px">🗡️ Оружие за шоколадки</h3>
+      <div id="chocoWeapons" class="shop"></div>
     </div>
   </div>
 
-  <div class="block">
-    <h2>🛒 Магазин улучшений</h2>
-    <div class="shop">
-      <div class="shop-card">
-        <div class="icon">❤️</div>
-        <div class="shop-info">
-          <h3>Здоровье</h3>
-          <div class="mini">Макс. HP: <b id="hpStat">100</b></div>
-        </div>
-        <button id="hpBtn">+25 HP</button>
+  <div id="tab-codes" class="tab">
+    <div class="block">
+      <h2>🎁 Промо-коды</h2>
+      <div class="mini" style="margin-bottom:10px">Введи промо-код и получи награду. Коды за боссов работают после победы над ними.</div>
+      <div class="code-row">
+        <input id="codeInput" type="text" placeholder="ВВЕДИ КОД" autocomplete="off" spellcheck="false">
+        <button id="codeBtn">Активировать</button>
       </div>
-      <div class="shop-card">
-        <div class="icon">💥</div>
-        <div class="shop-info">
-          <h3>Урон оружия</h3>
-          <div class="mini">Бонус: <b id="dmgStat">+0</b></div>
-        </div>
-        <button id="dmgBtn">+5 урона</button>
-      </div>
-      <div class="shop-card">
-        <div class="icon">⚡</div>
-        <div class="shop-info">
-          <h3>Автопрокачка</h3>
-          <div class="mini">Купить максимум на все монеты</div>
-        </div>
-        <button id="maxBtn">Максимум</button>
-      </div>
+      <div id="codeStatus" class="mini" style="margin-top:8px"></div>
+    </div>
+
+    <div class="block">
+      <h2>⚠️ Опасная зона</h2>
+      <div class="mini" style="margin-bottom:10px">Полностью очищает весь прогресс: монеты, шоколадки, прокачку, скины, оружие, режимы и коды.</div>
+      <button id="resetBtn" class="reset-btn">🗑️ Сбросить весь прогресс</button>
+      <div id="resetStatus" class="mini" style="margin-top:8px"></div>
     </div>
   </div>
-
-  <div class="block">
-    <h2>⚡ Мега-оружие</h2>
-    <div class="mini" style="margin-bottom:10px">Мощнейшие орудия навсегда. Покупаются за монеты и добавляются в список оружия.</div>
-    <div id="megaShop" class="shop"></div>
-  </div>
-
-  <div class="block">
-    <h2>🍫 Шоколадный магазин</h2>
-    <div class="mini" style="margin-bottom:10px">Шоколадки падают за волны в волновом режиме. Скины меняют героя, оружие добавляется в список.</div>
-    <h3 style="margin:10px 0 6px">🎨 Скины</h3>
-    <div id="chocoSkins" class="shop"></div>
-    <h3 style="margin:10px 0 6px">🗡️ Оружие за шоколадки</h3>
-    <div id="chocoWeapons" class="shop"></div>
-  </div>
-
-  <div class="block">
-    <h2>🎁 Промо-коды</h2>
-    <div class="mini" style="margin-bottom:10px">Введи промо-код и получи награду. Каждый код можно активировать один раз.</div>
-    <div class="code-row">
-      <input id="codeInput" type="text" placeholder="ВВЕДИ КОД" autocomplete="off" spellcheck="false">
-      <button id="codeBtn">Активировать</button>
-    </div>
-    <div id="codeStatus" class="mini" style="margin-top:8px"></div>
-  </div>
-
-  <div class="block">
-    <h2>⚠️ Опасная зона</h2>
-    <div class="mini" style="margin-bottom:10px">Полностью очищает весь прогресс: монеты, шоколадки, прокачку, скины, оружие, режимы и коды.</div>
-    <button id="resetBtn" class="reset-btn">🗑️ Сбросить весь прогресс</button>
-    <div id="resetStatus" class="mini" style="margin-top:8px"></div>
-  </div>
-
-  <button id="startBtn">В бой!</button>
-  <button id="wavesBtn" class="waves-btn">🍫 Волновой режим: 14 волн + босс</button>
 </div>
 
 <div id="fight" class="hidden">
@@ -3108,6 +3144,12 @@ document.getElementById('resetBtn').onclick = () => {
 document.getElementById('startBtn').onclick = startFight;
 document.getElementById('wavesBtn').onclick = startWaves;
 document.getElementById('menuBtn').onclick = toMenu;
+
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
 document.addEventListener('keydown', e => {
   keys[e.key] = true;
