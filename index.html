@@ -6422,16 +6422,15 @@ function loop() {
 }
 
 // ---------- intro cutscene ----------
-const CS_RUN_END = 150;
-const CS_KB_END = 310;
-const CS_SWORD_END = 400;
-const CS_FADE_START = 560;
-const CS_END = 650;
+const CS_RUN_END = 240;
+const CS_KB_END = 500;
+const CS_SWORD_END = 640;
+const CS_FADE_START = 900;
+const CS_END = 1040;
 const CS_GROUND = 500;
 const CS_BOSSES = [
-  { type: 'slime',  x: 738, txt: 'Ха-ха-ха!' },
-  { type: 'wolf',   x: 818, txt: 'Слабо!' },
-  { type: 'goblin', x: 895, txt: 'Хе-хе-хе!' }
+  { type: 'lightthief', x: 720, txt: 'Ха-ха-ха!' },
+  { type: 'reflection', x: 862, txt: 'Слабо!' }
 ];
 
 function startCutscene() {
@@ -6553,19 +6552,19 @@ function drawCutscene() {
   let goldWeapon = true;
   let plainWeapon = false;
   if (ph === 0) {
-    heroX = -80 + t * 5.0;
-    heroBob = Math.abs(Math.sin(t * 0.55)) * 5;
+    heroX = -80 + t * 3.1;
+    heroBob = Math.abs(Math.sin(t * 0.4)) * 5;
   } else if (ph === 1) {
-    const p = Math.min(1, (t - CS_RUN_END) / 45);
+    const p = Math.min(1, (t - CS_RUN_END) / 80);
     const e = p * (2 - p);
-    heroX = 670 - 600 * e;
-    if (p < 0.55) heroRot = (p / 0.55) * (Math.PI / 2);
-    else heroRot = (Math.PI / 2) - (Math.min(1, (t - CS_RUN_END - 45) / 65)) * (Math.PI / 2);
+    heroX = 664 - 600 * e;
+    if (p < 0.5) heroRot = (p / 0.5) * (Math.PI / 2);
+    else heroRot = (Math.PI / 2) - (Math.min(1, (t - CS_RUN_END - 80) / 160)) * (Math.PI / 2);
   } else {
     heroX = 66;
-    heroBob = Math.sin(t * 0.12) * 2;
+    heroBob = Math.sin(t * 0.1) * 2;
     goldWeapon = false;
-    plainWeapon = t >= CS_SWORD_END - 40;
+    plainWeapon = t >= CS_SWORD_END;
   }
   const heroCX = heroX + 30;
   const heroCY = CS_GROUND - 14 + (ph === 1 ? Math.sin(heroRot) * 26 : 0);
@@ -6585,7 +6584,7 @@ function drawCutscene() {
   // plain sword (drop + pickup)
   if (ph >= 2) {
     const dropStart = CS_SWORD_END - 90;
-    const land = CS_SWORD_END - 55;
+    const land = CS_SWORD_END - 30;
     if (t < dropStart) { /* nothing yet */ }
     else if (t < land) {
       const p = (t - dropStart) / (land - dropStart);
@@ -6604,7 +6603,7 @@ function drawCutscene() {
       ctx.rotate(Math.sin(Math.min(1, (t - land) / 10) * Math.PI) * 0.06);
       drawPlainSword(0, 0);
       ctx.restore();
-      if (t >= CS_SWORD_END - 40) {
+      if (t >= CS_SWORD_END - 45) {
         ctx.fillStyle = 'rgba(255,230,120,.5)';
         ctx.beginPath(); ctx.arc(66, CS_GROUND - 14, 12 + Math.sin(t * 0.5) * 3, 0, Math.PI * 2); ctx.fill();
       }
@@ -6615,10 +6614,10 @@ function drawCutscene() {
   for (let i = 0; i < CS_BOSSES.length; i++) {
     const b = CS_BOSSES[i];
     const laugh = ph === 1;
-    const bounce = laugh ? Math.abs(Math.sin(t * 0.3 + i * 1.7)) * 8 : Math.sin(t * 0.05 + i * 2) * 2;
+    const bounce = laugh ? Math.abs(Math.sin(t * 0.25 + i * 1.7)) * 8 : Math.sin(t * 0.05 + i * 2) * 2;
     drawCSBoss(b.type, b.x, CS_GROUND - bounce, laugh);
     if (laugh && t > CS_RUN_END + 20 + i * 16 && t < CS_KB_END - 14) {
-      drawCSBubble(b.x, CS_GROUND - 118 - Math.abs(Math.sin(t * 0.4 + i)) * 6, b.txt);
+      drawCSBubble(b.x, CS_GROUND - 172 - Math.abs(Math.sin(t * 0.4 + i)) * 8, b.txt);
     }
   }
 
@@ -6656,8 +6655,8 @@ function drawCutscene() {
   if (ph >= 3) {
     const line1 = 'Я отомщу им всем...';
     const line2 = 'Я вернусь сильнее!';
-    const chars1 = Math.max(0, Math.min(line1.length, Math.floor((t - CS_SWORD_END) / 4)));
-    const chars2 = Math.max(0, Math.min(line2.length, Math.floor((t - CS_SWORD_END - 110) / 4)));
+    const chars1 = Math.max(0, Math.min(line1.length, Math.floor((t - CS_SWORD_END) / 5)));
+    const chars2 = Math.max(0, Math.min(line2.length, Math.floor((t - CS_SWORD_END - 130) / 5)));
     if (chars1 > 0) {
       ctx.font = 'bold 34px Segoe UI, Arial';
       ctx.textAlign = 'center';
@@ -6858,7 +6857,7 @@ function drawCSBoss(type, x, y, laugh) {
     ctx.beginPath(); ctx.moveTo(34, -18); ctx.lineTo(36, -26); ctx.stroke();
     ctx.fillStyle = '#d9a441';
     ctx.beginPath(); ctx.arc(26, -6, 4, 0, Math.PI * 2); ctx.fill();
-  } else {
+  } else if (type === 'goblin') {
     ctx.fillStyle = '#7cc45e';
     ctx.fillRect(-18, -10, 36, 26);
     ctx.fillStyle = '#5da03f';
@@ -6875,6 +6874,77 @@ function drawCSBoss(type, x, y, laugh) {
     ctx.strokeStyle = '#4c7a33';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(2, -6, 6, 0.2, Math.PI - 0.2); ctx.stroke();
+  } else if (type === 'lightthief') {
+    // arms
+    ctx.strokeStyle = '#2f2f5a'; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(-34, -6); ctx.quadraticCurveTo(-48, 6, -32, 20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(34, -6); ctx.quadraticCurveTo(48, 6, 32, 20); ctx.stroke();
+    // dark sphere
+    ctx.fillStyle = '#1b1b2f';
+    ctx.beginPath(); ctx.arc(0, -18, 36, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#2f2f5a'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, -18, 36, 0, Math.PI * 2); ctx.stroke();
+    // spiral arms inside
+    ctx.strokeStyle = 'rgba(90,60,160,.8)'; ctx.lineWidth = 2.5;
+    for (let i = 0; i < 3; i++) {
+      const a0 = tt * 0.7 + i * 2.1;
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        const a = a0 + k * 0.4, rad = 9 + k * 9;
+        const px = Math.cos(a) * rad, py = -18 + Math.sin(a) * rad;
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    // eyes
+    ctx.fillStyle = '#b18cff';
+    ctx.beginPath(); ctx.arc(-12, -24, 8.5, 0, Math.PI * 2); ctx.arc(12, -24, 8.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-10, -26, 3, 0, Math.PI * 2); ctx.arc(14, -26, 3, 0, Math.PI * 2); ctx.fill();
+    // grin
+    ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, -4, 12, 0.3, Math.PI - 0.3); ctx.stroke();
+    // stolen light orb above head
+    ctx.fillStyle = 'rgba(255,211,61,.3)';
+    ctx.beginPath(); ctx.arc(0, -70, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffd33d';
+    ctx.beginPath(); ctx.arc(0, -70, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-4, -74, 4.5, 0, Math.PI * 2); ctx.fill();
+  } else if (type === 'reflection') {
+    // rotating facet spikes
+    ctx.strokeStyle = 'rgba(165,243,252,.65)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      const a = tt * 0.8 + i * 1.047;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * 26, -14 + Math.sin(a) * 26);
+      ctx.lineTo(Math.cos(a) * 46, -14 + Math.sin(a) * 46);
+      ctx.stroke();
+    }
+    // faceted mirror polygon
+    ctx.fillStyle = '#1e1b4b';
+    ctx.beginPath();
+    ctx.moveTo(0, -62); ctx.lineTo(28, -44); ctx.lineTo(40, -12); ctx.lineTo(28, 12); ctx.lineTo(0, 28); ctx.lineTo(-28, 12); ctx.lineTo(-40, -12); ctx.lineTo(-28, -44);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(240,171,252,.95)'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -62); ctx.lineTo(28, -44); ctx.lineTo(40, -12); ctx.lineTo(28, 12); ctx.lineTo(0, 28); ctx.lineTo(-28, 12); ctx.lineTo(-40, -12); ctx.lineTo(-28, -44);
+    ctx.closePath(); ctx.stroke();
+    // mirror face
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    rr(-15, -24, 30, 38, 7);
+    ctx.fillStyle = '#1e1b4b';
+    ctx.fillRect(-12, -13, 24, 22);
+    ctx.fillStyle = '#f0abfc';
+    ctx.beginPath(); ctx.arc(0, -2, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-2, -4, 2, 0, Math.PI * 2); ctx.fill();
+    // floating shards
+    ctx.fillStyle = 'rgba(253,224,71,.85)';
+    for (let i = 0; i < 3; i++) {
+      const a = tt * 1.2 + i * 2.1;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * 50, -14 + Math.sin(a) * 50, 3, 0, Math.PI * 2); ctx.fill();
+    }
   }
   ctx.restore();
 }
