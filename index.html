@@ -270,6 +270,54 @@
     cursor: pointer;
   }
   #fsBtn:hover { background: #30363d; }
+  #sideModes {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 45;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .side-mode-btn {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
+    border-radius: 12px;
+    border: 2px solid #30363d;
+    background: rgba(22,27,34,.92);
+    color: #e6edf3;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .12s, box-shadow .12s, transform .12s;
+  }
+  .side-mode-btn:hover:not(:disabled) { border-color: #8b949e; transform: scale(1.08); }
+  .side-mode-btn.on { border-color: #c055ff; box-shadow: 0 0 12px rgba(192,85,255,.45); }
+  .side-mode-btn.god.on { border-color: #f0883e; box-shadow: 0 0 12px rgba(240,136,62,.45); }
+  .side-mode-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .side-mode-btn .tt {
+    position: absolute;
+    right: 54px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    font-family: Consolas, 'Courier New', monospace;
+    background: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .12s;
+  }
+  .side-mode-btn:hover .tt { opacity: 1; }
   .distort-btn {
     display: block;
     margin: 10px auto 0;
@@ -595,6 +643,10 @@
       <button id="fsBtn">⛶</button>
       <button id="menuBtn">← Меню</button>
     </div>
+  </div>
+  <div id="sideModes">
+    <button id="sideDistortBtn" class="side-mode-btn" title="Режим искажения"><span class="tt">Искажение</span>🌀</button>
+    <button id="sideGodBtn" class="side-mode-btn god" title="Режим бога"><span class="tt">Бог</span>👑</button>
   </div>
   <div class="hint" id="hint"></div>
   <div id="touchControls">
@@ -1648,6 +1700,47 @@ document.getElementById('dimBtn').onclick = () => {
 
 document.getElementById('dizzyBtn').onclick = toggleDizzyMode;
 
+function updateSideModeUI() {
+  const d = document.getElementById('sideDistortBtn');
+  const g = document.getElementById('sideGodBtn');
+  if (!d || !g) return;
+  d.classList.toggle('on', !!distorted);
+  d.disabled = !!dimension;
+  d.title = dimension
+    ? '🌀 Искажение: всегда ВКЛ в новом измерении'
+    : '🌀 Искажение: ' + (distorted ? 'ВКЛ' : 'ВЫКЛ');
+  g.classList.toggle('on', !!godMode);
+  g.disabled = !godUnlocked;
+  g.title = godUnlocked
+    ? '👑 Режим бога: ' + (godMode ? 'ВКЛ' : 'ВЫКЛ')
+    : '👑 Режим бога: 🔒 победи Хаоса в режиме искажения';
+}
+function showSideModes(show) {
+  const m = document.getElementById('sideModes');
+  if (m) m.style.display = show ? 'flex' : 'none';
+}
+
+document.getElementById('sideDistortBtn').onclick = () => {
+  if (dimension) return;
+  distorted = !distorted;
+  setStore('bf_distorted', distorted ? '1' : '0');
+  if (distorted) genCracks();
+  updateDistortOverlay();
+  updateDistortUI();
+  updateSideModeUI();
+};
+
+document.getElementById('sideGodBtn').onclick = () => {
+  if (!godUnlocked) return;
+  godMode = !godMode;
+  setStore('bf_god', godMode ? '1' : '0');
+  if (godMode) { distorted = true; setStore('bf_distorted', '1'); genCracks(); }
+  updateDistortUI();
+  updateGodUI();
+  updateDistortOverlay();
+  updateSideModeUI();
+};
+
 function advReward() { return 10000 * (advCount + 1); }
 function updateAdvBtn() {
   const btn = document.getElementById('advBtn');
@@ -1696,6 +1789,8 @@ function startFight() {
     ? '🕹️ Джойстик — движение &nbsp;·&nbsp; ⚔️ — атака &nbsp;·&nbsp; 💨 — рывок &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
     : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> или <kbd>Shift</kbd> — атака &nbsp;·&nbsp;<kbd>E</kbd> — рывок &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
   document.getElementById('touchControls').classList.toggle('on', isTouch);
+  showSideModes(true);
+  updateSideModeUI();
 }
 
 function toMenu() {
@@ -1705,6 +1800,7 @@ function toMenu() {
   fightEl.classList.add('hidden');
   menuEl.classList.remove('hidden');
   document.getElementById('touchControls').classList.remove('on');
+  showSideModes(false);
   buildBossList();
   buildChocoShop();
   refreshShop();
@@ -2948,6 +3044,8 @@ function startWaves() {
     ? '🕹️ Джойстик — движение &nbsp;·&nbsp; ⚔️ — атака &nbsp;·&nbsp; 💨 — рывок &nbsp;·&nbsp; <kbd>Esc</kbd> — меню'
     : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / стрелки — движение &nbsp;·&nbsp;<kbd>Пробел</kbd> — атака &nbsp;·&nbsp;<kbd>E</kbd> — рывок &nbsp;·&nbsp;<kbd>R</kbd> — рестарт &nbsp;·&nbsp;<kbd>Esc</kbd> — меню';
   document.getElementById('touchControls').classList.toggle('on', isTouch);
+  showSideModes(true);
+  updateSideModeUI();
   bossNameLabel.textContent = '🍫 Волновой режим';
 }
 
