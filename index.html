@@ -743,7 +743,8 @@ const SKY_BOSSES = [
   { id: 'sky7', name: 'Хронос Времени', type: 'timeg', stars: 36, hp: 135000, dmg: 115, projDmg: 52, speed: 1.0, r: 75, color: '#a5f3fc', accent: '#fcd34d', desc: 'Владыка времени: вращающиеся стрелки и сферы вечности.', win: 'Время пошло против Хроноса!', lose: 'Время остановилось для тебя.', talk: ['ВРЕМЯ МНЕ ПОДЧИНЕНО.', 'ТИК-ТАК.', 'ТВОЁ ВРЕМЯ ИСТЕКАЕТ.'] },
   { id: 'sky8', name: 'Пожиратель Звёзд', type: 'starq', stars: 37, hp: 165000, dmg: 125, projDmg: 55, speed: 1.2, r: 85, color: '#0f172a', accent: '#fbbf24', desc: 'Голодная бездна неба: метеоры, аккреция и сверхновые.', win: 'Звёздный голод утолён!', lose: 'Ты стал его добычей.', talk: ['ЗВЁЗДЫ ВКУСНЫ.', 'ГОЛОД НЕ УТОЛИТЬ.', 'ПОСЛЕДНЯЯ СВЕРХНОВА!'] },
   { id: 'sky9', name: 'Верховный Пантеон', type: 'pantheon', stars: 38, hp: 210000, dmg: 135, projDmg: 60, speed: 1.0, r: 95, color: '#e2e8f0', accent: '#fbbf24', desc: 'Суд всех богов: колонны, судные кольца и землетрясения.', win: 'Пантеон низвергнут!', lose: 'Боги осудили тебя.', talk: ['СУД БОГОВ НАЧАЛСЯ.', 'ВИНОВЕН.', 'ПРИГОВОР ОКОНЧАТЕЛЕН.'] },
-  { id: 'sky10', name: 'НЕБЕСНОЕ ОТРАЖЕНИЕ', type: 'reflection', stars: 39, hp: 380000, dmg: 155, projDmg: 72, speed: 1.05, r: 110, color: '#a5f3fc', accent: '#f0abfc', phases: 3, desc: 'Живое зеркало всех измерений: 15 перевоплощений в любого босса, а затем его истинная форма — 3 фазы. Ты против ВСЕХ сразу!', win: 'НЕБЕСНОЕ ОТРАЖЕНИЕ РАЗБИТО! ТЫ ПОБЕДИЛ САМОГО СЕБЯ!', lose: 'Ты затерялся среди своих же отражений...', talk: ['Я — твоё отражение.', 'Все боги — лишь мои маски.', 'Покажи, кто ты без масок!'] }
+  { id: 'sky10', name: 'НЕБЕСНОЕ ОТРАЖЕНИЕ', type: 'reflection', stars: 39, hp: 380000, dmg: 155, projDmg: 72, speed: 1.05, r: 110, color: '#a5f3fc', accent: '#f0abfc', phases: 3, desc: 'Живое зеркало всех измерений: 15 перевоплощений в любого босса, а затем его истинная форма — 3 фазы. Ты против ВСЕХ сразу!', win: 'НЕБЕСНОЕ ОТРАЖЕНИЕ РАЗБИТО! ТЫ ПОБЕДИЛ САМОГО СЕБЯ!', lose: 'Ты затерялся среди своих же отражений...', talk: ['Я — твоё отражение.', 'Все боги — лишь мои маски.', 'Покажи, кто ты без масок!'] },
+  { id: 'sky11', name: 'ИМПЕРАТРИЦА ФЕЙ', type: 'empress', stars: 40, hp: 900000, dmg: 175, projDmg: 85, speed: 1.0, r: 95, phases: 3, color: '#f0abfc', accent: '#7df9c0', desc: 'Владычица тронного зала и всех фей. Три фазы: спокойствие, гнев и гигантская форма. Встань на колени — или падёшь навсегда.', win: 'ИМПЕРАТРИЦА ФЕЙ ПОВЕРЖЕНА! ТЫ ОСВОБОДИЛ ЦАРСТВО ФЕЙ!', lose: 'Императрица фей сделала тебя своей вечной игрушкой...', talk: ['Встань на колени, смертный.', 'Служи мне — и будешь жить.', 'Феи подчиняются только мне.'] }
 ];
 
 const canvas = document.getElementById('game');
@@ -1535,6 +1536,10 @@ function getBeatenIds() { return (getStore('bf_beaten') || '').split(',').filter
 function bossUnlocked(b, list) {
   if (b.id === 'god') return godUnlocked;
   if (b.id === 'ultimate') return ultimateUnlocked;
+  if (b.id === 'sky11') {
+    const bt = getBeatenIds();
+    return bt.indexOf('lightthief') !== -1 && bt.indexOf('sky10') !== -1;
+  }
   const idx = list.indexOf(b);
   if (idx <= 0) return true;
   return getBeatenIds().indexOf(list[idx - 1].id) !== -1;
@@ -1568,7 +1573,10 @@ function buildBossList() {
   if (firstLocked) {
     const d = document.createElement('div');
     d.className = 'card locked';
-    d.innerHTML = `<div><h3>🔒 Заблокировано</h3><div class="mini">Победи «${full[full.indexOf(firstLocked) - 1].name}», чтобы открыть ${prefix}«${firstLocked.name}»</div></div>`;
+    const hint = firstLocked.id === 'sky11'
+      ? 'Победи «ПОХИТИТЕЛЯ СВЕТА» и «НЕБЕСНОЕ ОТРАЖЕНИЕ», чтобы войти в тронный зал'
+      : 'Победи «' + full[full.indexOf(firstLocked) - 1].name + '», чтобы открыть ' + prefix + '«' + firstLocked.name + '»';
+    d.innerHTML = `<div><h3>🔒 Заблокировано</h3><div class="mini">${hint}</div></div>`;
     bl.appendChild(d);
   }
   const idx = list.findIndex(b => b.id === prevId);
@@ -1874,6 +1882,8 @@ function startFight() {
   document.getElementById('touchControls').classList.toggle('on', isTouch);
   showSideModes(true);
   updateSideModeUI();
+  if (boss.id === 'sky11') { startThroneScene(); return; }
+  screen = 'fight';
 }
 
 function toMenu() {
@@ -1912,6 +1922,7 @@ function reset() {
   boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0; boss.phase = 1; boss.phaseFlash = 0; boss.atkCd2 = 0; boss.phases = bdef.phases || 1;
   boss.name = bdef.name; boss.id = bdef.id; boss.stars = bdef.stars; boss.color = bdef.color; boss.accent = bdef.accent; boss.talk = bdef.talk; boss.win = bdef.win; boss.lose = bdef.lose;
   if (boss.id === 'sky10') buildReflectionSetup();
+  if (boss.id === 'sky11') buildEmpressSetup();
   gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false; showCode = null; letterShown = false;
   particles.length = 0; projs.length = 0;
   bossNameLabel.textContent = boss.name;
@@ -1940,6 +1951,9 @@ function registerBossDefeat() {
     setStore('bf_skyUnlocked', '1');
   }
   if (boss.id === 'sky10') {
+    letterShown = true;
+  }
+  if (boss.id === 'sky11') {
     letterShown = true;
   }
   const c = CODE_BY_BOSS[boss.id];
@@ -3647,6 +3661,8 @@ function updateBoss() {
     }
     boss.x = clamp(boss.x, 60, canvas.width - 60);
     boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'empress') {
+    updateEmpressLogic();
   }
 
   talkTimer--;
@@ -3723,6 +3739,141 @@ function updateReflectionLogic() {
       shake = 18;
     }
   }
+}
+
+function buildEmpressSetup() {
+  boss.phase = 1;
+  boss.phaseFlash = 0;
+  boss.giantFx = 0;
+  boss.state = 'idle'; boss.timer = 90; boss.atkCd = 70;
+}
+
+function updateEmpressLogic() {
+  const hpRatio = boss.hp / boss.maxHp;
+  let want = 1;
+  if (hpRatio <= 1 / 3) want = 3;
+  else if (hpRatio <= 2 / 3) want = 2;
+  if (want !== boss.phase) {
+    boss.phase = want;
+    boss.phaseFlash = 130;
+    boss.state = 'idle'; boss.timer = 80; boss.atkCd = 70;
+    projs.length = 0;
+    burst(boss.x, boss.y, ['#7df9c0', '#f0abfc', '#fde047'][want - 1], 60);
+    shake = 22;
+    if (want === 3) boss.giantFx = 90;
+    return;
+  }
+  const ph = boss.phase || 1;
+  const dx = player.x + player.w / 2 - boss.x;
+  const dy = player.y + player.h / 2 - boss.y;
+  const d = Math.hypot(dx, dy);
+  const nx = (dx / d) || 1, ny = (dy / d) || 0;
+  if (ph === 3) {
+    boss.x += nx * boss.speed * 1.6;
+    boss.y = clamp(boss.y + ny * 1.4, 90, canvas.height - 180);
+  } else {
+    boss.x += nx * boss.speed;
+    boss.y += ny * boss.speed;
+  }
+  boss.x = clamp(boss.x, 60, canvas.width - 60);
+  boss.y = clamp(boss.y, 70, canvas.height - 100);
+
+  if (boss.state === 'idle') {
+    if (d < 130 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    else if (boss.atkCd <= 0 && d < 680) {
+      boss.atkCd = ph === 3 ? 48 : ph === 2 ? 58 : 72;
+      const pool = ph === 1
+        ? ['dust', 'gust', 'beam', 'bloom']
+        : ph === 2
+          ? ['dust', 'gust', 'beam', 'bloom', 'wisp', 'ring', 'storm']
+          : ['gbeam', 'quake', 'meteor', 'rage', 'gust', 'ring'];
+      boss.state = pool[Math.floor(Math.random() * pool.length)];
+      boss.timer = (boss.state === 'storm' || boss.state === 'quake' || boss.state === 'meteor') ? 70 : 46;
+    }
+  } else if (boss.state === 'dust') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const a = Math.atan2(dy, dx);
+      for (let i = -1; i <= 1; i++) shootBossProj(Math.cos(a + i * 0.35) * 3.2, Math.sin(a + i * 0.35) * 3.2, boss.projDmg, 8, '#f0abfc');
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gust') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const a = Math.atan2(dy, dx);
+      const n = ph === 3 ? 7 : 5;
+      for (let i = -(n >> 1); i <= (n >> 1); i++) {
+        const aa = a + i * (ph === 3 ? 0.22 : 0.18);
+        shootBossProj(Math.cos(aa) * 4.6, Math.sin(aa) * 4.6, boss.projDmg, 7, '#7df9c0');
+      }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'beam') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      const a = Math.atan2(dy, dx);
+      shootBossProj(Math.cos(a) * 6.2, Math.sin(a) * 6.2, boss.projDmg * (ph === 2 ? 1.25 : 1), 5, '#ffd33d');
+      if (ph >= 2) for (let i = -1; i <= 1; i += 2) shootBossProj(Math.cos(a + i * 0.14) * 5.2, Math.sin(a + i * 0.14) * 5.2, boss.projDmg, 5, '#ff9eb1');
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'bloom') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      boss.x = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 220, 90, canvas.width - 90);
+      boss.y = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 120, 90, canvas.height - 160);
+      burst(boss.x, boss.y, '#f0abfc', 26);
+      const n = ph === 3 ? 16 : 8;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 7, '#f0abfc'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'wisp') {
+    boss.timer--;
+    if (boss.timer % 9 === 0) projs.push({ x: boss.x, y: boss.y, vx: nx * 2.6, vy: ny * 2.6, dmg: boss.projDmg, r: 9, friendly: false, color: '#ff4d6d', homing: true });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'ring') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      const n = ph === 3 ? 18 : 12;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 8, '#ffd6f7'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'storm') {
+    boss.timer--;
+    if (boss.timer % 4 === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 400 - 200), y: -24, vx: 0, vy: 5.2, dmg: boss.projDmg, r: 9, friendly: false, color: ph === 3 ? '#fde047' : '#ff4d6d' });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 32; }
+  } else if (boss.state === 'gbeam') {
+    boss.timer--;
+    if (boss.timer % 5 === 0) {
+      const a = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.3;
+      shootBossProj(Math.cos(a) * 5.6, Math.sin(a) * 5.6, boss.projDmg, 6, '#fde047');
+      shootBossProj(Math.cos(a) * 5.6, Math.sin(a) * 5.6, boss.projDmg, 8, '#ffd6f7');
+    }
+    if (boss.timer === 24) for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 10, '#f0abfc'); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'quake') {
+    boss.timer--;
+    if (boss.timer === 30) {
+      shake = 16;
+      const wy = canvas.height - 70;
+      projs.push({ x: boss.x - 40, y: wy, vx: -5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: '#fde047', shock: true });
+      projs.push({ x: boss.x + 40, y: wy, vx: 5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: '#fde047', shock: true });
+    }
+    if (boss.timer === 10) { burst(boss.x, boss.y, '#fde047', 24); if (d < 180) hurtPlayer(boss.dmg); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'meteor') {
+    boss.timer--;
+    if (boss.timer % 3 === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 520 - 260), y: -30, vx: 0, vy: 6.4, dmg: boss.projDmg * 1.2, r: 13, friendly: false, color: '#ff9eb1' });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'rage') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      burst(boss.x, boss.y, '#f0abfc', 50);
+      for (let i = 0; i < 22; i++) { const a = (i / 22) * Math.PI * 2; shootBossProj(Math.cos(a) * 4.2, Math.sin(a) * 4.2, boss.projDmg, 9, '#f0abfc'); }
+    }
+    if (boss.timer === 8) for (let i = 0; i < 22; i++) { const a = (i / 22) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 9, '#ffd6f7'); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  }
+  if (boss.giantFx > 0) boss.giantFx--;
 }
 
 function updateBars() {
@@ -4695,7 +4846,7 @@ function drawSkyBoss() {
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.7 + Math.sin(t * 4) * 8, t * 1.5, t * 1.5 + 0.9); ctx.stroke();
   }
-  const dmg = { sky1: drawSky1, sky2: drawSky2, sky3: drawSky3, sky4: drawSky4, sky5: drawSky5, sky6: drawSky6, sky7: drawSky7, sky8: drawSky8, sky9: drawSky9, sky10: drawSky10 };
+  const dmg = { sky1: drawSky1, sky2: drawSky2, sky3: drawSky3, sky4: drawSky4, sky5: drawSky5, sky6: drawSky6, sky7: drawSky7, sky8: drawSky8, sky9: drawSky9, sky10: drawSky10, sky11: drawSky11 };
   if (dmg[boss.id]) dmg[boss.id]();
   if (boss.hitFx > 0) {
     ctx.globalAlpha = Math.min(0.45, 0.45 * (boss.hitFx / 8));
@@ -4961,6 +5112,237 @@ function drawSky10() {
   }
 }
 
+function drawSky11() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  if (ph === 3) {
+    ctx.fillStyle = 'rgba(253,224,71,.18)';
+    ctx.beginPath(); ctx.arc(0, 0, 150 + Math.sin(t * 3) * 12, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,246,179,.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 150 + Math.sin(t * 3) * 12, t, t + 2.1); ctx.stroke();
+    ctx.save();
+    ctx.scale(1.9, 1.9);
+    drawEmpressSprite(3, false, t);
+    ctx.restore();
+  } else {
+    drawEmpressSprite(ph, false, t);
+  }
+}
+
+function drawEmpressSprite(ph, seated, t) {
+  const calm = ph === 1;
+  const angry = ph === 2;
+  const giant = ph === 3;
+  const wingA = calm ? '#7df9c0' : angry ? '#f0abfc' : '#fde047';
+  const wingB = calm ? '#b8f7d8' : angry ? '#ffd6f7' : '#fff3a8';
+  const dress = calm ? '#d7f8e8' : angry ? '#e85d75' : '#fff3b0';
+  const dressDark = calm ? '#9fe8c4' : angry ? '#c23a58' : '#f5d455';
+  const hair = calm ? '#b6f0c2' : angry ? '#ff9eb1' : '#ffe28a';
+  const skin = '#ffe8d6';
+  const eyeC = calm ? '#2dd4bf' : angry ? '#ff4d6d' : '#b45309';
+  const wingFlap = Math.sin(t * (angry ? 5 : 3)) * 0.35;
+  ctx.save();
+
+  // aura
+  const ag = ctx.createRadialGradient(0, 6, 8, 0, 6, 92);
+  ag.addColorStop(0, (calm ? '#7df9c0' : angry ? '#ff9eb1' : '#fde047') + '55');
+  ag.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ag;
+  ctx.beginPath(); ctx.arc(0, 6, 92, 0, Math.PI * 2); ctx.fill();
+
+  // floating petals
+  ctx.fillStyle = wingA;
+  for (let i = 0; i < 6; i++) {
+    const a = t * 1.1 + i * 1.047;
+    const px = Math.cos(a) * (78 + Math.sin(t * 1.7 + i) * 6);
+    const py = 8 + Math.sin(a) * (64 + Math.cos(t * 1.3 + i) * 5);
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(a);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 7, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // back wings
+  for (let i = 0; i < 2; i++) {
+    const s = i === 0 ? 1 : -1;
+    ctx.save();
+    ctx.translate(s * 12, -34);
+    ctx.rotate(s * (0.5 + wingFlap * 0.5));
+    ctx.scale(1.15, 1);
+    ctx.fillStyle = wingA + '88';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 34, -22, s * 58, -10);
+    ctx.quadraticCurveTo(s * 46, 6, s * 20, 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = wingB;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(s * 8, -6);
+    ctx.quadraticCurveTo(s * 30, -16, s * 46, -10);
+    ctx.quadraticCurveTo(s * 36, 2, s * 18, 10);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // hair behind
+  ctx.fillStyle = hair;
+  ctx.beginPath();
+  ctx.moveTo(-14, -58);
+  ctx.quadraticCurveTo(-24, -42, -20, -18);
+  ctx.quadraticCurveTo(-28, 6, -12, 14);
+  ctx.lineTo(12, 14);
+  ctx.quadraticCurveTo(28, 6, 20, -18);
+  ctx.quadraticCurveTo(24, -42, 14, -58);
+  ctx.closePath();
+  ctx.fill();
+
+  // dress skirt (bell)
+  const sway = seated ? 0 : Math.sin(t * 2) * 3;
+  const skirtW = seated ? 62 : 46;
+  ctx.save();
+  ctx.translate(0, sway * 0.3);
+  ctx.fillStyle = dress;
+  ctx.beginPath();
+  ctx.moveTo(-17, -8);
+  ctx.quadraticCurveTo(-22, 22, -skirtW, 46);
+  ctx.quadraticCurveTo(0, 70 + (seated ? 8 : 0), skirtW, 46);
+  ctx.quadraticCurveTo(22, 22, 17, -8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = dressDark;
+  ctx.beginPath();
+  ctx.moveTo(0, 12);
+  ctx.quadraticCurveTo(-8, 34, -skirtW * 0.72, 46);
+  ctx.quadraticCurveTo(0, 66, skirtW * 0.72, 46);
+  ctx.quadraticCurveTo(8, 34, 0, 12);
+  ctx.closePath();
+  ctx.fill();
+  // hem gems
+  ctx.fillStyle = eyeC;
+  for (let i = -3; i <= 3; i++) {
+    const hx = i * (skirtW / 3.4);
+    const hy = 40 + Math.abs(i) * 2.6;
+    ctx.beginPath(); ctx.arc(hx, hy, 2.6, 0, Math.PI * 2); ctx.fill();
+  }
+  // skirt glow line
+  ctx.strokeStyle = wingB; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(-skirtW * 0.5, 30); ctx.quadraticCurveTo(0, 50, skirtW * 0.5, 30); ctx.stroke();
+  ctx.restore();
+
+  // arms
+  ctx.strokeStyle = skin; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-15, -30); ctx.lineTo(-26, -14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(15, -30); ctx.lineTo(26, -14); ctx.stroke();
+  // hand holding scepter
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(26, -14, 5, 0, Math.PI * 2); ctx.fill();
+
+  // scepter
+  const scAng = angry ? -0.55 : -0.35;
+  ctx.save();
+  ctx.translate(30, -12);
+  ctx.rotate(scAng);
+  ctx.strokeStyle = '#d9a441'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -52); ctx.stroke();
+  ctx.strokeStyle = '#8b6b16'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(-3, -8); ctx.lineTo(3, -8); ctx.moveTo(-3, -16); ctx.lineTo(3, -16); ctx.stroke();
+  const sg = ctx.createRadialGradient(0, -56, 2, 0, -56, 12);
+  sg.addColorStop(0, '#ffffff'); sg.addColorStop(0.5, angry ? '#ff4d6d' : giant ? '#fde047' : '#7df9c0'); sg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.arc(0, -56, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#ff9eb1' : '#eafff5';
+  ctx.beginPath(); ctx.arc(0, -56, 4.5 + Math.sin(t * 4) * 0.8, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // bodice
+  ctx.fillStyle = dressDark;
+  rr(-17, -34, 34, 28, 9);
+  ctx.fillStyle = dress;
+  rr(-15, -32, 30, 20, 7);
+  // belt
+  ctx.fillStyle = '#d9a441';
+  ctx.fillRect(-16, -14, 32, 4);
+  ctx.fillStyle = eyeC;
+  ctx.beginPath(); ctx.arc(0, -12, 3, 0, Math.PI * 2); ctx.fill();
+  // collar
+  ctx.fillStyle = wingB;
+  ctx.beginPath(); ctx.arc(0, -32, 7, 0, Math.PI * 2); ctx.fill();
+
+  // neck + head
+  ctx.fillStyle = skin;
+  rr(-6, -46, 12, 8, 3);
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(0, -58, 17, 0, Math.PI * 2); ctx.fill();
+  // blush
+  ctx.fillStyle = (calm ? '#ffc9d6' : angry ? '#ff6b86' : '#ffe0a3') + 'aa';
+  ctx.beginPath(); ctx.arc(-11, -54, 3.5, 0, Math.PI * 2); ctx.arc(11, -54, 3.5, 0, Math.PI * 2); ctx.fill();
+
+  // eyes
+  ctx.fillStyle = eyeC;
+  if (angry) {
+    // slanted angry eyes
+    ctx.save();
+    ctx.translate(-9, -60); ctx.rotate(-0.25);
+    ctx.beginPath(); ctx.ellipse(0, 0, 5, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.translate(9, -60); ctx.rotate(0.25);
+    ctx.beginPath(); ctx.ellipse(0, 0, 5, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // angry brows
+    ctx.strokeStyle = hair; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(-14, -66); ctx.lineTo(-5, -63); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(14, -66); ctx.lineTo(5, -63); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(-9, -60, 4.4, 0, Math.PI * 2); ctx.arc(9, -60, 4.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-8, -61, 1.7, 0, Math.PI * 2); ctx.arc(10, -61, 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = hair; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-13, -65); ctx.quadraticCurveTo(-9, -67, -5, -65); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(5, -65); ctx.quadraticCurveTo(9, -67, 13, -65); ctx.stroke();
+  }
+
+  // mouth
+  ctx.strokeStyle = angry ? '#7f1d1d' : '#c97b6b'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  if (giant) { ctx.moveTo(-6, -48); ctx.lineTo(6, -48); }
+  else if (angry) { ctx.moveTo(-5, -49); ctx.lineTo(0, -46); ctx.lineTo(5, -49); }
+  else { ctx.arc(0, -51, 4.5, 0.15, Math.PI - 0.15); }
+  ctx.stroke();
+
+  // bangs
+  ctx.fillStyle = hair;
+  ctx.beginPath(); ctx.moveTo(-16, -66); ctx.quadraticCurveTo(-12, -76, -4, -73); ctx.quadraticCurveTo(0, -70, 4, -74); ctx.quadraticCurveTo(12, -76, 16, -66); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = hair + 'bb';
+  ctx.beginPath(); ctx.arc(-6, -74, 4, 0, Math.PI * 2); ctx.beginPath(); ctx.arc(8, -75, 4.4, 0, Math.PI * 2); ctx.fill();
+
+  // crown
+  ctx.fillStyle = '#ffd33d';
+  ctx.beginPath();
+  ctx.moveTo(-12, -72);
+  ctx.lineTo(-12, -84);
+  ctx.lineTo(-8, -78);
+  ctx.lineTo(-4, -86);
+  ctx.lineTo(0, -79);
+  ctx.lineTo(4, -86);
+  ctx.lineTo(8, -78);
+  ctx.lineTo(12, -84);
+  ctx.lineTo(12, -72);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#a3710f'; ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.fillStyle = eyeC;
+  ctx.beginPath(); ctx.arc(0, -81, 2.4, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
 function drawDim1() {
   const t = performance.now() / 1000;
   ctx.fillStyle = '#2a313a';
@@ -5150,7 +5532,7 @@ const OLD_FLOOR = {
 const SKY_FLOOR = {
   sky1: '#3a3514', sky2: '#24324a', sky3: '#2b3038', sky4: '#3a3210',
   sky5: '#14334a', sky6: '#35233a', sky7: '#1c2a3a', sky8: '#14141f',
-  sky9: '#2b2f36', sky10: '#211a44'
+  sky9: '#2b2f36', sky10: '#211a44', sky11: '#3a2a5a'
 };
 
 function drawBoss() {
@@ -6138,6 +6520,35 @@ function drawSkyBackground() {
       }
       ctx.strokeStyle = 'rgba(167,139,250,.5)'; ctx.lineWidth = 2;
       for (let i = 0; i < 30; i++) { const a = i * 2.399963 + t * 0.1, d2 = Math.sqrt(i) * 48; const x = 480 + Math.cos(a) * d2, y = 240 + Math.sin(a) * d2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * 5, y + Math.sin(a) * 5); ctx.stroke(); }
+    },
+    sky11: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#1a1030'); g.addColorStop(0.5, '#33205c'); g.addColorStop(1, '#4a2a6b');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // arched windows
+      ctx.fillStyle = 'rgba(125,249,192,.12)';
+      for (let i = 0; i < 3; i++) {
+        const wx = 90 + i * 400;
+        ctx.beginPath(); ctx.moveTo(wx - 60, 420); ctx.lineTo(wx - 60, 150); ctx.arc(wx, 150, 60, Math.PI, 0); ctx.lineTo(wx + 60, 420); ctx.closePath(); ctx.fill();
+      }
+      // pillars
+      ctx.fillStyle = '#3a2a5a';
+      for (let i = 0; i < 4; i++) {
+        const px = 40 + i * 300;
+        ctx.fillRect(px, 0, 44, canvas.height);
+        ctx.fillStyle = '#4a3672';
+        ctx.fillRect(px, 0, 12, canvas.height);
+        ctx.fillStyle = '#3a2a5a';
+        ctx.beginPath(); ctx.moveTo(px - 12, 14); ctx.lineTo(px + 56, 14); ctx.lineTo(px + 44, 0); ctx.lineTo(px, 0); ctx.closePath(); ctx.fill();
+      }
+      // floating light motes
+      ctx.fillStyle = 'rgba(240,171,252,.6)';
+      for (let i = 0; i < 26; i++) {
+        const mx = (i * 83 + 15) % canvas.width, my = 40 + ((i * 57) % 340);
+        ctx.globalAlpha = 0.35 + 0.4 * Math.abs(Math.sin(t + i * 1.3));
+        ctx.beginPath(); ctx.arc(mx, my, 2 + (i % 3), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
   };
   if (scene[boss.id]) scene[boss.id]();
@@ -6225,6 +6636,22 @@ function drawDevLetter() {
     'теперь оно отражает только правду о тебе.',
     'Путь пройден. Каждое измерение пало.',
     'Спасибо за то, что дошёл до конца.',
+    '',
+    'С любовью, твой разработчик ❤️'
+  ] : boss.id === 'sky11' ? [
+    'Дорогой игрок!',
+    '',
+    'ИМПЕРАТРИЦА ФЕЙ ПОВЕРЖЕНА! Ты отказался',
+    'стать её слугой, выдержал три фазы её гнева',
+    'и сокрушил даже гигантскую форму.',
+    '',
+    'Тронный зал опустел, и тысячи фей',
+    'впервые вздохнули свободно. Они теперь',
+    'поют твоё имя по всему Царству Фей.',
+    '',
+    'Ты прошёл каждое измерение, победил',
+    'каждого бога и сломил волю Императрицы.',
+    'Путь завершён. Ты — настоящая легенда.',
     '',
     'С любовью, твой разработчик ❤️'
   ] : [
@@ -6416,6 +6843,9 @@ function loop() {
     catch (e) { console.error(e); }
   } else if (screen === 'cutscene') {
     try { updateCutscene(); drawCutscene(); }
+    catch (e) { console.error(e); }
+  } else if (screen === 'throne') {
+    try { updateThroneScene(); drawThroneScene(); }
     catch (e) { console.error(e); }
   }
   requestAnimationFrame(loop);
@@ -6967,6 +7397,150 @@ function skipCutscene() {
   if (screen === 'cutscene') endCutscene();
 }
 
+// ---------- throne room intro (Императрица Фей) ----------
+const TRN_ENTER = 130;
+const TRN_TALK1 = 210;
+const TRN_TALK2 = 320;
+const TRN_TALK3 = 430;
+const TRN_REFUSE = 560;
+const TRN_ANGRY = 690;
+const TRN_FLASH = 810;
+const TRN_END = 880;
+const TRN_EMP_X = 700, TRN_EMP_Y = 428;
+let throne = null;
+
+function startThroneScene() {
+  throne = { t: 0, shattered: false, flash: 0, refuse: false, crumbs: [] };
+  screen = 'throne';
+  const ui = document.querySelector('#fight .ui');
+  if (ui) ui.style.display = 'none';
+  const sm = document.getElementById('sideModes');
+  if (sm) sm.style.display = 'none';
+  const tc = document.getElementById('touchControls');
+  if (tc) tc.style.display = 'none';
+  player.x = 150; player.y = 430;
+}
+
+function endThroneScene() {
+  throne = null;
+  screen = 'fight';
+  document.querySelector('#fight .ui').style.display = '';
+  document.getElementById('sideModes').style.display = '';
+  const tc = document.getElementById('touchControls');
+  if (tc) tc.style.display = '';
+  boss.state = 'idle'; boss.timer = 90; boss.atkCd = 70;
+  boss.phaseFlash = 90;
+  updateBars();
+}
+
+function updateThroneScene() {
+  if (!throne) return;
+  throne.t++;
+  const t = throne.t;
+  if (t <= TRN_ENTER) player.x = 150 + (t / TRN_ENTER) * 120;
+  else if (throne.refuse && t < TRN_ANGRY) player.x = Math.max(180, player.x - 0.7);
+  if (t === TRN_REFUSE) { throne.refuse = true; burst(player.x + 23, player.y, '#ffd33d', 10); }
+  if (t === TRN_ANGRY) {
+    throne.shattered = true;
+    shake = 18;
+    burst(TRN_EMP_X, TRN_EMP_Y, '#ff4d6d', 60);
+    burst(TRN_EMP_X, TRN_EMP_Y + 40, '#f0abfc', 50);
+    for (let i = 0; i < 16; i++) throne.crumbs.push({ x: TRN_EMP_X + (Math.random() - 0.5) * 130, y: TRN_EMP_Y - 40 + Math.random() * 60, vx: (Math.random() - 0.5) * 7, vy: -Math.random() * 8 - 2, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, s: 5 + Math.random() * 9, color: Math.random() < 0.5 ? '#d9a441' : '#a3710f' });
+  }
+  if (t === TRN_FLASH) throne.flash = 1;
+  if (throne.flash > 0) throne.flash = Math.max(0, throne.flash - 0.025);
+  for (let i = throne.crumbs.length - 1; i >= 0; i--) {
+    const c = throne.crumbs[i];
+    c.vy += 0.55; c.x += c.vx; c.y += c.vy; c.rot += c.vr;
+    if (c.y > 470) { c.y = 470; c.vy *= -0.4; c.vx *= 0.6; }
+  }
+  if (t >= TRN_END) endThroneScene();
+}
+
+function drawThrone(x, y, t) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(1.25, 1.25);
+  ctx.fillStyle = '#d9a441';
+  rr(-46, -70, 92, 120, 10);
+  ctx.fillStyle = '#8b6b16';
+  rr(-40, -64, 80, 108, 8);
+  ctx.fillStyle = '#7df9c0';
+  ctx.beginPath(); ctx.moveTo(0, -86); ctx.lineTo(10, -70); ctx.lineTo(0, -62); ctx.lineTo(-10, -70); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(125,249,192,.45)';
+  ctx.beginPath(); ctx.arc(0, -70, 14 + Math.sin(t * 3) * 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#d9a441';
+  rr(-62, 10, 22, 14, 5); rr(40, 10, 22, 14, 5);
+  ctx.fillStyle = '#c99938';
+  rr(-52, 20, 104, 16, 6);
+  ctx.fillStyle = '#a3710f';
+  ctx.fillRect(-20, 36, 40, 14);
+  ctx.fillStyle = '#8b6b16';
+  ctx.beginPath(); ctx.moveTo(-40, 50); ctx.lineTo(40, 50); ctx.lineTo(30, 62); ctx.lineTo(-30, 62); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawThroneScene() {
+  if (!throne) return;
+  const t = throne.t;
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#1a1030'); g.addColorStop(0.5, '#33205c'); g.addColorStop(1, '#4a2a6b');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(125,249,192,.12)';
+  for (let i = 0; i < 3; i++) { const wx = 90 + i * 400; ctx.beginPath(); ctx.moveTo(wx - 60, 420); ctx.lineTo(wx - 60, 150); ctx.arc(wx, 150, 60, Math.PI, 0); ctx.lineTo(wx + 60, 420); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = '#3a2a5a';
+  for (let i = 0; i < 4; i++) { const px = 40 + i * 300; ctx.fillRect(px, 0, 44, canvas.height); ctx.fillStyle = '#4a3672'; ctx.fillRect(px, 0, 12, canvas.height); ctx.fillStyle = '#3a2a5a'; ctx.beginPath(); ctx.moveTo(px - 12, 14); ctx.lineTo(px + 56, 14); ctx.lineTo(px + 44, 0); ctx.lineTo(px, 0); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle = '#3a2a5a';
+  ctx.fillRect(0, canvas.height - 34, canvas.width, 34);
+  ctx.fillStyle = 'rgba(240,171,252,.6)';
+  for (let i = 0; i < 26; i++) { const mx = (i * 83 + 15) % canvas.width, my = 40 + ((i * 57) % 340); ctx.globalAlpha = 0.35 + 0.4 * Math.abs(Math.sin(t * 0.06 + i * 1.3)); ctx.beginPath(); ctx.arc(mx, my, 2 + (i % 3), 0, Math.PI * 2); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.save();
+  if (throne.shattered) ctx.translate((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6);
+  if (!throne.shattered) drawThrone(TRN_EMP_X + 18, TRN_EMP_Y - 14, t * 0.06);
+  if (throne.shattered) {
+    const rise = Math.min(1, (t - TRN_ANGRY) / 30);
+    ctx.save();
+    ctx.translate(0, -rise * 44);
+    drawEmpressSprite(2, false, t * 0.06);
+    ctx.restore();
+  } else {
+    drawEmpressSprite(1, true, t * 0.06);
+  }
+  ctx.save();
+  for (const c of throne.crumbs) { ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.rot); ctx.fillStyle = c.color; ctx.fillRect(-c.s / 2, -c.s / 2, c.s, c.s); ctx.restore(); }
+  ctx.restore();
+  ctx.restore();
+  const hx = player.x + 23;
+  const hy = player.y + 38;
+  const hr = throne.refuse ? Math.sin(t * 0.5) * 0.25 : Math.sin(t * 0.08) * 0.04;
+  drawCSHero(hx, hy, hr, false, true, false);
+  if (t >= TRN_TALK1 && t < TRN_TALK2 && !throne.shattered) drawCSBubble(TRN_EMP_X - 6, TRN_EMP_Y - 205, 'Встань на колени, смертный.');
+  if (t >= TRN_TALK2 && t < TRN_TALK3 && !throne.shattered) drawCSBubble(TRN_EMP_X - 6, TRN_EMP_Y - 205, 'Стань моим верным слугой — и получишь всё.');
+  if (t >= TRN_TALK3 && t < TRN_REFUSE && !throne.shattered) drawCSBubble(TRN_EMP_X - 6, TRN_EMP_Y - 205, 'Твоя жизнь теперь принадлежит мне.');
+  if (throne.refuse && t < TRN_ANGRY) drawCSBubble(hx, hy - 92, 'Я никому не служу!');
+  if (throne.shattered && t < TRN_FLASH) drawCSBubble(TRN_EMP_X - 6, TRN_EMP_Y - 215, 'ГЛУПЕЦ! ТОГДА УМРИ!');
+  if (throne.flash > 0) {
+    ctx.fillStyle = 'rgba(255,220,120,' + throne.flash + ')';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  if (t >= TRN_FLASH) {
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = Math.min(1, (t - TRN_FLASH) / 20);
+    ctx.fillStyle = '#ffd33d';
+    ctx.font = 'bold 44px Segoe UI, Arial';
+    ctx.fillText('ИМПЕРАТРИЦА ФЕЙ', canvas.width / 2, 200);
+    ctx.fillStyle = '#eafff5';
+    ctx.font = '18px Segoe UI, Arial';
+    ctx.fillText('Держись, герой...', canvas.width / 2, 234);
+    ctx.globalAlpha = 1;
+  }
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = '13px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Пробел / Esc — пропустить', canvas.width / 2, canvas.height - 10);
+}
+
 
 function buildCodeChips() {
   const el = document.getElementById('codeChips');
@@ -7087,6 +7661,10 @@ document.addEventListener('keydown', e => {
   keys[e.key] = true;
   if (screen === 'cutscene') {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape' || e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') endCutscene();
+    return;
+  }
+  if (screen === 'throne') {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape' || e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') endThroneScene();
     return;
   }
   if (screen === 'fight') {
@@ -7263,7 +7841,8 @@ const TRACKS = {
   sky7: { bpm: 118, lead: 'triangle', melody: [60,0,60,0,63,0,67,0,62,0,62,0,65,0,69,0], bass: [36,0,36,0,39,0,36,0,38,0,38,0,41,0,38,0] },
   sky8: { bpm: 124, lead: 'sine', melody: [62,0,58,0,55,0,0,0,60,0,56,0,53,0,0,0], bass: [31,0,31,0,28,0,28,0,29,0,29,0,26,0,26,0] },
   sky9: { bpm: 104, lead: 'triangle', melody: [50,53,57,0,52,55,60,0,54,57,62,0,55,58,63,0], bass: [26,0,33,0,26,0,33,0,28,0,35,0,28,0,35,0] },
-  sky10: { bpm: 128, lead: 'triangle', melody: [76,79,84,79,76,79,84,0,77,81,84,81,77,81,84,0], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] }
+  sky10: { bpm: 128, lead: 'triangle', melody: [76,79,84,79,76,79,84,0,77,81,84,81,77,81,84,0], bass: [48,0,48,0,45,0,45,0,43,0,43,0,45,0,45,0] },
+  sky11: { bpm: 120, lead: 'sine', melody: [72,0,76,79,0,76,0,72,0,77,80,84,0,80,0,76,0,74,77,81,0,77,0,74,0,72,75,79,0,76,72,0], bass: [45,0,45,0,41,0,43,0,42,0,42,0,38,0,40,0,44,0,44,0,40,0,42,0,41,0,41,0,37,0,39,0] }
 };
 
 const BOSS_TRACK = {
@@ -7274,7 +7853,8 @@ const BOSS_TRACK = {
   king: 'boss', god: 'god', ultimate: 'final',
   dim1: 'dim1', dim2: 'dim2', dim3: 'dim3', dim4: 'dim4', dim5: 'dim5', dim6: 'dim6', dim7: 'dim7', dim8: 'dim8',
   herald: 'dim5', darkking: 'dim7', lightthief: 'dim8',
-  sky1: 'sky1', sky2: 'sky2', sky3: 'sky3', sky4: 'sky4', sky5: 'sky5', sky6: 'sky6', sky7: 'sky7', sky8: 'sky8', sky9: 'sky9', sky10: 'sky10'
+  sky1: 'sky1', sky2: 'sky2', sky3: 'sky3', sky4: 'sky4', sky5: 'sky5', sky6: 'sky6', sky7: 'sky7', sky8: 'sky8', sky9: 'sky9', sky10: 'sky10', sky11: 'sky11',
+  empress: 'sky11'
 };
 
 const Music = {
@@ -7428,7 +8008,7 @@ function initYandexSDK() {
 
 document.getElementById('fsBtn').onclick = toggleFullscreen;
 document.getElementById('fsBtnMenu').onclick = toggleFullscreen;
-canvas.addEventListener('pointerdown', () => { if (screen === 'cutscene') endCutscene(); });
+canvas.addEventListener('pointerdown', () => { if (screen === 'cutscene') endCutscene(); else if (screen === 'throne') endThroneScene(); });
 
 initYandexSDK();
 buildMenu();
