@@ -765,6 +765,7 @@ let weapon = WEAPONS.sword;
 let selectedWeapon = 0;
 let selectedBoss = 0;
 let screen = 'menu';
+let cutscene = null;
 let gameOver = false;
 let win = false;
 let shake = 0;
@@ -6413,9 +6414,489 @@ function loop() {
   if (screen === 'fight') {
     try { update(); draw(); }
     catch (e) { console.error(e); }
+  } else if (screen === 'cutscene') {
+    try { updateCutscene(); drawCutscene(); }
+    catch (e) { console.error(e); }
   }
   requestAnimationFrame(loop);
 }
+
+// ---------- intro cutscene ----------
+const CS_RUN_END = 150;
+const CS_KB_END = 310;
+const CS_SWORD_END = 400;
+const CS_FADE_START = 560;
+const CS_END = 650;
+const CS_GROUND = 500;
+const CS_BOSSES = [
+  { type: 'slime',  x: 738, txt: 'Ха-ха-ха!' },
+  { type: 'wolf',   x: 818, txt: 'Слабо!' },
+  { type: 'goblin', x: 895, txt: 'Хе-хе-хе!' }
+];
+
+function startCutscene() {
+  if (cutscene) return;
+  cutscene = {
+    t: 0,
+    gear: [],
+    gearSpawned: false,
+    swordLand: 0,
+    swordPicked: 0,
+    vowDone: false,
+    vow2: false,
+    fade: 0
+  };
+  screen = 'cutscene';
+  menuEl.classList.add('hidden');
+  fightEl.classList.remove('hidden');
+  document.querySelector('#fight .ui').style.display = 'none';
+  document.getElementById('sideModes').style.display = 'none';
+  const tc = document.getElementById('touchControls');
+  if (tc) tc.style.display = 'none';
+}
+
+function endCutscene() {
+  cutscene = null;
+  screen = 'menu';
+  fightEl.classList.add('hidden');
+  menuEl.classList.remove('hidden');
+  document.querySelector('#fight .ui').style.display = '';
+  document.getElementById('sideModes').style.display = '';
+  const tc = document.getElementById('touchControls');
+  if (tc) tc.style.display = '';
+  try { buildBossList(); refreshShop(); updateAdvBtn(); } catch (e) {}
+}
+
+function csPhase(t) {
+  if (t < CS_RUN_END) return 0;
+  if (t < CS_KB_END) return 1;
+  if (t < CS_SWORD_END) return 2;
+  return 3;
+}
+
+function updateCutscene() {
+  const cs = cutscene;
+  if (!cs) return;
+  cs.t++;
+  if (!cs.gearSpawned && cs.t >= CS_RUN_END + 5) {
+    cs.gearSpawned = true;
+    const kinds = ['sword', 'shield', 'helm', 'axe', 'bow', 'chest', 'boots'];
+    for (let i = 0; i < kinds.length; i++) {
+      cs.gear.push({
+        kind: kinds[i],
+        x: 620 + Math.random() * 60,
+        y: 300 + Math.random() * 80,
+        vx: -9 - Math.random() * 7,
+        vy: -11 - Math.random() * 7,
+        rot: (Math.random() - 0.5) * 1.2,
+        vr: (Math.random() - 0.5) * 0.35,
+        alpha: 1
+      });
+    }
+  }
+  for (let i = 0; i < cs.gear.length; i++) {
+    const g = cs.gear[i];
+    g.vy += 0.7;
+    g.x += g.vx; g.y += g.vy; g.rot += g.vr;
+    if (g.y > CS_GROUND) {
+      g.y = CS_GROUND;
+      if (Math.abs(g.vy) > 1.5) { g.vy = -g.vy * 0.42; g.vx *= 0.65; g.vr *= 0.5; }
+      else { g.vy = 0; g.vx *= 0.9; g.alpha = Math.max(0, g.alpha - 0.015); }
+    }
+    if (g.x < 40) { g.x = 40; g.vx *= -0.4; }
+  }
+  if (cs.t >= CS_SWORD_END - 90 && cs.swordLand === 0) cs.swordLand = cs.t;
+  if (cs.t >= CS_SWORD_END - 40 && cs.swordPicked === 0) cs.swordPicked = cs.t;
+  if (cs.t >= CS_FADE_START) cs.fade = Math.min(1, (cs.t - CS_FADE_START) / 60);
+  if (cs.t >= CS_END) endCutscene();
+}
+
+function drawCutscene() {
+  const cs = cutscene;
+  if (!cs) return;
+  const t = cs.t;
+  const ph = csPhase(t);
+
+  // background
+  const g = ctx.createLinearGradient(0, 0, 0, 540);
+  g.addColorStop(0, '#0b0e1a');
+  g.addColorStop(0.7, '#141b2e');
+  g.addColorStop(1, '#1c1628');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 960, 540);
+  // moon
+  ctx.fillStyle = 'rgba(220,230,255,.14)';
+  ctx.beginPath(); ctx.arc(820, 90, 52, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(220,230,255,.1)';
+  ctx.beginPath(); ctx.arc(820, 90, 66, 0, Math.PI * 2); ctx.fill();
+  // pillars
+  ctx.fillStyle = 'rgba(60,70,100,.35)';
+  ctx.fillRect(180, 240, 26, 260);
+  ctx.fillRect(700, 180, 30, 320);
+  ctx.fillRect(920, 230, 24, 270);
+  // ground
+  ctx.fillStyle = '#171226';
+  ctx.fillRect(0, CS_GROUND, 960, 40);
+  ctx.strokeStyle = 'rgba(140,120,200,.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, CS_GROUND); ctx.lineTo(960, CS_GROUND); ctx.stroke();
+  // dust motes
+  for (let i = 0; i < 24; i++) {
+    const mx = ((i * 137 + t * 0.4) % 1000) - 20;
+    const my = 60 + ((i * 71) % 380);
+    ctx.fillStyle = 'rgba(160,180,230,' + (0.06 + 0.06 * Math.sin(t * 0.05 + i)) + ')';
+    ctx.fillRect(mx, my, 2, 2);
+  }
+
+  // hero
+  let heroX, heroRot = 0, heroBob = 0;
+  let goldWeapon = true;
+  let plainWeapon = false;
+  if (ph === 0) {
+    heroX = -80 + t * 5.0;
+    heroBob = Math.abs(Math.sin(t * 0.55)) * 5;
+  } else if (ph === 1) {
+    const p = Math.min(1, (t - CS_RUN_END) / 45);
+    const e = p * (2 - p);
+    heroX = 670 - 600 * e;
+    if (p < 0.55) heroRot = (p / 0.55) * (Math.PI / 2);
+    else heroRot = (Math.PI / 2) - (Math.min(1, (t - CS_RUN_END - 45) / 65)) * (Math.PI / 2);
+  } else {
+    heroX = 66;
+    heroBob = Math.sin(t * 0.12) * 2;
+    goldWeapon = false;
+    plainWeapon = t >= CS_SWORD_END - 40;
+  }
+  const heroCX = heroX + 30;
+  const heroCY = CS_GROUND - 14 + (ph === 1 ? Math.sin(heroRot) * 26 : 0);
+
+  // draw gear flying (losing equipment) before hero so hero is on top
+  drawCSGear(cs.gear, t);
+
+  // hero
+  const dust = ph === 0 && Math.floor(t / 6) % 2 === 0;
+  if (dust) {
+    ctx.fillStyle = 'rgba(180,170,150,.25)';
+    ctx.beginPath(); ctx.arc(heroX, CS_GROUND - 2, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(heroX + 16, CS_GROUND - 2, 4, 0, Math.PI * 2); ctx.fill();
+  }
+  drawCSHero(heroCX, heroCY - heroBob, heroRot, goldWeapon, plainWeapon, ph === 1);
+
+  // plain sword (drop + pickup)
+  if (ph >= 2) {
+    const dropStart = CS_SWORD_END - 90;
+    const land = CS_SWORD_END - 55;
+    if (t < dropStart) { /* nothing yet */ }
+    else if (t < land) {
+      const p = (t - dropStart) / (land - dropStart);
+      const sy = -40 + p * (CS_GROUND - 14 + 40);
+      const spark = 0.5 + 0.5 * Math.sin(t * 0.8);
+      ctx.save();
+      ctx.translate(66, sy);
+      ctx.rotate(Math.sin(t * 0.4) * 0.2);
+      drawPlainSword(0, 0);
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,230,120,' + spark * 0.7 + ')';
+      ctx.beginPath(); ctx.arc(66 + Math.sin(t) * 8, sy - 20 + Math.cos(t * 1.3) * 8, 2.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.save();
+      ctx.translate(66, CS_GROUND - 14);
+      ctx.rotate(Math.sin(Math.min(1, (t - land) / 10) * Math.PI) * 0.06);
+      drawPlainSword(0, 0);
+      ctx.restore();
+      if (t >= CS_SWORD_END - 40) {
+        ctx.fillStyle = 'rgba(255,230,120,.5)';
+        ctx.beginPath(); ctx.arc(66, CS_GROUND - 14, 12 + Math.sin(t * 0.5) * 3, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  // bosses
+  for (let i = 0; i < CS_BOSSES.length; i++) {
+    const b = CS_BOSSES[i];
+    const laugh = ph === 1;
+    const bounce = laugh ? Math.abs(Math.sin(t * 0.3 + i * 1.7)) * 8 : Math.sin(t * 0.05 + i * 2) * 2;
+    drawCSBoss(b.type, b.x, CS_GROUND - bounce, laugh);
+    if (laugh && t > CS_RUN_END + 20 + i * 16 && t < CS_KB_END - 14) {
+      drawCSBubble(b.x, CS_GROUND - 118 - Math.abs(Math.sin(t * 0.4 + i)) * 6, b.txt);
+    }
+  }
+
+  // shockwave flash
+  if (ph === 1 && t < CS_RUN_END + 14) {
+    const p = (t - CS_RUN_END) / 14;
+    ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * (1 - p)) + ')';
+    ctx.beginPath(); ctx.arc(670, CS_GROUND - 40, 60 + p * 220, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.9 * (1 - p)) + ')';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(670, CS_GROUND - 40, 40 + p * 260, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  // captions
+  const captions = {
+    0: 'Прокачанный герой рвётся в бой...',
+    1: 'Боссы отшвырнули его и смеются над ним',
+    2: 'Потеряв всё... он берёт обычный меч'
+  };
+  const cap = captions[ph];
+  if (cap) {
+    let ca = 1;
+    if (ph === 0) ca = Math.min(1, (t - 20) / 30) * Math.max(0, Math.min(1, (CS_RUN_END - t) / 40));
+    if (ph === 1) ca = Math.min(1, (t - CS_RUN_END - 20) / 30) * Math.max(0, Math.min(1, (CS_KB_END - t) / 40));
+    if (ph === 2) ca = Math.min(1, (t - CS_SWORD_END + 110) / 30) * Math.max(0, Math.min(1, (CS_SWORD_END + 40 - t) / 40));
+    if (ca > 0) {
+      ctx.font = '18px Segoe UI, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.75 * ca) + ')';
+      ctx.fillText(cap, 480, 528);
+    }
+  }
+
+  // vow text (phase 3)
+  if (ph >= 3) {
+    const line1 = 'Я отомщу им всем...';
+    const line2 = 'Я вернусь сильнее!';
+    const chars1 = Math.max(0, Math.min(line1.length, Math.floor((t - CS_SWORD_END) / 4)));
+    const chars2 = Math.max(0, Math.min(line2.length, Math.floor((t - CS_SWORD_END - 110) / 4)));
+    if (chars1 > 0) {
+      ctx.font = 'bold 34px Segoe UI, Arial';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      ctx.lineWidth = 6;
+      ctx.strokeText(line1.substr(0, chars1), 480, 300);
+      ctx.fillStyle = '#ffd33d';
+      ctx.fillText(line1.substr(0, chars1), 480, 300);
+    }
+    if (chars2 > 0) {
+      ctx.font = 'bold 26px Segoe UI, Arial';
+      ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      ctx.strokeText(line2.substr(0, chars2), 480, 350);
+      ctx.fillStyle = '#e6edf3';
+      ctx.fillText(line2.substr(0, chars2), 480, 350);
+    }
+  }
+
+  // skip hint
+  ctx.font = '13px Segoe UI, Arial';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.fillText('Нажми Enter или кликни, чтобы пропустить ▶', 940, 22);
+
+  // fade out
+  if (cs.fade > 0) {
+    ctx.fillStyle = 'rgba(0,0,0,' + cs.fade + ')';
+    ctx.fillRect(0, 0, 960, 540);
+  }
+}
+
+function drawCSHero(cx, cy, rot, goldWeapon, plainWeapon, hurt) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot * 0.35);
+  ctx.scale(1.45, 1.45);
+  if (goldWeapon) {
+    ctx.fillStyle = 'rgba(255,220,120,.28)';
+    ctx.beginPath(); ctx.arc(0, -30, 52, 0, Math.PI * 2); ctx.fill();
+  }
+  // legs
+  ctx.fillStyle = '#3d3a50';
+  ctx.fillRect(-11, -6, 9, 14);
+  ctx.fillRect(3, -6, 9, 14);
+  // cape
+  ctx.fillStyle = goldWeapon ? '#7c1d1d' : '#3d2b2b';
+  ctx.beginPath();
+  ctx.moveTo(-13, -30);
+  ctx.quadraticCurveTo(-30, -8, -24, 16);
+  ctx.lineTo(-11, 2);
+  ctx.closePath();
+  ctx.fill();
+  // body armor
+  rr(-15, -36, 31, 32, 6, goldWeapon ? '#d9a441' : '#5b6b7b');
+  ctx.fillStyle = goldWeapon ? '#8b5e12' : '#3d4a58';
+  ctx.fillRect(-4, -32, 10, 8);
+  // belt
+  ctx.fillStyle = goldWeapon ? '#6b4a0a' : '#2f3942';
+  ctx.fillRect(-15, -10, 31, 6);
+  // arms
+  ctx.fillStyle = goldWeapon ? '#c99938' : '#5b6b7b';
+  ctx.fillRect(-16, -34, 7, 20);
+  ctx.fillRect(9, -34, 7, 20);
+  // head
+  rr(-13, -54, 27, 22, 7, '#e3b08c');
+  // helm
+  rr(-15, -58, 31, 13, 5, goldWeapon ? '#c9a227' : '#7c8794');
+  ctx.fillStyle = goldWeapon ? '#8b6b16' : '#55606c';
+  ctx.fillRect(-15, -52, 31, 3);
+  // eyes
+  ctx.fillStyle = hurt ? '#b91c1c' : '#1c1917';
+  ctx.beginPath(); ctx.arc(-5, -45, 2.2, 0, Math.PI * 2); ctx.arc(6, -45, 2.2, 0, Math.PI * 2); ctx.fill();
+  // weapon
+  if (goldWeapon) {
+    ctx.save();
+    ctx.translate(14, -16);
+    ctx.rotate(-0.5);
+    drawGoldSword();
+    ctx.restore();
+  } else if (plainWeapon) {
+    ctx.save();
+    ctx.translate(13, -8);
+    ctx.rotate(-0.2);
+    drawPlainSword(0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawGoldSword() {
+  ctx.fillStyle = '#a3710f';
+  ctx.fillRect(0, -5, 9, 10);
+  ctx.fillStyle = '#ffd33d';
+  ctx.fillRect(9, -3, 42, 7);
+  ctx.fillStyle = '#fff7cc';
+  ctx.fillRect(9, -3, 12, 3);
+  ctx.fillStyle = '#8b5e12';
+  ctx.fillRect(44, -7, 12, 13);
+}
+
+function drawPlainSword(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = '#5b6472';
+  ctx.fillRect(0, -5, 8, 10);
+  ctx.fillStyle = '#aeb6c0';
+  ctx.fillRect(8, -3, 40, 6);
+  ctx.fillStyle = '#7c8794';
+  ctx.fillRect(8, -3, 10, 3);
+  ctx.fillStyle = '#4a5260';
+  ctx.fillRect(42, -7, 10, 11);
+  ctx.restore();
+}
+
+function drawCSGear(gear, t) {
+  for (let i = 0; i < gear.length; i++) {
+    const g = gear[i];
+    ctx.save();
+    ctx.globalAlpha = g.alpha;
+    ctx.translate(g.x, g.y);
+    ctx.rotate(g.rot);
+    if (g.kind === 'sword') drawGoldSword();
+    else if (g.kind === 'shield') {
+      ctx.fillStyle = '#3b82c4';
+      ctx.fillRect(-8, -12, 16, 22);
+      ctx.fillStyle = '#9ec7e8';
+      ctx.fillRect(-8, -12, 6, 22);
+    } else if (g.kind === 'helm') {
+      ctx.fillStyle = '#7c8794';
+      rr(-9, -10, 18, 12, 4);
+      ctx.fillStyle = '#55606c';
+      ctx.fillRect(-9, -6, 18, 3);
+    } else if (g.kind === 'axe') {
+      ctx.fillStyle = '#a3710f';
+      ctx.fillRect(0, -2, 24, 5);
+      ctx.fillStyle = '#b8c0ca';
+      ctx.beginPath(); ctx.arc(28, 0, 10, 0, Math.PI * 2); ctx.fill();
+    } else if (g.kind === 'bow') {
+      ctx.strokeStyle = '#c9a227';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, 16, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+      ctx.fillStyle = '#d0d7de';
+      ctx.fillRect(-2, -16, 4, 32);
+    } else if (g.kind === 'chest') {
+      ctx.fillStyle = '#d9a441';
+      rr(-10, -12, 20, 20, 5);
+      ctx.fillStyle = '#8b5e12';
+      ctx.fillRect(-10, -12, 20, 4);
+    } else {
+      ctx.fillStyle = '#3d3a50';
+      rr(-8, -6, 16, 12, 4);
+    }
+    ctx.restore();
+  }
+}
+
+function drawCSBoss(type, x, y, laugh) {
+  const s = 1.5;
+  const tt = performance.now() / 1000;
+  ctx.save();
+  ctx.translate(x, y);
+  const sq = laugh ? Math.abs(Math.sin(tt * 6)) * 0.07 : Math.sin(tt * 2 + x) * 0.02;
+  ctx.scale(1 + sq, 1 - sq);
+  ctx.scale(s, s);
+  if (type === 'slime') {
+    ctx.fillStyle = '#7ec850';
+    ctx.beginPath();
+    ctx.moveTo(-34, 18);
+    ctx.quadraticCurveTo(-40, -16, -14, -20);
+    ctx.quadraticCurveTo(0, -30, 16, -18);
+    ctx.quadraticCurveTo(42, -12, 34, 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#b7e4a5';
+    ctx.fillRect(-20, -14, 10, 8);
+    ctx.fillStyle = '#1c1917';
+    ctx.beginPath(); ctx.arc(-14, -8, 3, 0, Math.PI * 2); ctx.arc(6, -8, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2f4a1f';
+    ctx.beginPath(); ctx.arc(-20, -8, 1.4, 0, Math.PI * 2); ctx.arc(0, -8, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3a5a28';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(2, 2, 7, 0.2, Math.PI - 0.2); ctx.stroke();
+  } else if (type === 'wolf') {
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(-26, -16, 52, 34);
+    ctx.fillRect(-18, -34, 10, 20);
+    ctx.fillRect(8, -34, 10, 20);
+    ctx.fillStyle = '#8b949e';
+    ctx.fillRect(-22, -34, 6, 8);
+    ctx.fillRect(16, -34, 6, 8);
+    ctx.beginPath(); ctx.moveTo(22, -14); ctx.lineTo(40, -4); ctx.lineTo(22, 4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1c1917';
+    ctx.beginPath(); ctx.arc(18, -14, 2.6, 0, Math.PI * 2); ctx.arc(28, -14, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f1f5f9';
+    ctx.beginPath(); ctx.arc(18, -14, 1.1, 0, Math.PI * 2); ctx.arc(28, -14, 1.1, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(34, -18); ctx.lineTo(36, -26); ctx.stroke();
+    ctx.fillStyle = '#d9a441';
+    ctx.beginPath(); ctx.arc(26, -6, 4, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.fillStyle = '#7cc45e';
+    ctx.fillRect(-18, -10, 36, 26);
+    ctx.fillStyle = '#5da03f';
+    ctx.beginPath(); ctx.arc(-24, -14, 9, 0, Math.PI * 2); ctx.arc(24, -14, 9, 0, Math.PI * 2); ctx.fill();
+    rr(-15, -30, 30, 20, 6, '#8fd06f');
+    ctx.fillStyle = '#1c1917';
+    ctx.beginPath(); ctx.arc(-7, -22, 2.6, 0, Math.PI * 2); ctx.arc(7, -22, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#7cc45e';
+    ctx.beginPath(); ctx.arc(20, 8, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a3710f';
+    ctx.fillRect(18, 0, 20, 5);
+    ctx.fillStyle = '#8b5e12';
+    ctx.fillRect(32, -2, 7, 12);
+    ctx.strokeStyle = '#4c7a33';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(2, -6, 6, 0.2, Math.PI - 0.2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCSBubble(x, y, txt) {
+  ctx.save();
+  ctx.font = 'bold 14px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  const w = ctx.measureText(txt).width + 20;
+  ctx.fillStyle = 'rgba(255,255,255,.95)';
+  rr(x - w / 2, y - 14, w, 28, 8);
+  ctx.fillStyle = 'rgba(0,0,0,.7)';
+  ctx.fillRect(x - 8, y + 12, 16, 8);
+  ctx.fillStyle = '#1c1917';
+  ctx.fillText(txt, x, y + 2);
+  ctx.restore();
+}
+
+function skipCutscene() {
+  if (screen === 'cutscene') endCutscene();
+}
+
 
 function buildCodeChips() {
   const el = document.getElementById('codeChips');
@@ -6513,6 +6994,7 @@ function resetProgress() {
   buildAchievements();
   const st = document.getElementById('resetStatus');
   if (st) { st.textContent = '✅ Прогресс полностью сброшен'; st.style.color = '#3fb950'; }
+  startCutscene();
 }
 
 document.getElementById('resetBtn').onclick = () => {
@@ -6533,6 +7015,10 @@ document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => showTab(b.d
 
 document.addEventListener('keydown', e => {
   keys[e.key] = true;
+  if (screen === 'cutscene') {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape' || e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') endCutscene();
+    return;
+  }
   if (screen === 'fight') {
     if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') { if (waveMode) startWaveRun(); else reset(); }
     if (e.key === 'Escape') toMenu();
@@ -6872,11 +7358,17 @@ function initYandexSDK() {
 
 document.getElementById('fsBtn').onclick = toggleFullscreen;
 document.getElementById('fsBtnMenu').onclick = toggleFullscreen;
+canvas.addEventListener('pointerdown', () => { if (screen === 'cutscene') endCutscene(); });
 
 initYandexSDK();
 buildMenu();
 updateAdvBtn();
 loop();
+
+setTimeout(() => {
+  const fresh = !getStore('bf_beaten') && !getStore('bf_wins') && !getStore('bf_coins') && !getStore('bf_choco') && !getStore('bf_hpLevel') && !getStore('bf_dmgLevel');
+  if (fresh && screen === 'menu') startCutscene();
+}, 900);
 </script>
 </body>
 </html>
