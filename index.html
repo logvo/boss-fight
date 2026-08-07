@@ -52,6 +52,8 @@
   }
   .card:hover { transform: translateY(-3px); border-color: #8b949e; }
   .card.selected { border-color: #58a6ff; background: #131c29; box-shadow: 0 0 14px rgba(88,166,255,.25); }
+  .card.locked { opacity: .55; cursor: default; border-style: dashed; }
+  .card.locked:hover { transform: none; border-color: #30363d; }
   .card .icon { font-size: 34px; }
   .card h3 { font-size: 17px; margin: 6px 0 4px; }
   .stars { color: #e3b341; font-size: 15px; letter-spacing: 2px; margin-bottom: 4px; }
@@ -189,6 +191,21 @@
     transition: transform .12s, box-shadow .12s;
   }
   .reset-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(248,81,73,.4); }
+  .code-chip {
+    display: inline-block;
+    margin: 5px 6px 0 0;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: Consolas, 'Courier New', monospace;
+    background: #161b22;
+    color: #7ee787;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .code-chip:hover { border-color: #7ee787; background: #1c2430; }
   #achBanner {
     position: fixed;
     top: 18px;
@@ -542,6 +559,7 @@
         <button id="codeBtn">Активировать</button>
       </div>
       <div id="codeStatus" class="mini" style="margin-top:8px"></div>
+      <div id="codeChips" class="mini" style="margin-top:8px;line-height:2"></div>
     </div>
 
     <div class="block">
@@ -633,14 +651,14 @@ const BOSSES = [
 ];
 
 const DIM_BOSSES = [
-  { id: 'dim1', name: 'Страж Врат', type: 'knight', stars: 19, hp: 18000, dmg: 60, projDmg: 30, speed: 0.8, r: 44, color: '#9aa7b5', accent: '#58a6ff', desc: 'Первый страж нового измерения. Крепкая броня и мощные рывки.', win: 'Страж Врат пал!', lose: 'Страж Врат сокрушил тебя.', talk: ['ОТСЮДА ДОРОГИ НАЗАД НЕТ.', 'Я — ПЕРВАЯ СТЕНА.', 'ДОКАЖИ, ЧТО ДОСТОИН!'] },
-  { id: 'dim2', name: 'Ловец Снов', type: 'shaman', stars: 20, hp: 22000, dmg: 65, projDmg: 32, speed: 1.0, r: 42, color: '#5ad1e0', accent: '#b7ecf5', desc: 'Плетёт иллюзии и призывает тотемы тьмы.', win: 'Ловец Снов рассеялся!', lose: 'Ты утонул в мире снов.', talk: ['ЭТО ЛИШЬ СОН.', 'ПРОСНИСЬ... ИЛИ НЕТ.', 'ТОТЕМ ЗОВЁТ ГЛУБЖЕ!'] },
-  { id: 'dim3', name: 'Огненный Титан', type: 'titan', stars: 21, hp: 28000, dmg: 70, projDmg: 34, speed: 0.5, r: 78, color: '#f0883e', accent: '#ffd33d', desc: 'Вулканический гигант, сотрясающий землю.', win: 'Огненный Титан остыл!', lose: 'Титан расплавил тебя в лаве.', talk: ['ЖАРКО?!', 'ГОРА ПЫЛАЕТ!', 'РАСПЛАВЛЮ ВСЁ!'] },
-  { id: 'dim4', name: 'Ледяная Королева', type: 'frost', stars: 22, hp: 32000, dmg: 75, projDmg: 36, speed: 1.0, r: 55, color: '#79c0ff', accent: '#c8e3ff', desc: 'Вечная мерзлота заморозит само время.', win: 'Ледяная Королева растаяла!', lose: 'Ты стал её ледяной статуей.', talk: ['ЗАМРИ.', 'ВЕЧНЫЙ ЛЁД.', 'МОЁ ЦАРСТВО — ХОЛОД.'] },
-  { id: 'dim5', name: 'Пожиратель Света', type: 'void', stars: 23, hp: 38000, dmg: 80, projDmg: 38, speed: 1.1, r: 60, color: '#b18cff', accent: '#bc8cff', desc: 'Поглощает весь свет реальности.', win: 'Пожиратель Света ослеп!', lose: 'Свет погас навсегда.', talk: ['ТЕМНОТА ПРИШЛА.', 'СВЕТ — ЭТО СЛАБОСТЬ.', 'ВСЁ ПОГЛОТИТСЯ.'] },
-  { id: 'dim6', name: 'МЕГА-Разрушитель', type: 'mega', stars: 24, hp: 45000, dmg: 90, projDmg: 42, speed: 0.9, r: 80, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Колосс нового измерения: землетрясения и огненный дождь.', win: 'МЕГА-Разрушитель ПОВЕРЖЕН!', lose: 'Разрушитель стёр тебя в пыль.', talk: ['Я — ПРИРОДНАЯ КАТАСТРОФА!', 'ТРЯСЁМ ЭТОТ МИР!', 'СМОТРИ ВВЕРХ!'] },
-  { id: 'dim7', name: 'ВЛАДЫКА ИЗМЕРЕНИЙ', type: 'annihilator', stars: 25, hp: 55000, dmg: 100, projDmg: 48, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ffd33d', desc: 'Правитель этого измерения. Конец пути.', win: 'ВЛАДЫКА ИЗМЕРЕНИЙ ПОВЕРЖЕН! ИГРА ПРОЙДЕНА ВНОВЬ!', lose: 'Измерение поглотило тебя.', talk: ['ТЫ ОСМЕЛИЛСЯ ВОЙТИ?', 'ЗДЕСЬ НЕТ СПАСЕНИЯ.', 'ПОСЛЕДНИЙ БОЙ!'] },
-  { id: 'dim8', name: 'ОХРАННИК РАЗУМА', type: 'chaos', stars: 26, hp: 62000, dmg: 110, projDmg: 52, speed: 1.2, r: 65, color: '#d77bff', accent: '#7b2cbf', desc: 'Тайный страж глубин измерения. Охраняет сам разум.', win: 'ОХРАННИК РАЗУМА СКЛОНЁН!', lose: 'Твой разум угас.', talk: ['КТО ЗДЕСЬ ПРОБУДИЛ МЕНЯ?', 'МЫСЛИ ТРЕЩАТ ПО ШВАМ.', 'Я НЕ ПОЗВОЛЮ ПОЗНАТЬ ИСТИНУ.'] }
+  { id: 'dim1', name: 'Страж Врат', type: 'gate', stars: 19, hp: 18000, dmg: 60, projDmg: 30, speed: 0.8, r: 44, color: '#9aa7b5', accent: '#58a6ff', desc: 'Первый страж нового измерения. Крепкая броня и мощные рывки.', win: 'Страж Врат пал!', lose: 'Страж Врат сокрушил тебя.', talk: ['ОТСЮДА ДОРОГИ НАЗАД НЕТ.', 'Я — ПЕРВАЯ СТЕНА.', 'ДОКАЖИ, ЧТО ДОСТОИН!'] },
+  { id: 'dim2', name: 'Ловец Снов', type: 'dream', stars: 20, hp: 22000, dmg: 65, projDmg: 32, speed: 1.0, r: 42, color: '#5ad1e0', accent: '#b7ecf5', desc: 'Плетёт иллюзии и призывает тотемы тьмы.', win: 'Ловец Снов рассеялся!', lose: 'Ты утонул в мире снов.', talk: ['ЭТО ЛИШЬ СОН.', 'ПРОСНИСЬ... ИЛИ НЕТ.', 'ТОТЕМ ЗОВЁТ ГЛУБЖЕ!'] },
+  { id: 'dim3', name: 'Огненный Титан', type: 'lava', stars: 21, hp: 28000, dmg: 70, projDmg: 34, speed: 0.5, r: 78, color: '#f0883e', accent: '#ffd33d', desc: 'Вулканический гигант, сотрясающий землю.', win: 'Огненный Титан остыл!', lose: 'Титан расплавил тебя в лаве.', talk: ['ЖАРКО?!', 'ГОРА ПЫЛАЕТ!', 'РАСПЛАВЛЮ ВСЁ!'] },
+  { id: 'dim4', name: 'Ледяная Королева', type: 'iceq', stars: 22, hp: 32000, dmg: 75, projDmg: 36, speed: 1.0, r: 55, color: '#79c0ff', accent: '#c8e3ff', desc: 'Вечная мерзлота заморозит само время.', win: 'Ледяная Королева растаяла!', lose: 'Ты стал её ледяной статуей.', talk: ['ЗАМРИ.', 'ВЕЧНЫЙ ЛЁД.', 'МОЁ ЦАРСТВО — ХОЛОД.'] },
+  { id: 'dim5', name: 'Пожиратель Света', type: 'eater', stars: 23, hp: 38000, dmg: 80, projDmg: 38, speed: 1.1, r: 60, color: '#b18cff', accent: '#bc8cff', desc: 'Поглощает весь свет реальности.', win: 'Пожиратель Света ослеп!', lose: 'Свет погас навсегда.', talk: ['ТЕМНОТА ПРИШЛА.', 'СВЕТ — ЭТО СЛАБОСТЬ.', 'ВСЁ ПОГЛОТИТСЯ.'] },
+  { id: 'dim6', name: 'МЕГА-Разрушитель', type: 'wrecker', stars: 24, hp: 45000, dmg: 90, projDmg: 42, speed: 0.9, r: 80, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Колосс нового измерения: землетрясения и огненный дождь.', win: 'МЕГА-Разрушитель ПОВЕРЖЕН!', lose: 'Разрушитель стёр тебя в пыль.', talk: ['Я — ПРИРОДНАЯ КАТАСТРОФА!', 'ТРЯСЁМ ЭТОТ МИР!', 'СМОТРИ ВВЕРХ!'] },
+  { id: 'dim7', name: 'ВЛАДЫКА ИЗМЕРЕНИЙ', type: 'dimlord', stars: 25, hp: 55000, dmg: 100, projDmg: 48, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ffd33d', desc: 'Правитель этого измерения. Конец пути.', win: 'ВЛАДЫКА ИЗМЕРЕНИЙ ПОВЕРЖЕН! ИГРА ПРОЙДЕНА ВНОВЬ!', lose: 'Измерение поглотило тебя.', talk: ['ТЫ ОСМЕЛИЛСЯ ВОЙТИ?', 'ЗДЕСЬ НЕТ СПАСЕНИЯ.', 'ПОСЛЕДНИЙ БОЙ!'] },
+  { id: 'dim8', name: 'ОХРАННИК РАЗУМА', type: 'mind', stars: 26, hp: 62000, dmg: 110, projDmg: 52, speed: 1.2, r: 65, color: '#d77bff', accent: '#7b2cbf', desc: 'Тайный страж глубин измерения. Охраняет сам разум.', win: 'ОХРАННИК РАЗУМА СКЛОНЁН!', lose: 'Твой разум угас.', talk: ['КТО ЗДЕСЬ ПРОБУДИЛ МЕНЯ?', 'МЫСЛИ ТРЕЩАТ ПО ШВАМ.', 'Я НЕ ПОЗВОЛЮ ПОЗНАТЬ ИСТИНУ.'] }
 ];
 
 const canvas = document.getElementById('game');
@@ -740,11 +758,26 @@ const CODES = {
   PUMPKIN: { name: 'Скин «Тыква»', apply() { if (skinsOwned.indexOf('pumpkin') === -1) skinsOwned.push('pumpkin'); } },
   MEGASTORM: { name: 'Мега-оружие «Шторм-бластер»', apply() { if (megaOwned.indexOf('storm') === -1) megaOwned.push('storm'); } },
   GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } },
+  DIZZY: { name: 'Режим «Головокружение»', apply() { dizzyUnlocked = true; setStore('bf_dizzyUnlocked', '1'); } },
+  MIND10K: { name: '10000 монет', apply() { coins += 10000; } },
+  DIM5000: { name: '5000 монет', apply() { coins += 5000; } },
+  CHOCO100: { name: '100 шоколадок', apply() { chocolates += 100; } },
+  DIMSPEED: { name: 'Режим скорости', apply() { speedMode = true; setStore('bf_speed', '1'); } },
   BELKA: { repeatable: true, name: '9999999999999999999 🪙 и 9999999999999999999 🍫', apply() { coins += 9999999999999999999; chocolates += 9999999999999999999; } }
 };
 const BOSS_NAMES = {};
 const CODE_BY_BOSS = {};
 BOSSES.forEach(b => {
+  BOSS_NAMES[b.id] = b.name;
+  const code = (b.id + (b.stars * 15)).toUpperCase();
+  CODE_BY_BOSS[b.id] = code;
+  CODES[code] = {
+    bossId: b.id,
+    name: 'Награда за победу над «' + b.name + '»',
+    apply() { coins += b.stars * 15; chocolates += b.stars * 2; }
+  };
+});
+DIM_BOSSES.forEach(b => {
   BOSS_NAMES[b.id] = b.name;
   const code = (b.id + (b.stars * 15)).toUpperCase();
   CODE_BY_BOSS[b.id] = code;
@@ -1158,6 +1191,7 @@ function updateDistortUI() {
   const s = document.getElementById('distortStatus');
   const b = document.getElementById('distortBtn');
   if (!s || !b) return;
+  b.closest('.mode-row').style.display = dimension ? 'none' : '';
   if (distorted) {
     s.textContent = '⚠️ Режим искажения активен — реальность трещит, боссы изменились!';
     b.textContent = 'Режим искажения: ВКЛ';
@@ -1398,10 +1432,25 @@ function buildWeaponList() {
   });
 }
 
+function getBeatenIds() { return (getStore('bf_beaten') || '').split(',').filter(Boolean); }
+function bossUnlocked(b, list) {
+  if (b.id === 'god') return godUnlocked;
+  if (b.id === 'ultimate') return ultimateUnlocked;
+  if (b.id === 'dim8') return dizzyUnlocked;
+  const idx = list.indexOf(b);
+  if (idx <= 0) return true;
+  return getBeatenIds().indexOf(list[idx - 1].id) !== -1;
+}
+function bossList() {
+  const full = dimension ? DIM_BOSSES : BOSSES;
+  return full.filter(b => bossUnlocked(b, full));
+}
+
 function buildBossList() {
   const bl = document.getElementById('bossList');
   bl.innerHTML = '';
-  const list = dimension ? DIM_BOSSES.filter(b => b.id !== 'dim8' || dizzyUnlocked) : BOSSES.filter(b => (b.id !== 'god' || godUnlocked) && (b.id !== 'ultimate' || ultimateUnlocked));
+  const full = dimension ? DIM_BOSSES : BOSSES;
+  const list = bossList();
   const prevId = (list[selectedBoss] || list[0]).id;
   list.forEach((b, i) => {
     const d = document.createElement('div');
@@ -1416,6 +1465,13 @@ function buildBossList() {
     };
     bl.appendChild(d);
   });
+  const firstLocked = full.find(b => !bossUnlocked(b, full));
+  if (firstLocked) {
+    const d = document.createElement('div');
+    d.className = 'card locked';
+    d.innerHTML = `<div><h3>🔒 Заблокировано</h3><div class="mini">Победи «${full[full.indexOf(firstLocked) - 1].name}», чтобы открыть ${dimension ? '🌌 ' : ''}«${firstLocked.name}»</div></div>`;
+    bl.appendChild(d);
+  }
   const idx = list.findIndex(b => b.id === prevId);
   selectedBoss = idx >= 0 ? idx : 0;
 }
@@ -1431,6 +1487,7 @@ function buildMenu() {
   updateDimUI();
   updateDizzyUI();
   updateDistortOverlay();
+  buildCodeChips();
   buildWeaponList();
   buildBossList();
   buildMegaShop();
@@ -1574,7 +1631,7 @@ function updateDimUI() {
   }
   btn.textContent = dimension ? '🌌 Новое измерение: ВКЛ' : '🌌 Новое измерение: ВЫКЛ';
   st.textContent = dimension
-    ? 'Играешь с чистого листа: прокачка x3 дороже, 7 новых боссов, все сложнее'
+    ? 'Играешь с чистого листа: прокачка x3 дороже, 8 новых боссов, все сложнее'
     : 'Вернуться в прошлое измерение со старой прокачкой';
 }
 document.getElementById('dimBtn').onclick = () => {
@@ -1654,7 +1711,7 @@ function toMenu() {
 }
 
 function reset() {
-  const blist = dimension ? DIM_BOSSES : BOSSES;
+  const blist = bossList();
   const bdef = blist[selectedBoss];
   const isUlt = bdef.type === 'ultimate';
   const godDmgMult = (godMode && !isUlt) ? 2.5 : 1;
@@ -2368,6 +2425,350 @@ function updateBoss() {
         }
       }
       if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'gate') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.25;
+      boss.y += ny * boss.speed * 0.25;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.4) { boss.state = 'grid'; boss.timer = 55; }
+        else if (roll < 0.75) { boss.state = 'spiral'; boss.timer = 50; }
+        else { boss.state = 'beam'; boss.timer = 42; }
+      }
+      if (d < 90 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'grid') {
+      boss.timer--;
+      if (boss.timer % 5 === 0) {
+        const gx = player.x + player.w / 2;
+        const dir = Math.random() > 0.5 ? 1 : -1;
+        projs.push({ x: gx + dir * (50 + Math.random() * 120), y: -20, vx: 0, vy: 7, dmg: boss.projDmg, r: 8, friendly: false, color: '#58a6ff' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'spiral') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        const a = performance.now() / 300 + (50 - boss.timer) * 0.25;
+        shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 7, '#58a6ff');
+        shootBossProj(Math.cos(-a) * 3.0, Math.sin(-a) * 3.0, boss.projDmg, 6, '#b18cff');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'beam') {
+      boss.timer--;
+      if (boss.timer === 12) {
+        const base = Math.atan2(dy, dx);
+        for (let i = 0; i < 5; i++) shootBossProj(Math.cos(base + (i - 2) * 0.12) * 6.5, Math.sin(base + (i - 2) * 0.12) * 6.5, boss.projDmg, 6, '#e6f3ff');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    }
+    boss.x = clamp(boss.x, 40, canvas.width - 40);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'dream') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.6;
+      boss.y += ny * boss.speed * 0.6;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.4) { boss.state = 'bubbles'; boss.timer = 55; }
+        else if (roll < 0.75) { boss.state = 'orbit'; boss.timer = 60; }
+        else { boss.state = 'lure'; boss.timer = 70; }
+      }
+      if (d < 80 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'bubbles') {
+      boss.timer--;
+      if (boss.timer % 7 === 0) {
+        const a = Math.random() * Math.PI * 2;
+        projs.push({ x: boss.x, y: boss.y, vx: Math.cos(a) * 1.6, vy: Math.sin(a) * 1.6 - 0.5, dmg: boss.projDmg, r: 10, friendly: false, color: '#5ad1e0' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'orbit') {
+      boss.timer--;
+      if (boss.timer % 5 === 0) {
+        const a = performance.now() / 450 + (60 - boss.timer) * 0.28;
+        shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 7, '#b7ecf5');
+        shootBossProj(Math.cos(a + Math.PI) * 3.6, Math.sin(a + Math.PI) * 3.6, boss.projDmg, 7, '#b7ecf5');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'lure') {
+      boss.timer--;
+      if (boss.timer % 8 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 3.2, vy: ny * 3.2, dmg: boss.projDmg, r: 8, friendly: false, color: '#d2a8ff', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'lava') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.4;
+      boss.y += ny * boss.speed * 0.4;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.45) { boss.state = 'quake'; boss.timer = 45; }
+        else if (roll < 0.8) { boss.state = 'meteor'; boss.timer = 40; }
+        else { boss.state = 'erupt'; boss.timer = 34; }
+      }
+      if (d < 120 && boss.atkCd <= 0) { boss.atkCd = 50; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'quake') {
+      boss.timer--;
+      if (boss.timer === 22) {
+        shake = 16;
+        burst(boss.x, boss.y, '#f0883e', 22);
+        const wy = canvas.height - 50;
+        projs.push({ x: boss.x - boss.r - 10, y: wy, vx: -4.2, vy: 0, dmg: boss.projDmg, r: 18, friendly: false, color: '#f0883e', shock: true });
+        projs.push({ x: boss.x + boss.r + 10, y: wy, vx: 4.2, vy: 0, dmg: boss.projDmg, r: 18, friendly: false, color: '#f0883e', shock: true });
+        projs.push({ x: boss.x - boss.r - 30, y: wy, vx: -7, vy: 0, dmg: boss.projDmg, r: 13, friendly: false, color: '#ffd33d', shock: true });
+        projs.push({ x: boss.x + boss.r + 30, y: wy, vx: 7, vy: 0, dmg: boss.projDmg, r: 13, friendly: false, color: '#ffd33d', shock: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'meteor') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 360 - 180), y: -24, vx: (Math.random() - 0.5) * 0.5, vy: 5.6, dmg: boss.projDmg, r: 11, friendly: false, color: '#ffd33d' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'erupt') {
+      boss.timer--;
+      if (boss.timer === 12) {
+        burst(boss.x, boss.y, '#ffd33d', 24);
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2 + performance.now() / 600;
+          shootBossProj(Math.cos(a) * 3.0, Math.sin(a) * 3.0, boss.projDmg, 8, '#f0883e');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 90);
+  } else if (t === 'iceq') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.55;
+      boss.y += ny * boss.speed * 0.55;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.4) { boss.state = 'ring'; boss.timer = 55; }
+        else if (roll < 0.75) { boss.state = 'rain'; boss.timer = 40; }
+        else { boss.state = 'wall'; boss.timer = 50; }
+      }
+      if (d < 90 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'ring') {
+      boss.timer--;
+      if (boss.timer % 5 === 0) {
+        const a = performance.now() / 500 + (55 - boss.timer) * 0.3;
+        shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 7, '#79c0ff');
+        shootBossProj(Math.cos(a + Math.PI / 2) * 3.4, Math.sin(a + Math.PI / 2) * 3.4, boss.projDmg, 7, '#79c0ff');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'rain') {
+      boss.timer--;
+      if (boss.timer % 7 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 320 - 160), y: -20, vx: 0, vy: 6.2, dmg: boss.projDmg, r: 8, friendly: false, color: '#79c0ff' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'wall') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        const y = Math.random() * (canvas.height - 200) + 60;
+        projs.push({ x: -20, y, vx: 6.4, vy: 0, dmg: boss.projDmg, r: 9, friendly: false, color: '#c8e3ff' });
+        projs.push({ x: canvas.width + 20, y, vx: -6.4, vy: 0, dmg: boss.projDmg, r: 9, friendly: false, color: '#c8e3ff' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 110);
+  } else if (t === 'eater') {
+    if (boss.state === 'idle') {
+      boss.timer--;
+      const pull = 0.35;
+      player.x -= nx * pull;
+      player.y -= ny * pull;
+      player.x = clamp(player.x, 0, canvas.width - player.w);
+      player.y = clamp(player.y, 0, canvas.height - player.h);
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.5) { boss.state = 'nova'; boss.timer = 42; }
+        else { boss.state = 'tendril'; boss.timer = 45; }
+      }
+      if (d < 100 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'nova') {
+      boss.timer--;
+      if (boss.timer === 14) {
+        shake = 10;
+        burst(boss.x, boss.y, '#b18cff', 24);
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2;
+          shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 8, '#b18cff');
+        }
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2 + performance.now() / 500;
+          shootBossProj(Math.cos(a) * 2.2, Math.sin(a) * 2.2, boss.projDmg, 6, '#bc8cff');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 130; }
+    } else if (boss.state === 'tendril') {
+      boss.timer--;
+      if (boss.timer % 9 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 4, vy: ny * 4, dmg: boss.projDmg, r: 7, friendly: false, color: '#bc8cff', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 130; }
+    }
+    boss.x = clamp(boss.x, 80, canvas.width - 80);
+    boss.y = clamp(boss.y, 100, canvas.height - 130);
+  } else if (t === 'wrecker') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.7;
+      boss.y += ny * boss.speed * 0.5;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.35) { boss.state = 'quake'; boss.timer = 42; }
+        else if (roll < 0.7) { boss.state = 'mortar'; boss.timer = 40; }
+        else { boss.state = 'ram'; boss.timer = 26; boss.dirX = nx; boss.dirY = ny; }
+      }
+      if (d < 110 && boss.atkCd <= 0) { boss.atkCd = 45; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'quake') {
+      boss.timer--;
+      if (boss.timer === 20) {
+        shake = 16;
+        burst(boss.x, boss.y, '#ff6b6b', 22);
+        const wy = canvas.height - 52;
+        for (let k = 0; k < 3; k++) {
+          const dir = k % 2 === 0 ? 1 : -1;
+          const spd = 3.5 + k * 1.6;
+          projs.push({ x: boss.x + dir * (boss.r + k * 18), y: wy, vx: dir * spd, vy: 0, dmg: boss.projDmg, r: 15, friendly: false, color: '#ff6b6b', shock: true });
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'mortar') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 380 - 190), y: -24, vx: 0, vy: 6.4, dmg: boss.projDmg, r: 12, friendly: false, color: '#ff4d6d' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    } else if (boss.state === 'ram') {
+      boss.x += boss.dirX * 8;
+      boss.y += boss.dirY * 8;
+      boss.timer--;
+      if (d < 60) {
+        hurtPlayer(boss.dmg); boss.hitFx = 8; shake = 10;
+        for (let i = -1; i <= 1; i++) { const a = Math.atan2(dy, dx) + i * 0.4; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 6, '#ff4d6d'); }
+        boss.state = 'idle'; boss.timer = 120;
+      } else if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 40, canvas.width - 40);
+    boss.y = clamp(boss.y, 50, canvas.height - 90);
+  } else if (t === 'dimlord') {
+    const ph = boss.hp / boss.maxHp <= 0.34 ? 3 : boss.hp / boss.maxHp <= 0.67 ? 2 : 1;
+    if (ph !== boss.phase) {
+      boss.phase = ph; boss.phaseFlash = 110; boss.state = 'idle'; boss.timer = 100;
+      burst(boss.x, boss.y, '#ffd33d', 40); shake = 12; boss.atkCd = 60;
+    }
+    boss.timer--; boss.atkCd--;
+    const sp = boss.speed * (ph === 3 ? 1.5 : ph === 2 ? 1 : 0.8);
+    if (ph === 1) {
+      boss.x += nx * sp; boss.y += ny * sp;
+      if (boss.state === 'idle') {
+        if (boss.timer <= 0) { boss.state = 'portal'; boss.timer = 55; }
+      } else if (boss.state === 'portal') {
+        if (boss.timer % 6 === 0) {
+          const pa = Math.random() * Math.PI * 2;
+          const px2 = clamp(player.x + player.w / 2 + Math.cos(pa) * 140, 40, canvas.width - 40);
+          const py2 = clamp(player.y + player.h / 2 + Math.sin(pa) * 100, 50, canvas.height - 90);
+          const b = Math.atan2(player.y + player.h / 2 - py2, player.x + player.w / 2 - px2);
+          projs.push({ x: px2, y: py2, vx: Math.cos(b) * 4.2, vy: Math.sin(b) * 4.2, dmg: boss.projDmg, r: 8, friendly: false, color: '#ffd33d' });
+          burst(px2, py2, '#ffd33d', 6);
+        }
+        if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+      }
+      if (boss.atkCd <= 0 && d < 420) { boss.atkCd = 80; shootBossProj(nx * 5, ny * 5, boss.projDmg, 8, '#ffd33d'); }
+    } else if (ph === 2) {
+      if (boss.state === 'idle') {
+        boss.x += nx * sp; boss.y += ny * sp;
+        if (boss.timer <= 0) { boss.state = 'tele'; boss.timer = 50; boss.tx = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 230, 60, canvas.width - 60); boss.ty = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100); }
+      } else if (boss.state === 'tele') {
+        if (boss.timer === 24) { boss.x = boss.tx; boss.y = boss.ty; burst(boss.x, boss.y, '#ffd33d', 20); }
+        if (boss.timer <= 0) { boss.state = 'spin'; boss.timer = 55; }
+      } else if (boss.state === 'spin') {
+        if (boss.timer % 4 === 0) {
+          const a = performance.now() / 350 + (55 - boss.timer) * 0.32;
+          shootBossProj(Math.cos(a) * 4.6, Math.sin(a) * 4.6, boss.projDmg, 8, '#ff4d6d');
+          shootBossProj(Math.cos(-a) * 3.4, Math.sin(-a) * 3.4, boss.projDmg, 6, '#ffd33d');
+        }
+        if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+      }
+    } else {
+      if (boss.state === 'idle') {
+        boss.x += nx * sp; boss.y += ny * sp;
+        if (boss.timer <= 0) { boss.state = 'rain'; boss.timer = 42; }
+      } else if (boss.state === 'rain') {
+        if (boss.timer % 5 === 0) {
+          projs.push({ x: player.x + player.w / 2 + (Math.random() * 340 - 170), y: -20, vx: 0, vy: 7, dmg: boss.projDmg, r: 10, friendly: false, color: '#ff4d6d' });
+        }
+        if (boss.timer <= 0) { boss.state = 'burst'; boss.timer = 30; }
+      } else if (boss.state === 'burst') {
+        if (boss.timer === 15) {
+          burst(boss.x, boss.y, '#ffd33d', 30);
+          for (let i = 0; i < 16; i++) {
+            const a = (i / 16) * Math.PI * 2 + performance.now() / 500;
+            shootBossProj(Math.cos(a) * 4, Math.sin(a) * 4, boss.projDmg, 8, '#ffd33d');
+          }
+        }
+        if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 80; }
+      }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'mind') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.6;
+      boss.y += ny * boss.speed * 0.6;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.4) { boss.state = 'wave'; boss.timer = 40; }
+        else if (roll < 0.75) { boss.state = 'homing'; boss.timer = 42; }
+        else { boss.state = 'shift'; boss.timer = 55; }
+      }
+      if (d < 95 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'wave') {
+      boss.timer--;
+      if (boss.timer === 14) {
+        shake = 12;
+        burst(boss.x, boss.y, '#d77bff', 26);
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * Math.PI * 2 + performance.now() / 600;
+          shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 7, '#d77bff');
+        }
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 - performance.now() / 600;
+          shootBossProj(Math.cos(a) * 2.6, Math.sin(a) * 2.6, boss.projDmg, 5, '#7b2cbf');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'homing') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 3.6, vy: ny * 3.6, dmg: boss.projDmg, r: 8, friendly: false, color: '#d77bff', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'shift') {
+      boss.timer--;
+      if (boss.timer === 27) {
+        boss.x = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 250, 60, canvas.width - 60);
+        boss.y = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 150, 60, canvas.height - 100);
+        burst(boss.x, boss.y, '#7b2cbf', 22);
+        for (let i = -2; i <= 2; i++) {
+          const a = Math.atan2(dy, dx) + i * 0.18;
+          shootBossProj(Math.cos(a) * 5.5, Math.sin(a) * 5.5, boss.projDmg, 7, '#7b2cbf');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
     }
     boss.x = clamp(boss.x, 50, canvas.width - 50);
     boss.y = clamp(boss.y, 60, canvas.height - 100);
@@ -4244,15 +4645,18 @@ function drawNight() {
 function drawDizzy() {
   if (dizzyDark <= 0) return;
   const p = 1 - dizzyDark / 52;
-  const a = Math.sin(Math.min(1, Math.max(0, p)) * Math.PI) * 0.75;
+  const a = Math.sin(Math.min(1, Math.max(0, p)) * Math.PI) * 0.85;
   if (a <= 0.02) return;
   const cx = canvas.width / 2, cy = canvas.height / 2;
   ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate((p - 0.5) * 0.12);
+  ctx.translate(-cx, -cy);
   const g = ctx.createRadialGradient(cx, cy, 8, cx, cy, canvas.width * 0.62);
-  g.addColorStop(0, 'rgba(2,6,23,' + (a * 0.35).toFixed(3) + ')');
+  g.addColorStop(0, 'rgba(2,6,23,' + (a * 0.45).toFixed(3) + ')');
   g.addColorStop(1, 'rgba(2,6,23,' + a.toFixed(3) + ')');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(-30, -30, canvas.width + 60, canvas.height + 60);
   ctx.restore();
 }
 
@@ -4265,6 +4669,33 @@ function loop() {
     catch (e) { console.error(e); }
   }
   requestAnimationFrame(loop);
+}
+
+function buildCodeChips() {
+  const el = document.getElementById('codeChips');
+  if (!el) return;
+  el.innerHTML = '';
+  const chips = [];
+  const beaten = (getStore('bf_beaten') || '').split(',').filter(Boolean);
+  for (const b of BOSSES.concat(DIM_BOSSES)) {
+    const code = CODE_BY_BOSS[b.id];
+    if (!code) continue;
+    if (beaten.indexOf(b.id) === -1) continue;
+    if (activatedCodes.indexOf(code) !== -1) continue;
+    chips.push({ code: code, name: b.name });
+  }
+  if (!chips.length) { el.textContent = 'Здесь появятся коды, полученные за победы над боссами. Нажми на код, чтобы активировать.'; return; }
+  for (const c of chips) {
+    const s = document.createElement('span');
+    s.className = 'code-chip';
+    s.textContent = c.code;
+    s.title = 'Награда за победу над «' + c.name + '» — нажми, чтобы активировать';
+    s.onclick = () => {
+      activateCode(c.code);
+      buildCodeChips();
+    };
+    el.appendChild(s);
+  }
 }
 
 function activateCode(raw) {
@@ -4289,6 +4720,7 @@ function activateCode(raw) {
     buildChocoShop();
     updateGodUI();
     refreshShop();
+    buildCodeChips();
     st.textContent = '✅ Код активирован: ' + c.name;
     st.style.color = '#3fb950';
   } catch (e) {
