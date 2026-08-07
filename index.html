@@ -245,6 +245,23 @@
   .bar div { height: 100%; border-radius: 11px; transition: width .25s; }
   #hpBar div { background: #3fb950; }
   #bossBar div { background: #f85149; }
+  #bossBar .phase-pip {
+    position: absolute;
+    top: 4px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #0d1117;
+    border: 1px solid #e6edf3;
+    transform: translateX(-50%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  #bossBar .phase-pip.on {
+    background: #ffd33d;
+    border-color: #ffd33d;
+    box-shadow: 0 0 6px #ffd33d;
+  }
   .bar span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
   .label { color: #8b949e; font-size: 12px; }
   .label b { color: #e6edf3; }
@@ -490,10 +507,6 @@
       <button id="dimBtn" class="distort-btn god">🌌 Новое измерение: 🔒 ЗАКРЫТО</button>
       <span id="dimStatus" class="mode-desc"></span>
     </div>
-    <div class="mode-row">
-      <button id="dizzyBtn" class="distort-btn">🌀 Головокружение: 🔒 ЗАКРЫТО</button>
-      <span id="dizzyStatus" class="mode-desc"></span>
-    </div>
     <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
     <div class="menu-cols">
@@ -699,7 +712,10 @@ const BOSSES = [
   { id: 'annihilator', name: 'Аннигилятор',    type: 'annihilator', stars: 15, hp: 11500, dmg: 75, projDmg: 25, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ff9eb1', desc: 'Машина уничтожения: стены огня и телепорты.', win: 'АННИГИЛЯТОР УНИЧТОЖЕН!', lose: 'Аннигилятор стёр тебя в пыль.', talk: ['ОШИБКА: ЦЕЛЬ ЖИВА.', 'УНИЧТОЖИТЬ.', 'СИСТЕМА ЗАПУЩЕНА.'] },
   { id: 'chaos',  name: 'Хаос-Сущность',       type: 'chaos',  stars: 16, hp: 9500, dmg: 70, projDmg: 22, speed: 1.1, r: 65, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Изначальный хаос. Уклоняйся от всего!', win: 'ХАОС ПОБЕЖДЁН! ТЫ ЛЕГЕНДА!', lose: 'Хаос поглотил тебя навсегда.', talk: ['ВСЁ — ХАОС.', 'КОНЕЦ БЛИЗОК.'] },
   { id: 'god',    name: 'ВСЕВЫШНИЙ',            type: 'god',    stars: 17, hp: 8000, dmg: 45, projDmg: 22, speed: 0.6, r: 95, color: '#ffd33d', accent: '#ffd33d', desc: 'Божественный суд неминуем. Только в режиме бога.', win: 'БОГ ПОВЕРЖЕН?! НЕВОЗМОЖНО!', lose: 'Всевышний низверг тебя во тьму.', talk: ['ТЫ ОСМЕЛИЛСЯ?', 'МОЯ СИЛА БЕСКОНЕЧНА.', 'НА КОЛЕНИ, СМЕРТНЫЙ!'] },
-  { id: 'ultimate', name: 'ФИНАЛЬНЫЙ БОСС',     type: 'ultimate', stars: 18, hp: 16000, dmg: 50, projDmg: 28, speed: 0.8, r: 70, color: '#ffd33d', accent: '#ff4d6d', desc: 'Три фазы: король, ужасный король-призрак, бешенство. Открывается после победы над ВСЕВЫШНИМ в режиме бога.', win: 'ФИНАЛЬНЫЙ БОСС ПОВЕРЖЕН! ТЫ ПРОШЁЛ ИГРУ!', lose: 'Финальный босс поглотил тебя навсегда...', talk: ['Я — конец твоего пути.', 'ТРИ ФАЗЫ ЖДУТ ТЕБЯ.', 'ПОКАЖИ, НА ЧТО СПОСОБЕН!'] }
+  { id: 'ultimate', name: 'ФИНАЛЬНЫЙ БОСС',     type: 'ultimate', stars: 18, hp: 16000, dmg: 50, projDmg: 28, speed: 0.8, r: 70, color: '#ffd33d', accent: '#ff4d6d', desc: 'Три фазы: король, ужасный король-призрак, бешенство. Открывается после победы над ВСЕВЫШНИМ в режиме бога.', win: 'ФИНАЛЬНЫЙ БОСС ПОВЕРЖЕН! ТЫ ПРОШЁЛ ИГРУ!', lose: 'Финальный босс поглотил тебя навсегда...', talk: ['Я — конец твоего пути.', 'ТРИ ФАЗЫ ЖДУТ ТЕБЯ.', 'ПОКАЖИ, НА ЧТО СПОСОБЕН!'] },
+  { id: 'herald', name: 'Глашатай Тьмы',        type: 'herald', stars: 19, hp: 26000, dmg: 65, projDmg: 30, speed: 1.0, r: 55, color: '#5a5a7a', accent: '#7b2cbf', desc: 'Первый вестник тьмы: телепорты и сгустки мрака. Свет начал гаснуть с его появлением.', win: 'Глашатай Тьмы рассеялся, но тьма густеет!', lose: 'Тьма поглотила тебя.', talk: ['СВЕТ УМИРАЕТ.', 'Я ЛИШЬ НАЧАЛО.', 'ТЬМА УЖЕ ЗДЕСЬ.'] },
+  { id: 'darkking', name: 'Король Тьмы',        type: 'darkking', stars: 20, hp: 46000, dmg: 80, projDmg: 38, speed: 1.0, r: 70, color: '#6e3a9e', accent: '#b18cff', desc: 'Владыка мрака: кольца тьмы и тёмные щупальца. Украл последний свет у горизонта.', win: 'Король Тьмы пал! Остался лишь Похититель Света...', lose: 'Король Тьмы навеки заточил тебя во мрак.', talk: ['СВЕТ — МОЁ НАСЛЕДИЕ.', 'КОРОНА ТЬМЫ ВЕЧНА.', 'ГОРИЗОНТ ПОГАС.'] },
+  { id: 'lightthief', name: 'ПОХИТИТЕЛЬ СВЕТА', type: 'lightthief', stars: 21, hp: 150000, dmg: 95, projDmg: 45, speed: 0.9, r: 90, color: '#1b1b2f', accent: '#ffd33d', phases: 5, desc: 'Украл весь свет и погрузил мир во тьму. Пять фаз ярости — победи его, чтобы вернуть свет!', win: 'СВЕТ ВОЗВРАЩЁН! ТЫ СОВЕРШИЛ НЕВОЗМОЖНОЕ!', lose: 'Тьма поглотила тебя навсегда...', talk: ['Я ЗАБРАЛ СВЕТ.', 'МИР ПРИНАДЛЕЖИТ ТЬМЕ.', 'БЕЗ СВЕТА НЕТ НАДЕЖДЫ.'] }
 ];
 
 const DIM_BOSSES = [
@@ -748,10 +764,6 @@ let ultimateUnlocked = false;
 let letterShown = false;
 let dimUnlocked = false;
 let dimension = false;
-let dizzyUnlocked = getStore('bf_dizzyUnlocked') === '1';
-let dizzyMode = false;
-let dizzyDark = 0;
-let dizzyTimer = 0;
 let distortFlash = 0;
 let cracks = [];
 const keys = {};
@@ -810,7 +822,6 @@ const CODES = {
   PUMPKIN: { name: 'Скин «Тыква»', apply() { if (skinsOwned.indexOf('pumpkin') === -1) skinsOwned.push('pumpkin'); } },
   MEGASTORM: { name: 'Мега-оружие «Шторм-бластер»', apply() { if (megaOwned.indexOf('storm') === -1) megaOwned.push('storm'); } },
   GODMODE: { name: 'Режим бога', apply() { godUnlocked = true; setStore('bf_godUnlocked', '1'); } },
-  DIZZY: { name: 'Режим «Головокружение»', apply() { dizzyUnlocked = true; setStore('bf_dizzyUnlocked', '1'); } },
   MIND10K: { name: '10000 монет', apply() { coins += 10000; } },
   DIM5000: { name: '5000 монет', apply() { coins += 5000; } },
   CHOCO100: { name: '100 шоколадок', apply() { chocolates += 100; } },
@@ -848,8 +859,6 @@ dimension = getStore('bf_dimension') === '1';
 speedMode = getStore('bf_speed') === '1';
 boomMode = getStore('bf_boom') === '1';
 nightMode = getStore('bf_night') === '1';
-dizzyMode = getStore('bf_dizzy') === '1';
-if (dizzyMode) dizzyTimer = 420 + Math.floor(Math.random() * 280);
 if (godMode) distorted = true;
 if (dimension) distorted = true;
 let achBannerTO = null;
@@ -1082,6 +1091,11 @@ function modeColors() {
   return { vig: 'rgba(124,77,255,.28)', crack: '#c055ff', crack2: '#ff6bc1', glowFill: 'rgba(192,85,255,.14)', glowStroke: 'rgba(192,85,255,.6)', floor: 'rgba(192,85,255,.35)', flashBase: '192,85,255', amb: ['#c055ff', '#ff6bc1'] };
 }
 function anyMode() { return distorted || speedMode || boomMode || nightMode; }
+function phaseColor() {
+  const colors = ['#ffd33d', '#9d6bff', '#ff4d6d', '#ff8c42', '#e0115f'];
+  const idx = Math.min((boss.phases || 1) - 1, Math.max(0, (boss.phase || 1) - 1));
+  return colors[idx];
+}
 function burst(x, y, color, n) {
   for (let i = 0; i < n; i++) particles.push({ x, y, vx: (Math.random() - 0.5) * 8, vy: -Math.random() * 6, size: Math.random() * 5 + 2, color, life: 40 + Math.random() * 20, maxLife: 60 });
 }
@@ -1325,34 +1339,6 @@ function updateNightUI() {
   }
 }
 
-function updateDizzyUI() {
-  const s = document.getElementById('dizzyStatus');
-  const b = document.getElementById('dizzyBtn');
-  if (!s || !b) return;
-  if (!dizzyUnlocked) {
-    s.textContent = '🔒 Режим «Головокружение»: победи ВЛАДЫКУ ИЗМЕРЕНИЙ';
-    b.disabled = true;
-    b.textContent = '🌀 Головокружение: 🔒 ЗАКРЫТО';
-    return;
-  }
-  b.disabled = false;
-  if (dizzyMode) {
-    s.textContent = '🌀 Головокружение активно — экран редко затуманивается! В списке появился ОХРАННИК РАЗУМА';
-    b.textContent = 'Головокружение: ВКЛ';
-  } else {
-    s.textContent = '🌀 Открыто! Мир иногда теряет равновесие. В списке появился ОХРАННИК РАЗУМА';
-    b.textContent = 'Головокружение: ВЫКЛ';
-  }
-}
-
-function toggleDizzyMode() {
-  dizzyMode = !dizzyMode;
-  dizzyDark = 0;
-  dizzyTimer = dizzyMode ? 420 + Math.floor(Math.random() * 280) : 0;
-  setStore('bf_dizzy', dizzyMode ? '1' : '0');
-  updateDizzyUI();
-}
-
 function activateGodMode() {
   godMode = true;
   godUnlocked = true;
@@ -1488,7 +1474,6 @@ function getBeatenIds() { return (getStore('bf_beaten') || '').split(',').filter
 function bossUnlocked(b, list) {
   if (b.id === 'god') return godUnlocked;
   if (b.id === 'ultimate') return ultimateUnlocked;
-  if (b.id === 'dim8') return dizzyUnlocked;
   const idx = list.indexOf(b);
   if (idx <= 0) return true;
   return getBeatenIds().indexOf(list[idx - 1].id) !== -1;
@@ -1537,7 +1522,6 @@ function buildMenu() {
   updateBoomUI();
   updateNightUI();
   updateDimUI();
-  updateDizzyUI();
   updateDistortOverlay();
   buildCodeChips();
   buildWeaponList();
@@ -1698,8 +1682,6 @@ document.getElementById('dimBtn').onclick = () => {
   buildAchievements();
 };
 
-document.getElementById('dizzyBtn').onclick = toggleDizzyMode;
-
 function updateSideModeUI() {
   const d = document.getElementById('sideDistortBtn');
   const g = document.getElementById('sideGodBtn');
@@ -1801,6 +1783,7 @@ function toMenu() {
   menuEl.classList.remove('hidden');
   document.getElementById('touchControls').classList.remove('on');
   showSideModes(false);
+  clearBossPips();
   buildBossList();
   buildChocoShop();
   refreshShop();
@@ -1825,11 +1808,12 @@ function reset() {
   boss.projDmg = bdef.projDmg * godDmgMult * nightDmgMult;
   boss.speed = bdef.speed * (godMode && !isUlt ? 1.3 : 1) * (speedMode ? 1.6 : 1);
   boss.type = bdef.type;
-  boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0; boss.phase = 1; boss.phaseFlash = 0; boss.atkCd2 = 0;
+  boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0; boss.phase = 1; boss.phaseFlash = 0; boss.atkCd2 = 0; boss.phases = bdef.phases || 1;
   boss.name = bdef.name; boss.id = bdef.id; boss.stars = bdef.stars; boss.color = bdef.color; boss.accent = bdef.accent; boss.talk = bdef.talk; boss.win = bdef.win; boss.lose = bdef.lose;
   gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false; showCode = null; letterShown = false;
   particles.length = 0; projs.length = 0;
   bossNameLabel.textContent = boss.name;
+  setupBossBar();
   updateBars();
 }
 
@@ -1848,9 +1832,8 @@ function registerBossDefeat() {
     dimUnlocked = true;
     setStore('bf_dimUnlocked', '1');
   }
-  if (boss.id === 'dim7') {
-    dizzyUnlocked = true;
-    setStore('bf_dizzyUnlocked', '1');
+  if (boss.id === 'lightthief') {
+    letterShown = true;
   }
   const c = CODE_BY_BOSS[boss.id];
   if (c && activatedCodes.indexOf(c) === -1) showCode = c;
@@ -1899,16 +1882,6 @@ function shootBossProj(vx, vy, dmg, r, color) {
 }
 
 function update() {
-  if (dizzyMode) {
-    if (dizzyDark > 0) dizzyDark--;
-    else {
-      dizzyTimer--;
-      if (dizzyTimer <= 0) {
-        dizzyDark = 52;
-        dizzyTimer = 420 + Math.floor(Math.random() * 280);
-      }
-    }
-  }
   if (waveMode) { updateWaves(); return; }
   if (gameOver) {
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -2961,6 +2934,216 @@ function updateBoss() {
     }
     boss.x = clamp(boss.x, 50, canvas.width - 50);
     boss.y = clamp(boss.y, 60, canvas.height - 90);
+  } else if (t === 'herald') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.7;
+      boss.y += ny * boss.speed * 0.7;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.45) { boss.state = 'shadow'; boss.timer = 42; }
+        else if (roll < 0.75) { boss.state = 'tele'; boss.timer = 55; }
+        else { boss.state = 'wisp'; boss.timer = 40; }
+      }
+      if (d < 90 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'shadow') {
+      boss.timer--;
+      if (boss.timer % 5 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 340 - 170), y: -20, vx: 0, vy: 6.6, dmg: boss.projDmg, r: 10, friendly: false, color: '#7b2cbf' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 100; }
+    } else if (boss.state === 'tele') {
+      boss.timer--;
+      if (boss.timer === 27) {
+        boss.x = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 240, 60, canvas.width - 60);
+        boss.y = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100);
+        burst(boss.x, boss.y, '#7b2cbf', 20);
+        const base = Math.atan2(dy, dx);
+        for (let i = -1; i <= 1; i++) shootBossProj(Math.cos(base + i * 0.22) * 5, Math.sin(base + i * 0.22) * 5, boss.projDmg, 8, '#5a5a7a');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 100; }
+    } else if (boss.state === 'wisp') {
+      boss.timer--;
+      if (boss.timer % 7 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 3.8, vy: ny * 3.8, dmg: boss.projDmg, r: 7, friendly: false, color: '#b18cff', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 100; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'darkking') {
+    if (boss.state === 'idle') {
+      boss.x += nx * boss.speed * 0.55;
+      boss.y += ny * boss.speed * 0.55;
+      boss.timer--;
+      if (boss.timer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.3) { boss.state = 'ring'; boss.timer = 50; }
+        else if (roll < 0.55) { boss.state = 'spiral'; boss.timer = 55; }
+        else if (roll < 0.8) { boss.state = 'tendril'; boss.timer = 42; }
+        else { boss.state = 'quake'; boss.timer = 46; }
+      }
+      if (d < 95 && boss.atkCd <= 0) { boss.atkCd = 60; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    } else if (boss.state === 'ring') {
+      boss.timer--;
+      if (boss.timer === 15) {
+        burst(boss.x, boss.y, '#6e3a9e', 24);
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2 + performance.now() / 600;
+          shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 8, '#6e3a9e');
+        }
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2 - performance.now() / 600;
+          shootBossProj(Math.cos(a) * 2.4, Math.sin(a) * 2.4, boss.projDmg, 6, '#b18cff');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'spiral') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        const a = performance.now() / 350 + (55 - boss.timer) * 0.34;
+        shootBossProj(Math.cos(a) * 4.4, Math.sin(a) * 4.4, boss.projDmg, 8, '#6e3a9e');
+        shootBossProj(Math.cos(-a) * 3.2, Math.sin(-a) * 3.2, boss.projDmg, 6, '#b18cff');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'tendril') {
+      boss.timer--;
+      if (boss.timer % 8 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 4.2, vy: ny * 4.2, dmg: boss.projDmg, r: 8, friendly: false, color: '#b18cff', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 110; }
+    } else if (boss.state === 'quake') {
+      boss.timer--;
+      if (boss.timer === 20) {
+        shake = 15;
+        burst(boss.x, boss.y, '#6e3a9e', 22);
+        const wy = canvas.height - 52;
+        for (let k = 0; k < 3; k++) {
+          const dir = k % 2 === 0 ? 1 : -1;
+          const spd = 3.4 + k * 1.5;
+          projs.push({ x: boss.x + dir * (boss.r + k * 18), y: wy, vx: dir * spd, vy: 0, dmg: boss.projDmg, r: 15, friendly: false, color: '#6e3a9e', shock: true });
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 120; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'lightthief') {
+    const ratio = boss.hp / boss.maxHp;
+    const ph = ratio <= 0.2 ? 5 : ratio <= 0.4 ? 4 : ratio <= 0.6 ? 3 : ratio <= 0.8 ? 2 : 1;
+    if (ph !== boss.phase) {
+      boss.phase = ph;
+      boss.phaseFlash = 130;
+      boss.state = 'idle';
+      boss.timer = 100;
+      boss.atkCd = 50;
+      burst(boss.x, boss.y, ['#2b2b2b', '#6e3a9e', '#9d6bff', '#ffd33d', '#ff4d6d'][ph - 1], 55);
+      shake = 16;
+    }
+    boss.timer--;
+    boss.atkCd--;
+    const sp = boss.speed * (ph === 5 ? 1.7 : ph === 4 ? 1.35 : ph === 3 ? 1.1 : ph === 2 ? 0.95 : 0.8);
+    if (boss.state === 'idle') {
+      boss.x += nx * sp;
+      boss.y += ny * sp;
+      if (boss.atkCd <= 0 && d < 560) {
+        boss.atkCd = 70;
+        const roll = Math.random();
+        if (ph === 1) boss.state = roll < 0.6 ? 'bolt' : 'ring';
+        else if (ph === 2) boss.state = roll < 0.5 ? 'rain' : 'spiral';
+        else if (ph === 3) boss.state = roll < 0.5 ? 'homing' : 'duoring';
+        else if (ph === 4) boss.state = roll < 0.45 ? 'telefan' : 'quake';
+        else boss.state = roll < 0.5 ? 'rainburst' : 'homing';
+        boss.timer = boss.state === 'telefan' ? 55 : boss.state === 'quake' ? 60 : boss.state === 'rain' || boss.state === 'rainburst' ? 45 : 50;
+      }
+    } else if (boss.state === 'bolt') {
+      boss.timer--;
+      if (boss.timer % 10 === 0) {
+        const base = Math.atan2(dy, dx);
+        shootBossProj(Math.cos(base) * 5.4, Math.sin(base) * 5.4, boss.projDmg, 8, '#7b2cbf');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'ring') {
+      boss.timer--;
+      if (boss.timer === 24) {
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + performance.now() / 600;
+          shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 7, '#6e3a9e');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'rain') {
+      boss.timer--;
+      if (boss.timer % 5 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 360 - 180), y: -20, vx: 0, vy: 7, dmg: boss.projDmg, r: 10, friendly: false, color: '#7b2cbf' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'spiral') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        const a = performance.now() / 350 + (50 - boss.timer) * 0.35;
+        shootBossProj(Math.cos(a) * 4.4, Math.sin(a) * 4.4, boss.projDmg, 8, '#9d6bff');
+        shootBossProj(Math.cos(-a) * 3.2, Math.sin(-a) * 3.2, boss.projDmg, 6, '#6e3a9e');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'homing') {
+      boss.timer--;
+      if (boss.timer % 7 === 0) {
+        projs.push({ x: boss.x, y: boss.y, vx: nx * 3.6, vy: ny * 3.6, dmg: boss.projDmg, r: 8, friendly: false, color: '#ffd33d', homing: true });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'duoring') {
+      boss.timer--;
+      if (boss.timer === 15) {
+        burst(boss.x, boss.y, '#ffd33d', 22);
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2 + performance.now() / 500;
+          shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 7, '#9d6bff');
+        }
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2 - performance.now() / 500;
+          shootBossProj(Math.cos(a) * 2.5, Math.sin(a) * 2.5, boss.projDmg, 5, '#ffd33d');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'telefan') {
+      boss.timer--;
+      if (boss.timer === 27) {
+        boss.x = clamp(player.x + player.w / 2 + (Math.random() > 0.5 ? 1 : -1) * 260, 60, canvas.width - 60);
+        boss.y = clamp(player.y + player.h / 2 + (Math.random() > 0.5 ? 1 : -1) * 140, 60, canvas.height - 100);
+        burst(boss.x, boss.y, '#ff4d6d', 24);
+        const base = Math.atan2(dy, dx);
+        for (let i = -2; i <= 2; i++) shootBossProj(Math.cos(base + i * 0.2) * 5.6, Math.sin(base + i * 0.2) * 5.6, boss.projDmg, 8, '#ff4d6d');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'quake') {
+      boss.timer--;
+      if (boss.timer === 30 || boss.timer === 15) {
+        shake = 14;
+        const wy = canvas.height - 52;
+        for (let k = 0; k < 3; k++) {
+          const dir = k % 2 === 0 ? 1 : -1;
+          const spd = 3.6 + k * 1.6;
+          projs.push({ x: boss.x + dir * (boss.r + k * 18), y: wy, vx: dir * spd, vy: 0, dmg: boss.projDmg, r: 14, friendly: false, color: '#ffd33d', shock: true });
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    } else if (boss.state === 'rainburst') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        projs.push({ x: player.x + player.w / 2 + (Math.random() * 400 - 200), y: -20, vx: 0, vy: 8, dmg: boss.projDmg, r: 9, friendly: false, color: '#ff4d6d' });
+      }
+      if (boss.timer === 20) {
+        burst(boss.x, boss.y, '#ffd33d', 26);
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * Math.PI * 2 + performance.now() / 400;
+          shootBossProj(Math.cos(a) * 4.4, Math.sin(a) * 4.4, boss.projDmg, 8, '#ffd33d');
+        }
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.timer = 90; }
+    }
+    boss.x = clamp(boss.x, 50, canvas.width - 50);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
   }
 
   talkTimer--;
@@ -2984,7 +3167,37 @@ function updateBars() {
     return;
   }
   bossBarFill.style.width = Math.max(0, boss.hp / boss.maxHp * 100) + '%';
-  bossBarText.textContent = Math.max(0, Math.round(boss.hp)) + ' / ' + boss.maxHp;
+  let t = Math.max(0, Math.round(boss.hp)) + ' / ' + boss.maxHp;
+  if (boss.phases >= 2) {
+    t += ' · Фаза ' + boss.phase + '/' + boss.phases;
+    updateBossPips();
+  }
+  bossBarText.textContent = t;
+}
+
+let bossPips = [];
+function setupBossBar() {
+  clearBossPips();
+  if (!boss.phases || boss.phases < 2) return;
+  const bar = document.getElementById('bossBar');
+  if (!bar) return;
+  for (let i = 0; i < boss.phases; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'phase-pip' + (i === 0 ? ' on' : '');
+    pip.style.left = ((i + 0.5) / boss.phases * 100) + '%';
+    bar.appendChild(pip);
+    bossPips.push(pip);
+  }
+}
+function updateBossPips() {
+  if (bossPips.length !== (boss.phases || 1)) return;
+  for (let i = 0; i < bossPips.length; i++) {
+    bossPips[i].classList.toggle('on', i === boss.phase - 1);
+  }
+}
+function clearBossPips() {
+  bossPips.forEach(p => p.remove());
+  bossPips = [];
 }
 
 const WAVE_TYPES = [
@@ -3050,6 +3263,7 @@ function startWaves() {
 }
 
 function startWaveRun() {
+  clearBossPips();
   player.x = 150; player.y = 340;
   player.maxHp = 100 + lv('hp') * 25;
   player.hp = player.maxHp;
@@ -3344,7 +3558,6 @@ function drawWaves() {
   drawDashCd();
   if (gameOver) drawWaveGameOver();
   if (nightMode) drawNight();
-  if (dizzyMode) drawDizzy();
 }
 
 function drawWaveGameOver() {
@@ -3991,7 +4204,7 @@ function drawBoss() {
     const p = 1 - boss.deathT / DEATH_TIME;
     ctx.globalAlpha = Math.max(0, 1 - p);
     const fall = boss.type === 'knight' || boss.type === 'goblin' || boss.type === 'wolf' || boss.type === 'mega' || boss.type === 'snail' || boss.type === 'shaman' || boss.type === 'titan' || boss.type === 'frost';
-    const sink = boss.type === 'dragon' || boss.type === 'void' || boss.type === 'kingdragon' || boss.type === 'chaos' || boss.type === 'bat' || boss.type === 'swarm' || boss.type === 'annihilator';
+    const sink = boss.type === 'dragon' || boss.type === 'void' || boss.type === 'kingdragon' || boss.type === 'chaos' || boss.type === 'bat' || boss.type === 'swarm' || boss.type === 'annihilator' || boss.type === 'herald' || boss.type === 'darkking' || boss.type === 'lightthief';
     if (fall) ctx.rotate(p * 1.6);
     if (sink) ctx.translate(0, p * 120);
     if (boss.type === 'slime') ctx.scale(1 - p * 0.5, 1 - p * 0.9);
@@ -4458,6 +4671,94 @@ function drawBoss() {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-boss.r * 0.2, -boss.r * 1.05, 4, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (boss.type === 'herald') {
+    const gl = Math.sin(performance.now() / 400) * 4;
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#2b113a');
+    ctx.beginPath();
+    ctx.moveTo(-boss.r, -boss.r * 0.2);
+    ctx.quadraticCurveTo(-boss.r * 1.15, boss.r * 0.6, 0, boss.r * 0.95);
+    ctx.quadraticCurveTo(boss.r * 1.15, boss.r * 0.6, boss.r, -boss.r * 0.2);
+    ctx.quadraticCurveTo(0, -boss.r * 0.75, -boss.r, -boss.r * 0.2);
+    ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#0d0d1f');
+    ctx.beginPath(); ctx.arc(0, -boss.r * 0.2, boss.r * 0.42, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#b18cff';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.18, -boss.r * 0.24, 5 + gl / 3, 0, Math.PI * 2); ctx.arc(boss.r * 0.18, -boss.r * 0.24, 5 + gl / 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.15, -boss.r * 0.27, 2, 0, Math.PI * 2); ctx.arc(boss.r * 0.21, -boss.r * 0.27, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : 'rgba(123,44,191,.7)'; ctx.lineWidth = 3;
+    for (let i = -1; i <= 1; i++) {
+      const w = Math.sin(performance.now() / 250 + i * 2) * 6;
+      ctx.beginPath(); ctx.moveTo(i * boss.r * 0.45, boss.r * 0.8);
+      ctx.quadraticCurveTo(i * boss.r * 0.6 + w, boss.r * 1.1, i * boss.r * 0.75 + w * 1.5, boss.r * 1.3); ctx.stroke();
+    }
+  } else if (boss.type === 'darkking') {
+    const gl = Math.sin(performance.now() / 300) * 5;
+    ctx.fillStyle = b ? '#ffffff' : 'rgba(72,29,124,.85)';
+    ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.35 + gl, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#4a1d80');
+    ctx.beginPath();
+    ctx.moveTo(-boss.r * 0.8, -boss.r * 0.2);
+    ctx.quadraticCurveTo(-boss.r * 1.05, boss.r * 0.55, 0, boss.r * 0.95);
+    ctx.quadraticCurveTo(boss.r * 1.05, boss.r * 0.55, boss.r * 0.8, -boss.r * 0.2);
+    ctx.quadraticCurveTo(0, -boss.r * 0.55, -boss.r * 0.8, -boss.r * 0.2);
+    ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#2b0f4d');
+    ctx.beginPath(); ctx.arc(0, -boss.r * 0.35, boss.r * 0.42, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#b18cff');
+    ctx.beginPath();
+    ctx.moveTo(-boss.r * 0.35, -boss.r * 0.7);
+    ctx.lineTo(-boss.r * 0.35, -boss.r * 0.95);
+    ctx.lineTo(-boss.r * 0.18, -boss.r * 0.78);
+    ctx.lineTo(0, -boss.r * 1.0);
+    ctx.lineTo(boss.r * 0.18, -boss.r * 0.78);
+    ctx.lineTo(boss.r * 0.35, -boss.r * 0.95);
+    ctx.lineTo(boss.r * 0.35, -boss.r * 0.7);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#e3b341';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.18, -boss.r * 0.4, 5, 0, Math.PI * 2); ctx.arc(boss.r * 0.18, -boss.r * 0.4, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.15, -boss.r * 0.42, 2, 0, Math.PI * 2); ctx.arc(boss.r * 0.21, -boss.r * 0.42, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#b18cff'); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(boss.r * 0.55, boss.r * 0.4); ctx.lineTo(boss.r * 0.95, -boss.r * 0.2); ctx.stroke();
+    ctx.fillStyle = '#e3b341';
+    ctx.beginPath(); ctx.arc(boss.r * 1.0, -boss.r * 0.28, 8 + Math.sin(performance.now() / 200) * 3, 0, Math.PI * 2); ctx.fill();
+  } else if (boss.type === 'lightthief') {
+    const ph = boss.phase || 1;
+    const t2 = performance.now();
+    const pulse = Math.sin(t2 / 300) * 6;
+    const aura = ph >= 5 ? 'rgba(255,77,109,.3)' : ph >= 4 ? 'rgba(255,211,61,.22)' : ph >= 3 ? 'rgba(157,107,255,.22)' : ph >= 2 ? 'rgba(110,58,158,.18)' : 'rgba(30,30,60,.18)';
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.5 + pulse, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b ? '#ffffff' : corrupt('#1b1b2f');
+    ctx.beginPath(); ctx.arc(0, 0, boss.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#2f2f5a'); ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      const a0 = t2 / 1000 + i * 2.1;
+      ctx.beginPath();
+      for (let k = 0; k < 5; k++) {
+        const a = a0 + k * 0.4;
+        const rad = boss.r * 0.3 + k * boss.r * 0.16;
+        const px = Math.cos(a) * rad, py = Math.sin(a) * rad;
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = ph >= 4 ? '#ff4d6d' : ph >= 3 ? '#ffd33d' : '#b18cff';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.32, -boss.r * 0.3, 10 + (ph >= 4 ? 3 : 0), 0, Math.PI * 2); ctx.arc(boss.r * 0.32, -boss.r * 0.3, 10 + (ph >= 4 ? 3 : 0), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-boss.r * 0.3, -boss.r * 0.33, 4, 0, Math.PI * 2); ctx.arc(boss.r * 0.34, -boss.r * 0.33, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = b ? '#ffffff' : corrupt('#23234a'); ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.moveTo(boss.r * 0.7, boss.r * 0.3); ctx.quadraticCurveTo(boss.r * 0.95, -boss.r * 0.3, boss.r * 0.15, -boss.r * 0.95); ctx.stroke();
+    const orbR = boss.r * 0.3 + Math.sin(t2 / 250) * 3;
+    ctx.fillStyle = 'rgba(255,211,61,.25)';
+    ctx.beginPath(); ctx.arc(0, -boss.r * 1.15, orbR * 1.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffd33d';
+    ctx.beginPath(); ctx.arc(0, -boss.r * 1.15, orbR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-orbR * 0.3, -boss.r * 1.15 - orbR * 0.3, orbR * 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, boss.r * 0.25, boss.r * 0.22, 0.3, Math.PI - 0.3); ctx.stroke();
   }
   ctx.restore();
 
@@ -4539,6 +4840,40 @@ function drawGodBackground() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function drawLightThiefBackground() {
+  const t = performance.now() / 1000;
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, '#0a0a14');
+  g.addColorStop(0.6, '#131020');
+  g.addColorStop(1, '#2b1a3a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = '#141226';
+  for (let i = 0; i < 40; i++) {
+    const x = (i * 197 + 13) % canvas.width;
+    const y = (i * 311 + 7) % canvas.height;
+    ctx.fillRect(x, y, 2, 2);
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  const cg = ctx.createRadialGradient(canvas.width / 2, 30, 5, canvas.width / 2, 30, 120);
+  cg.addColorStop(0, 'rgba(255,211,61,.35)');
+  cg.addColorStop(1, 'rgba(255,211,61,0)');
+  ctx.fillStyle = cg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 0.5 + Math.sin(t * 2) * 0.2;
+  ctx.fillStyle = '#ffd33d';
+  ctx.beginPath(); ctx.ellipse(canvas.width / 2, 30, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  const glow = ctx.createRadialGradient(boss.x, boss.y, 10, boss.x, boss.y, 300);
+  glow.addColorStop(0, 'rgba(190,110,255,.18)');
+  glow.addColorStop(1, 'rgba(190,110,255,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 function drawCracks() {
   if (!anyMode() || !cracks.length) return;
   const t = performance.now() / 1000;
@@ -4589,7 +4924,21 @@ function drawDevLetter() {
   ctx.fillText('📜 Письмо от разработчика', canvas.width / 2, by + 44);
   ctx.fillStyle = '#5d3a1e';
   ctx.font = '16px Segoe UI, Arial';
-  const lines = [
+  const lines = boss.id === 'lightthief' ? [
+    'Дорогой игрок!',
+    '',
+    'Похититель Света повержен! Он украл свет',
+    'и погрузил мир во тьму — но ты вернул его.',
+    '',
+    'Высоко в небе открылся ПОРТАЛ ВО СВЕТ! ☀️',
+    'За ним лежит НОВОЕ ИЗМЕРЕНИЕ —',
+    'мир из чистого света и воздуха.',
+    '',
+    'Пока не готово... но скоро ты туда войдёшь.',
+    'Соберись: там тебя ждёт ещё сложнее!',
+    '',
+    'С любовью, твой разработчик ❤️'
+  ] : [
     'Дорогой игрок!',
     '',
     'Ты сделал невозможное: победил всех боссов,',
@@ -4676,6 +5025,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (boss.id && boss.id.indexOf('dim') === 0) drawDimBackground();
   else if (boss.type === 'god' || boss.type === 'ultimate') drawGodBackground();
+  else if (boss.type === 'lightthief') drawLightThiefBackground();
   ctx.save();
   if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   if (boss.id && boss.id.indexOf('dim') === 0) drawDimFloor();
@@ -4694,7 +5044,7 @@ function draw() {
     ctx.strokeStyle = 'rgba(0,0,0,.7)';
     ctx.lineWidth = 5;
     ctx.strokeText('⚠️ ФАЗА ' + boss.phase + '!', boss.x, boss.y - boss.r - 42);
-    ctx.fillStyle = boss.phase === 3 ? '#ff4d6d' : boss.phase === 2 ? '#9d6bff' : '#ffd33d';
+    ctx.fillStyle = phaseColor();
     ctx.fillText('⚠️ ФАЗА ' + boss.phase + '!', boss.x, boss.y - boss.r - 42);
   }
 
@@ -4706,7 +5056,6 @@ function draw() {
   }
 
   if (nightMode) drawNight();
-  if (dizzyMode) drawDizzy();
 
   if (boss.hp > 0) {
     ctx.font = '16px Segoe UI, Arial';
@@ -4737,24 +5086,6 @@ function drawNight() {
   g.addColorStop(1, 'rgba(2,6,23,0.95)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.restore();
-}
-
-function drawDizzy() {
-  if (dizzyDark <= 0) return;
-  const p = 1 - dizzyDark / 52;
-  const a = Math.sin(Math.min(1, Math.max(0, p)) * Math.PI) * 0.85;
-  if (a <= 0.02) return;
-  const cx = canvas.width / 2, cy = canvas.height / 2;
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate((p - 0.5) * 0.12);
-  ctx.translate(-cx, -cy);
-  const g = ctx.createRadialGradient(cx, cy, 8, cx, cy, canvas.width * 0.62);
-  g.addColorStop(0, 'rgba(2,6,23,' + (a * 0.45).toFixed(3) + ')');
-  g.addColorStop(1, 'rgba(2,6,23,' + a.toFixed(3) + ')');
-  ctx.fillStyle = g;
-  ctx.fillRect(-30, -30, canvas.width + 60, canvas.height + 60);
   ctx.restore();
 }
 
@@ -4840,7 +5171,7 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
   }
 });
 
-const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_dizzy', 'bf_dizzyUnlocked', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
 
 function resetProgress() {
   RESET_KEYS.forEach(k => {
@@ -4856,7 +5187,6 @@ function resetProgress() {
   distorted = false; godUnlocked = false; godMode = false;
   ultimateUnlocked = false; letterShown = false;
   dimUnlocked = false; dimension = false;
-  dizzyUnlocked = false; dizzyMode = false; dizzyDark = 0; dizzyTimer = 0;
   speedMode = false; boomMode = false; nightMode = false;
   try { buildMenu(); } catch (e) {}
   updateAdvBtn();
@@ -4970,7 +5300,7 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_dizzy', 'bf_dizzyUnlocked', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
@@ -5006,9 +5336,6 @@ function applyCloudData(data) {
   ultimateUnlocked = getStore('bf_ultimateUnlocked') === '1';
   dimUnlocked = getStore('bf_dimUnlocked') === '1';
   dimension = getStore('bf_dimension') === '1';
-  dizzyUnlocked = getStore('bf_dizzyUnlocked') === '1';
-  dizzyMode = getStore('bf_dizzy') === '1';
-  if (dizzyMode) dizzyTimer = 420 + Math.floor(Math.random() * 280);
   speedMode = getStore('bf_speed') === '1';
   boomMode = getStore('bf_boom') === '1';
   nightMode = getStore('bf_night') === '1';
