@@ -511,6 +511,10 @@
       <button id="skyBtn" class="distort-btn god">☀️ Божественное измерение: 🔒 ЗАКРЫТО</button>
       <span id="skyStatus" class="mode-desc"></span>
     </div>
+    <div class="mode-row">
+      <button id="elfBtn" class="distort-btn god">🧚 Измерение эльфов: 🔒 ЗАКРЫТО</button>
+      <span id="elfStatus" class="mode-desc"></span>
+    </div>
     <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
     <div class="menu-cols">
@@ -747,6 +751,21 @@ const SKY_BOSSES = [
   { id: 'sky11', name: 'ИМПЕРАТРИЦА ФЕЙ', type: 'empress', stars: 40, hp: 900000, dmg: 175, projDmg: 85, speed: 1.0, r: 95, phases: 3, color: '#f0abfc', accent: '#7df9c0', desc: 'Владычица тронного зала и всех фей. Три фазы: спокойствие, гнев и гигантская форма. Встань на колени — или падёшь навсегда.', win: 'ИМПЕРАТРИЦА ФЕЙ ПОВЕРЖЕНА! ТЫ ОСВОБОДИЛ ЦАРСТВО ФЕЙ!', lose: 'Императрица фей сделала тебя своей вечной игрушкой...', talk: ['Встань на колени, смертный.', 'Служи мне — и будешь жить.', 'Феи подчиняются только мне.'] }
 ];
 
+const ELF_BOSSES = [
+  { id: 'elf1', name: 'Лесной Страж', type: 'elfguard', stars: 41, hp: 240000, dmg: 120, projDmg: 60, speed: 1.0, r: 55, phases: 2, color: '#6ee7a0', accent: '#a7f3d0', desc: 'Первый страж эльфийских лесов: точные стрелы и ливни дротиков. Две фазы ярости.', win: 'Лесной Страж преклонил колено!', lose: 'Стрелы леса настигли тебя.', talk: ['Ты не пройдёшь через рощу.', 'Лес говорит со мной.', 'СТРЕЛЫ УЖЕ В ПУТИ!'] },
+  { id: 'elf2', name: 'Сильфида Ветра', type: 'sylph', stars: 42, hp: 280000, dmg: 125, projDmg: 62, speed: 1.2, r: 50, phases: 2, color: '#7dd3fc', accent: '#bae6fd', desc: 'Фея воздуха: вихри и кольца шквалов. На второй фазе летает быстрее ветра.', win: 'Сильфида успокоила ветра!', lose: 'Ветер развеял тебя по лесам.', talk: ['ВЕТЕР ПОЁТ!', 'ЛЕТИ СО МНОЙ!', 'ВОЗДУХ МНЕ ПОКОРЕН.'] },
+  { id: 'elf3', name: 'Дриада Рощи', type: 'dryad', stars: 43, hp: 320000, dmg: 130, projDmg: 65, speed: 0.9, r: 70, phases: 2, color: '#86efac', accent: '#4ade80', desc: 'Дух священной рощи: корни из-под земли и дождь листвы.', win: 'Дриада расцвела вновь!', lose: 'Корни рощи поглотили тебя.', talk: ['РОЩА НЕ ПРОПУСТИТ.', 'КОРНИ ПРОБУДИЛИСЬ.', 'ПРИРОДА ЗАЩИТИТ СЕБЯ!'] },
+  { id: 'elf4', name: 'Каменный Голем', type: 'rockgol', stars: 44, hp: 360000, dmg: 140, projDmg: 68, speed: 0.6, r: 80, phases: 2, color: '#b0875b', accent: '#d8b98a', desc: 'Великан из горных валунов: трясёт землю и швыряет камни.', win: 'Каменный Голем рассыпался!', lose: 'Голем раздавил тебя в горную пыль.', talk: ['КАМЕНЬ ВЕЧЕН.', 'ГОРА ИДЁТ!', 'ХРУ-У-М!'] },
+  { id: 'elf5', name: 'Лунная Фея', type: 'moonfey', stars: 45, hp: 400000, dmg: 140, projDmg: 70, speed: 1.15, r: 55, phases: 2, color: '#cbd5e1', accent: '#e0f2fe', desc: 'Танцовщица под луной: серпы лунного света и звёздные кольца.', win: 'Лунная Фея ушла за горизонт!', lose: 'Лунный свет усыпил тебя навеки.', talk: ['ЛУНА ВЫСОКО.', 'ТАНЦУЙ ПОД ЗВЁЗДАМИ!', 'НОЧЬ МНЕ СЕСТРА.'] },
+  { id: 'elf6', name: 'Древний Леший', type: 'treant', stars: 46, hp: 450000, dmg: 150, projDmg: 72, speed: 0.8, r: 78, phases: 2, color: '#4ade80', accent: '#a3e635', desc: 'Древнейшее древо леса: буря листьев и сотрясение почвы.', win: 'Древний Леший пустил новые корни!', lose: 'Ветви лешего обвили тебя навсегда.', talk: ['Я ПОМНЮ ПЕРВЫЙ РАССВЕТ.', 'ЛЕС ДЫШИТ ЧЕРЕЗ МЕНЯ.', 'ПОЧВА ДРОЖИТ!'] },
+  { id: 'elf7', name: 'Горный Колосс', type: 'colossus', stars: 47, hp: 500000, dmg: 160, projDmg: 75, speed: 0.55, r: 90, phases: 2, color: '#a8a29e', accent: '#e7e5e4', desc: 'Ожившая гора: обвалы, метеоритный дождь и ударные волны.', win: 'Горный Колосс рухнул вниз по склону!', lose: 'Обвал похоронил тебя.', talk: ['ГОРА ВСТАЛА!', 'СКАЛЫ ОБРУШАТСЯ!', 'ТОПОТ ГОР ВЕЧЕН.'] },
+  { id: 'elf8', name: 'Фея Кристалла', type: 'crystfey', stars: 48, hp: 550000, dmg: 155, projDmg: 78, speed: 1.1, r: 60, phases: 2, color: '#f0abfc', accent: '#e879f9', desc: 'Хранительница самоцветов: осколки кристаллов и вспышки света.', win: 'Фея Кристалла засияла вновь!', lose: 'Кристаллы пронзили тебя.', talk: ['СВЕТ В КАМНЕ ВЕЧЕН.', 'ОСКОЛКИ ПОЛЕТЯТ!', 'СМОТРИ ВНИМАТЕЛЬНО!'] },
+  { id: 'elf9', name: 'Голем-Хранитель', type: 'guardgol', stars: 49, hp: 620000, dmg: 170, projDmg: 80, speed: 0.6, r: 85, phases: 2, color: '#78716c', accent: '#fbbf24', desc: 'Гигантский страж рун: самонаводящиеся камни и рунные кольца.', win: 'Голем-Хранитель встал на колени!', lose: 'Руны хранителя стёрли тебя.', talk: ['РУНЫ ЗОВУТ.', 'СДВИНУСЬ ЛИ ШАГ?', 'ПЫЛЬ К РАССВЕТУ!'] },
+  { id: 'elf10', name: 'Гигантский Голем', type: 'giantgol', stars: 50, hp: 720000, dmg: 185, projDmg: 85, speed: 0.6, r: 95, phases: 2, color: '#57534e', accent: '#d97706', desc: 'Последний страж эльфийского измерения, колосс из древнего гранита. Две фазы: сонный гигант и разъярённая гора.', win: 'ГИГАНТСКИЙ ГОЛЕМ ПОВЕРЖЕН! ЦАРСТВО ЭЛЬФОВ ОТКРЫТО!', lose: 'Гранитный кулак стёр тебя в пыль.', talk: ['КТО ПОТРЕВОЖИЛ ГОРУ?', 'ГРАНИТ НЕ ПЛАЧЕТ.', 'ПОСЛЕДНИЙ ШАГ!'] }
+];
+
+const ELF_TYPES = ['elfguard', 'sylph', 'dryad', 'rockgol', 'moonfey', 'treant', 'colossus', 'crystfey', 'guardgol', 'giantgol'];
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const hpBarFill = document.querySelector('#hpBar div');
@@ -785,6 +804,8 @@ let dimUnlocked = false;
 let dimension = false;
 let skyUnlocked = false;
 let divine = false;
+let elfUnlocked = false;
+let elven = false;
 let distortFlash = 0;
 let cracks = [];
 const keys = {};
@@ -827,6 +848,13 @@ let skyAspdLevel = parseInt(getStore('bf_skyAspdLevel') || '0', 10);
 let skyArmorLevel = parseInt(getStore('bf_skyArmorLevel') || '0', 10);
 let skyMoveLevel = parseInt(getStore('bf_skyMoveLevel') || '0', 10);
 let skyRegenLevel = parseInt(getStore('bf_skyRegenLevel') || '0', 10);
+let elfHpLevel = parseInt(getStore('bf_elfHpLevel') || '0', 10);
+let elfDmgLevel = parseInt(getStore('bf_elfDmgLevel') || '0', 10);
+let elfCritLevel = parseInt(getStore('bf_elfCritLevel') || '0', 10);
+let elfAspdLevel = parseInt(getStore('bf_elfAspdLevel') || '0', 10);
+let elfArmorLevel = parseInt(getStore('bf_elfArmorLevel') || '0', 10);
+let elfMoveLevel = parseInt(getStore('bf_elfMoveLevel') || '0', 10);
+let elfRegenLevel = parseInt(getStore('bf_elfRegenLevel') || '0', 10);
 let advCount = parseInt(getStore('bf_advCount') || '0', 10);
 let chocolates = parseInt(getStore('bf_choco') || '0', 10);
 let megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
@@ -888,6 +916,16 @@ SKY_BOSSES.forEach(b => {
     apply() { coins += b.stars * 15; chocolates += b.stars * 2; }
   };
 });
+ELF_BOSSES.forEach(b => {
+  BOSS_NAMES[b.id] = b.name;
+  const code = (b.id + (b.stars * 15)).toUpperCase();
+  CODE_BY_BOSS[b.id] = code;
+  CODES[code] = {
+    bossId: b.id,
+    name: 'Награда за победу над «' + b.name + '»',
+    apply() { coins += b.stars * 15; chocolates += b.stars * 2; }
+  };
+});
 distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
@@ -896,12 +934,15 @@ dimUnlocked = getStore('bf_dimUnlocked') === '1';
 dimension = getStore('bf_dimension') === '1';
 skyUnlocked = getStore('bf_skyUnlocked') === '1';
 divine = getStore('bf_divine') === '1';
+elfUnlocked = getStore('bf_elfUnlocked') === '1';
+elven = getStore('bf_elven') === '1';
 speedMode = getStore('bf_speed') === '1';
 boomMode = getStore('bf_boom') === '1';
 nightMode = getStore('bf_night') === '1';
 if (godMode) distorted = true;
 if (dimension) distorted = true;
 if (divine) distorted = true;
+if (elven) distorted = true;
 let achBannerTO = null;
 const ACHIEVEMENTS = [
   { id: 'win1', name: 'Первый шаг', desc: 'Победи любого босса', check: () => totalWins >= 1, coins: 100 },
@@ -981,13 +1022,14 @@ const UP_REG_COST = l => 600 + l * 400;
 const MAX_CRIT = 12, MAX_ASPD = 10, MAX_ARMOR = 10, MAX_MOVE = 10, MAX_REG = 10;
 function lv(k) {
   if (divine) return { hp: skyHpLevel, dmg: skyDmgLevel, crit: skyCritLevel, aspd: skyAspdLevel, armor: skyArmorLevel, move: skyMoveLevel, regen: skyRegenLevel }[k];
+  if (elven) return { hp: elfHpLevel, dmg: elfDmgLevel, crit: elfCritLevel, aspd: elfAspdLevel, armor: elfArmorLevel, move: elfMoveLevel, regen: elfRegenLevel }[k];
   if (dimension) return { hp: dimHpLevel, dmg: dimDmgLevel, crit: dimCritLevel, aspd: dimAspdLevel, armor: dimArmorLevel, move: dimMoveLevel, regen: dimRegenLevel }[k];
   return { hp: hpLevel, dmg: dmgLevel, crit: critLevel, aspd: atkSpdLevel, armor: armorLevel, move: moveLevel, regen: regenLevel }[k];
 }
 function lvMax(k) { return k === 'crit' ? MAX_CRIT : k === 'aspd' ? MAX_ASPD : k === 'armor' ? MAX_ARMOR : k === 'move' ? MAX_MOVE : k === 'regen' ? MAX_REG : 999; }
 function upCost(k) {
   const base = k === 'hp' ? UP_HP_COST : k === 'dmg' ? UP_DMG_COST : k === 'crit' ? UP_CRIT_COST : k === 'aspd' ? UP_ASPD_COST : k === 'armor' ? UP_ARMOR_COST : k === 'move' ? UP_MOVE_COST : UP_REG_COST;
-  return Math.round(base(lv(k)) * (divine ? 10 : dimension ? 3 : 1));
+  return Math.round(base(lv(k)) * (divine ? 10 : elven ? 25 : dimension ? 3 : 1));
 }
 function buyUp(k) {
   if (lv(k) >= lvMax(k)) return;
@@ -1002,6 +1044,14 @@ function buyUp(k) {
     else if (k === 'armor') skyArmorLevel++;
     else if (k === 'move') skyMoveLevel++;
     else skyRegenLevel++;
+  } else if (elven) {
+    if (k === 'hp') elfHpLevel++;
+    else if (k === 'dmg') elfDmgLevel++;
+    else if (k === 'crit') elfCritLevel++;
+    else if (k === 'aspd') elfAspdLevel++;
+    else if (k === 'armor') elfArmorLevel++;
+    else if (k === 'move') elfMoveLevel++;
+    else elfRegenLevel++;
   } else if (dimension) {
     if (k === 'hp') dimHpLevel++;
     else if (k === 'dmg') dimDmgLevel++;
@@ -1056,10 +1106,19 @@ function saveProgress() {
   setStore('bf_skyArmorLevel', skyArmorLevel);
   setStore('bf_skyMoveLevel', skyMoveLevel);
   setStore('bf_skyRegenLevel', skyRegenLevel);
+  setStore('bf_elfHpLevel', elfHpLevel);
+  setStore('bf_elfDmgLevel', elfDmgLevel);
+  setStore('bf_elfCritLevel', elfCritLevel);
+  setStore('bf_elfAspdLevel', elfAspdLevel);
+  setStore('bf_elfArmorLevel', elfArmorLevel);
+  setStore('bf_elfMoveLevel', elfMoveLevel);
+  setStore('bf_elfRegenLevel', elfRegenLevel);
   setStore('bf_dimUnlocked', dimUnlocked ? '1' : '0');
   setStore('bf_dimension', dimension ? '1' : '0');
   setStore('bf_skyUnlocked', skyUnlocked ? '1' : '0');
   setStore('bf_divine', divine ? '1' : '0');
+  setStore('bf_elfUnlocked', elfUnlocked ? '1' : '0');
+  setStore('bf_elven', elven ? '1' : '0');
   setStore('bf_choco', chocolates);
   setStore('bf_chocoWeapons', chocoWeaponsOwned.join(','));
   setStore('bf_skins', skinsOwned.join(','));
@@ -1319,7 +1378,7 @@ function updateDistortUI() {
   const s = document.getElementById('distortStatus');
   const b = document.getElementById('distortBtn');
   if (!s || !b) return;
-  b.closest('.mode-row').style.display = (dimension || divine) ? 'none' : '';
+  b.closest('.mode-row').style.display = (dimension || divine || elven) ? 'none' : '';
   if (distorted) {
     s.textContent = '⚠️ Режим искажения активен — реальность трещит, боссы изменились!';
     b.textContent = 'Режим искажения: ВКЛ';
@@ -1345,7 +1404,7 @@ function updateGodUI() {
   const s = document.getElementById('godStatus');
   const b = document.getElementById('godBtn');
   if (!s || !b) return;
-  b.closest('.mode-row').style.display = (dimension || divine) ? 'none' : '';
+  b.closest('.mode-row').style.display = (dimension || divine || elven) ? 'none' : '';
   if (!godUnlocked) {
     s.textContent = '🔒 Режим бога: победи Хаоса в режиме искажения';
     b.disabled = true;
@@ -1545,17 +1604,17 @@ function bossUnlocked(b, list) {
   return getBeatenIds().indexOf(list[idx - 1].id) !== -1;
 }
 function bossList() {
-  const full = divine ? SKY_BOSSES : dimension ? DIM_BOSSES : BOSSES;
+  const full = divine ? SKY_BOSSES : elven ? ELF_BOSSES : dimension ? DIM_BOSSES : BOSSES;
   return full.filter(b => bossUnlocked(b, full));
 }
 
 function buildBossList() {
   const bl = document.getElementById('bossList');
   bl.innerHTML = '';
-  const full = divine ? SKY_BOSSES : dimension ? DIM_BOSSES : BOSSES;
+  const full = divine ? SKY_BOSSES : elven ? ELF_BOSSES : dimension ? DIM_BOSSES : BOSSES;
   const list = bossList();
   const prevId = (list[selectedBoss] || list[0]).id;
-  const prefix = divine ? '☀️ ' : dimension ? '🌌 ' : '';
+  const prefix = divine ? '☀️ ' : elven ? '🧚 ' : dimension ? '🌌 ' : '';
   list.forEach((b, i) => {
     const d = document.createElement('div');
     d.className = 'card' + (i === selectedBoss ? ' selected' : '');
@@ -1593,6 +1652,7 @@ function buildMenu() {
   updateNightUI();
   updateDimUI();
   updateSkyUI();
+  updateElfUI();
   updateDistortOverlay();
   buildCodeChips();
   buildWeaponList();
@@ -1624,6 +1684,14 @@ function maxUpgrade() {
       else if (best === 'armor') skyArmorLevel++;
       else if (best === 'move') skyMoveLevel++;
       else skyRegenLevel++;
+    } else if (elven) {
+      if (best === 'hp') elfHpLevel++;
+      else if (best === 'dmg') elfDmgLevel++;
+      else if (best === 'crit') elfCritLevel++;
+      else if (best === 'aspd') elfAspdLevel++;
+      else if (best === 'armor') elfArmorLevel++;
+      else if (best === 'move') elfMoveLevel++;
+      else elfRegenLevel++;
     } else if (dimension) {
       if (best === 'hp') dimHpLevel++;
       else if (best === 'dmg') dimDmgLevel++;
@@ -1752,11 +1820,15 @@ function updateDimUI() {
 document.getElementById('dimBtn').onclick = () => {
   if (!dimUnlocked) return;
   dimension = !dimension;
-  if (dimension) { divine = false; setStore('bf_divine', '0'); }
+  if (dimension) {
+    divine = false; setStore('bf_divine', '0');
+    elven = false; setStore('bf_elven', '0');
+  }
   setStore('bf_dimension', dimension ? '1' : '0');
   if (dimension) genCracks();
   updateDimUI();
   updateSkyUI();
+  updateElfUI();
   updateDistortOverlay();
   buildBossList();
   refreshShop();
@@ -1780,9 +1852,45 @@ function updateSkyUI() {
 document.getElementById('skyBtn').onclick = () => {
   if (!skyUnlocked) return;
   divine = !divine;
-  if (divine) { dimension = false; setStore('bf_dimension', '0'); }
+  if (divine) {
+    dimension = false; setStore('bf_dimension', '0');
+    elven = false; setStore('bf_elven', '0');
+  }
   setStore('bf_divine', divine ? '1' : '0');
   if (divine) genCracks();
+  updateSkyUI();
+  updateDimUI();
+  updateElfUI();
+  updateDistortOverlay();
+  buildBossList();
+  refreshShop();
+  buildAchievements();
+};
+
+function updateElfUI() {
+  const btn = document.getElementById('elfBtn');
+  const st = document.getElementById('elfStatus');
+  if (!btn || !st) return;
+  if (!elfUnlocked) {
+    btn.textContent = '🧚 Измерение эльфов: 🔒 ЗАКРЫТО';
+    st.textContent = 'Открывается после победы над ИМПЕРАТРИЦЕЙ ФЕЙ';
+    return;
+  }
+  btn.textContent = elven ? '🧚 Измерение эльфов: ВКЛ' : '🧚 Измерение эльфов: ВЫКЛ';
+  st.textContent = elven
+    ? 'Врата эльфийских лесов открыты: прокачка x25 дороже, 10 стражей леса, все с двумя фазами'
+    : 'Вернуться в прошлое измерение со старой прокачкой';
+}
+document.getElementById('elfBtn').onclick = () => {
+  if (!elfUnlocked) return;
+  elven = !elven;
+  if (elven) {
+    divine = false; setStore('bf_divine', '0');
+    dimension = false; setStore('bf_dimension', '0');
+  }
+  setStore('bf_elven', elven ? '1' : '0');
+  if (elven) genCracks();
+  updateElfUI();
   updateSkyUI();
   updateDimUI();
   updateDistortOverlay();
@@ -1796,8 +1904,8 @@ function updateSideModeUI() {
   const g = document.getElementById('sideGodBtn');
   if (!d || !g) return;
   d.classList.toggle('on', !!distorted);
-  d.disabled = !!(dimension || divine);
-  d.title = (dimension || divine)
+  d.disabled = !!(dimension || divine || elven);
+  d.title = (dimension || divine || elven)
     ? '🌀 Искажение: всегда ВКЛ в новом измерении'
     : '🌀 Искажение: ' + (distorted ? 'ВКЛ' : 'ВЫКЛ');
   g.classList.toggle('on', !!godMode);
@@ -1812,7 +1920,7 @@ function showSideModes(show) {
 }
 
 document.getElementById('sideDistortBtn').onclick = () => {
-  if (dimension || divine) return;
+  if (dimension || divine || elven) return;
   distorted = !distorted;
   setStore('bf_distorted', distorted ? '1' : '0');
   if (distorted) genCracks();
@@ -1955,6 +2063,8 @@ function registerBossDefeat() {
   }
   if (boss.id === 'sky11') {
     letterShown = true;
+    elfUnlocked = true;
+    setStore('bf_elfUnlocked', '1');
   }
   const c = CODE_BY_BOSS[boss.id];
   if (c && activatedCodes.indexOf(c) === -1) showCode = c;
@@ -2162,6 +2272,16 @@ function update() {
 
   if (shake > 0) shake--;
   updateBars();
+}
+
+function checkElfPhase(b) {
+  const hpr = b.hp / b.maxHp;
+  const want = hpr <= 0.5 ? 2 : 1;
+  if (b.phase !== want) {
+    b.phase = want;
+    b.phaseFlash = 130;
+    if (want === 2) burst(b.x, b.y, '#e6f7d1', 18);
+  }
 }
 
 function updateBoss() {
@@ -3663,6 +3783,8 @@ function updateBoss() {
     boss.y = clamp(boss.y, 60, canvas.height - 100);
   } else if (t === 'empress') {
     updateEmpressLogic();
+  } else if (ELF_TYPES.indexOf(t) >= 0) {
+    updateElfLogic();
   }
 
   talkTimer--;
@@ -3673,11 +3795,12 @@ function getBossDef(id) {
   for (const b of BOSSES) if (b.id === id) return b;
   for (const b of DIM_BOSSES) if (b.id === id) return b;
   for (const b of SKY_BOSSES) if (b.id === id) return b;
+  for (const b of ELF_BOSSES) if (b.id === id) return b;
   return null;
 }
 
 function buildReflectionSetup() {
-  const pool = BOSSES.concat(DIM_BOSSES, SKY_BOSSES).filter(b => b.id !== 'sky10');
+  const pool = BOSSES.concat(DIM_BOSSES, SKY_BOSSES, ELF_BOSSES).filter(b => b.id !== 'sky10');
   const picked = [];
   while (picked.length < 15 && pool.length) {
     const idx = Math.floor(Math.random() * pool.length);
@@ -3874,6 +3997,149 @@ function updateEmpressLogic() {
     if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
   }
   if (boss.giantFx > 0) boss.giantFx--;
+}
+
+const ELF_AI = {
+  elfguard: { mul: 1.0, p1: ['lash', 'leaf'], p2: ['lash', 'leaf', 'fey', 'petal'] },
+  sylph: { mul: 1.3, p1: ['fey', 'petal'], p2: ['fey', 'petal', 'leaf', 'ring'] },
+  dryad: { mul: 0.95, p1: ['sprout', 'vine'], p2: ['sprout', 'vine', 'ent', 'leaf'] },
+  rockgol: { mul: 0.6, p1: ['stone', 'boulder'], p2: ['stone', 'boulder', 'golem'] },
+  moonfey: { mul: 1.2, p1: ['moon', 'beam'], p2: ['moon', 'beam', 'petal', 'fey'] },
+  treant: { mul: 0.85, p1: ['ent', 'leaf'], p2: ['ent', 'leaf', 'stone'] },
+  colossus: { mul: 0.55, p1: ['boulder', 'stone'], p2: ['boulder', 'stone', 'golem'] },
+  crystfey: { mul: 1.15, p1: ['crystal', 'moon'], p2: ['crystal', 'moon', 'beam'] },
+  guardgol: { mul: 0.6, p1: ['golem', 'leaf'], p2: ['golem', 'leaf', 'stone'] },
+  giantgol: { mul: 0.5, p1: ['boulder', 'stone'], p2: ['boulder', 'stone', 'golem', 'ent'] }
+};
+
+function updateElfLogic() {
+  checkElfPhase(boss);
+  const ph = boss.phase || 1;
+  const cfg = ELF_AI[boss.type] || ELF_AI.elfguard;
+  const spdMul = cfg.mul * (ph === 2 ? 1.3 : 1);
+  const dx = player.x + player.w / 2 - boss.x;
+  const dy = player.y + player.h / 2 - boss.y;
+  const d = Math.hypot(dx, dy);
+  const nx = (dx / d) || 1, ny = (dy / d) || 0;
+  boss.x += nx * boss.speed * spdMul;
+  boss.y += ny * boss.speed * spdMul;
+  boss.x = clamp(boss.x, 60, canvas.width - 60);
+  boss.y = clamp(boss.y, 70, canvas.height - 100);
+
+  if (boss.state === 'idle') {
+    if (d < 130 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    else if (boss.atkCd <= 0 && d < 680) {
+      boss.atkCd = ph === 2 ? 46 : 58;
+      const pool = ph === 2 ? cfg.p2 : cfg.p1;
+      boss.state = pool[Math.floor(Math.random() * pool.length)];
+      boss.timer = (boss.state === 'golem' || boss.state === 'boulder' || boss.state === 'stone' || boss.state === 'ent') ? 70 : 46;
+    }
+  } else if (boss.state === 'lash') {
+    boss.timer--;
+    if (boss.timer === 18) {
+      boss.x = clamp(boss.x + nx * 70, 60, canvas.width - 60);
+      boss.y = clamp(boss.y + ny * 70, 70, canvas.height - 100);
+      burst(boss.x, boss.y, '#a7f3d0', 18);
+      if (d < 190) hurtPlayer(boss.dmg * 1.15);
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'leaf') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const a = Math.atan2(dy, dx);
+      const n = ph === 2 ? 7 : 5;
+      for (let i = -(n >> 1); i <= (n >> 1); i++) {
+        shootBossProj(Math.cos(a + i * 0.18) * 4.6, Math.sin(a + i * 0.18) * 4.6, boss.projDmg, 7, '#a7f3d0');
+      }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'fey') {
+    boss.timer--;
+    if (boss.timer % 9 === 0) projs.push({ x: boss.x, y: boss.y, vx: nx * 2.8, vy: ny * 2.8, dmg: boss.projDmg, r: 8, friendly: false, color: '#bae6fd', homing: true });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'sprout') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      burst(boss.x, boss.y, '#86efac', 20);
+      const n = ph === 2 ? 14 : 9;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.2, Math.sin(a) * 3.2, boss.projDmg, 7, '#86efac'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'vine') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      const a = Math.atan2(dy, dx);
+      for (let i = -1; i <= 1; i++) projs.push({ x: boss.x, y: boss.y, vx: Math.cos(a + i * 0.3) * 3.4, vy: Math.sin(a + i * 0.3) * 3.4, dmg: boss.projDmg, r: 9, friendly: false, color: '#4ade80', homing: true });
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'moon') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      burst(boss.x, boss.y, '#e0f2fe', 22);
+      const n = ph === 2 ? 16 : 11;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 8, '#e0f2fe'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'petal') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const n = ph === 2 ? 14 : 9;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.2, Math.sin(a) * 3.2, boss.projDmg, 7, '#f9a8d4'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'beam') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      const a = Math.atan2(dy, dx);
+      shootBossProj(Math.cos(a) * 6.2, Math.sin(a) * 6.2, boss.projDmg * (ph === 2 ? 1.25 : 1), 5, '#e0f2fe');
+      if (ph === 2) for (let i = -1; i <= 1; i += 2) shootBossProj(Math.cos(a + i * 0.14) * 5.2, Math.sin(a + i * 0.14) * 5.2, boss.projDmg, 5, '#cbd5e1');
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'crystal') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      const a = Math.atan2(dy, dx);
+      const n = ph === 2 ? 9 : 6;
+      for (let i = -(n >> 1); i <= (n >> 1); i++) {
+        const aa = a + i * 0.16;
+        shootBossProj(Math.cos(aa) * 4.8, Math.sin(aa) * 4.8, boss.projDmg * 1.05, 6, '#e879f9');
+      }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'ent') {
+    boss.timer--;
+    if (boss.timer === 34) {
+      shake = 10;
+      const n = 12;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + 0.15; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 9, '#a3e635'); }
+    }
+    if (boss.timer === 16) {
+      const n = 12;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 9, '#4ade80'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'golem' || boss.state === 'stone') {
+    boss.timer--;
+    const gc = boss.state === 'stone' ? '#b0875b' : '#fbbf24';
+    if (boss.timer === 30) {
+      shake = 14;
+      const wy = canvas.height - 70;
+      projs.push({ x: boss.x - 40, y: wy, vx: -5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: gc, shock: true });
+      projs.push({ x: boss.x + 40, y: wy, vx: 5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: gc, shock: true });
+    }
+    if (boss.timer === 10) { burst(boss.x, boss.y, gc, 24); if (d < 180) hurtPlayer(boss.dmg); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'boulder') {
+    boss.timer--;
+    if (boss.timer === 30) {
+      shake = 12;
+      const wy = canvas.height - 70;
+      projs.push({ x: boss.x - 50, y: wy, vx: -5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: '#d8b98a', shock: true });
+      projs.push({ x: boss.x + 50, y: wy, vx: 5, vy: 0, dmg: boss.projDmg, r: 16, friendly: false, color: '#d8b98a', shock: true });
+    }
+    if (boss.timer % 3 === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 460 - 230), y: -30, vx: 0, vy: 6, dmg: boss.projDmg * (ph === 2 ? 1.15 : 1), r: 13, friendly: false, color: '#b0875b' });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  }
 }
 
 function updateBars() {
@@ -4878,6 +5144,7 @@ function drawReflectionMimic() {
     boss.color = mb.color; boss.accent = mb.accent; boss.r = mb.r;
     if (boss.mimic.indexOf('dim') === 0) drawDimBoss();
     else if (boss.mimic.indexOf('sky') === 0) drawSkyBoss();
+    else if (boss.mimic.indexOf('elf') === 0) drawElfBoss();
     else { divine = false; drawBoss(); }
   }
   boss.id = savedId; boss.type = savedType; boss.color = savedCol; boss.accent = savedAcc; boss.r = savedR; boss.talk = savedTalk;
@@ -5126,6 +5393,321 @@ function drawSky11() {
     ctx.restore();
   } else {
     drawEmpressSprite(ph, false, t);
+  }
+}
+
+function drawElfBoss() {
+  const t = performance.now() / 1000;
+  ctx.save();
+  ctx.translate(boss.x, boss.y);
+  if (boss.deathT > 0) {
+    const p = 1 - boss.deathT / DEATH_TIME;
+    ctx.globalAlpha = Math.max(0, 1 - p);
+    ctx.scale(1 - p * 0.4, 1 - p * 0.4);
+    ctx.translate(0, p * 110);
+  } else {
+    ctx.translate(0, Math.sin(t * 2 + boss.x * 0.02) * 3);
+    ctx.fillStyle = boss.accent + '40';
+    ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.7 + Math.sin(t * 4) * 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.22)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.7 + Math.sin(t * 4) * 7, t * 1.4, t * 1.4 + 0.9); ctx.stroke();
+  }
+  const dmg = { elf1: drawElf1, elf2: drawElf2, elf3: drawElf3, elf4: drawElf4, elf5: drawElf5, elf6: drawElf6, elf7: drawElf7, elf8: drawElf8, elf9: drawElf9, elf10: drawElf10 };
+  if (dmg[boss.id]) dmg[boss.id]();
+  if (boss.hitFx > 0) {
+    ctx.globalAlpha = Math.min(0.45, 0.45 * (boss.hitFx / 8));
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(0, 0, boss.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+function drawElf1() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.strokeStyle = '#7c5a2e'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(26, -4, 34, -1.1, 1.1); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(10, -6); ctx.lineTo(-4, 4); ctx.stroke();
+  ctx.fillStyle = angry ? '#4ade80' : '#16a34a';
+  ctx.beginPath(); ctx.moveTo(-22, 34); ctx.lineTo(-10, -22); ctx.lineTo(10, -22); ctx.lineTo(22, 34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#86efac' : '#22c55e';
+  ctx.beginPath(); ctx.arc(0, -36, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fbddbd';
+  ctx.beginPath(); ctx.moveTo(-18, -38); ctx.lineTo(-34, -48); ctx.lineTo(-16, -30); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(18, -38); ctx.lineTo(34, -48); ctx.lineTo(16, -30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fbddbd';
+  ctx.beginPath(); ctx.arc(0, -36, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#166534';
+  ctx.beginPath(); ctx.arc(-6, -38, 2.5, 0, Math.PI * 2); ctx.arc(6, -38, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#a3e635';
+  ctx.beginPath(); ctx.moveTo(0, -70); ctx.lineTo(-12, -54); ctx.lineTo(12, -54); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fbddbd';
+  ctx.beginPath(); ctx.arc(-24, -10, 7, 0, Math.PI * 2); ctx.arc(24, -10, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#854d0e';
+  rr(24, -6, 10, 34, 3);
+  ctx.fillStyle = '#eab308';
+  for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(29, 22 + i * 8); ctx.rotate(0.5); ctx.fillRect(-2, -8, 4, 8); ctx.restore(); }
+  if (angry) {
+    ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 6);
+    ctx.beginPath(); ctx.arc(0, -10, 56 + Math.sin(t * 5) * 6, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawElf2() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const sp = ph === 2 ? 8 : 5;
+  ctx.strokeStyle = ph === 2 ? '#e0f2fe' : '#7dd3fc';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 3; i++) {
+    const a0 = t * sp + i * 2.1;
+    ctx.beginPath();
+    for (let k = 0; k <= 12; k++) {
+      const a = a0 + k * 0.5;
+      const rr2 = 16 + k * 4.5;
+      const x = Math.cos(a) * rr2 * 0.5;
+      const y = Math.sin(a) * rr2 * 0.35;
+      if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.fillStyle = ph === 2 ? '#bae6fd' : '#7dd3fc';
+  ctx.beginPath(); ctx.moveTo(-7, 34); ctx.lineTo(-4, -8); ctx.lineTo(4, -8); ctx.lineTo(7, 34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fdf2f8';
+  ctx.beginPath(); ctx.arc(0, -24, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = ph === 2 ? '#93c5fd' : '#60a5fa';
+  ctx.beginPath(); ctx.arc(0, -30, 13, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = ph === 2 ? '#ff4d6d' : '#1e3a8a';
+  ctx.beginPath(); ctx.arc(-4, -24, 2, 0, Math.PI * 2); ctx.arc(4, -24, 2, 0, Math.PI * 2); ctx.fill();
+  const wf = Math.sin(t * sp) * 0.4;
+  for (let i = 0; i < 2; i++) {
+    const s = i === 0 ? 1 : -1;
+    ctx.save();
+    ctx.translate(s * 6, -12);
+    ctx.rotate(s * (0.6 + wf * 0.6));
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = ph === 2 ? '#e0f2fe' : '#bfdbfe';
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(s * 30, -16, s * 40, 6); ctx.quadraticCurveTo(s * 26, 10, s * 14, 12); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawElf3() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  ctx.strokeStyle = '#78350f'; ctx.lineWidth = 7;
+  ctx.beginPath(); ctx.moveTo(-10, -6); ctx.quadraticCurveTo(-40, 4, -46, -26); ctx.moveTo(10, -6); ctx.quadraticCurveTo(40, 4, 46, -26); ctx.stroke();
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-46, -26); ctx.lineTo(-56, -40); ctx.moveTo(-46, -26); ctx.lineTo(-38, -44); ctx.moveTo(46, -26); ctx.lineTo(56, -40); ctx.moveTo(46, -26); ctx.lineTo(38, -44); ctx.stroke();
+  ctx.fillStyle = ph === 2 ? '#a16207' : '#92660a';
+  ctx.beginPath(); ctx.moveTo(-24, 36); ctx.lineTo(-14, -18); ctx.lineTo(14, -18); ctx.lineTo(24, 36); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(60,30,0,.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-12, -6); ctx.lineTo(-4, 12); ctx.moveTo(10, 0); ctx.lineTo(6, 20); ctx.moveTo(-2, -14); ctx.lineTo(2, -2); ctx.stroke();
+  ctx.fillStyle = ph === 2 ? '#854d0e' : '#b45309';
+  ctx.beginPath(); ctx.arc(0, -32, 16, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = ph === 2 ? '#fde047' : '#fef3c7';
+  ctx.beginPath(); ctx.arc(-5, -34, 3, 0, Math.PI * 2); ctx.arc(5, -34, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4ade80';
+  ctx.beginPath(); ctx.arc(-14, -46, 9, 0, Math.PI * 2); ctx.arc(0, -52, 11, 0, Math.PI * 2); ctx.arc(14, -46, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = ph === 2 ? '#a3e635' : '#86efac';
+  for (let i = 0; i < 5; i++) {
+    const a = t * 1.4 + i * 1.26;
+    const x = Math.cos(a) * (58 + Math.sin(t + i) * 5), y = -10 + Math.sin(a) * 40;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    ctx.beginPath(); ctx.ellipse(0, 0, 6, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+}
+
+function drawElf4() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = '#8a6a45';
+  ctx.beginPath(); ctx.moveTo(-26, 40); ctx.lineTo(-20, 22); ctx.lineTo(20, 22); ctx.lineTo(26, 40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#a16207' : '#a88055';
+  ctx.beginPath(); ctx.moveTo(-32, 24); ctx.lineTo(-26, -16); ctx.quadraticCurveTo(0, -30, 26, -16); ctx.lineTo(32, 24); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(40,20,0,.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-16, -6); ctx.lineTo(-6, 6); ctx.lineTo(-12, 18); ctx.moveTo(8, -12); ctx.lineTo(16, 0); ctx.stroke();
+  ctx.strokeStyle = '#8a6a45'; ctx.lineWidth = 14;
+  ctx.beginPath(); ctx.moveTo(-34, -4); ctx.quadraticCurveTo(-52, 4, -46, 20); ctx.moveTo(34, -4); ctx.quadraticCurveTo(52, 4, 46, 20); ctx.stroke();
+  ctx.fillStyle = '#8a6a45';
+  ctx.beginPath(); ctx.arc(-46, 24, 9, 0, Math.PI * 2); ctx.arc(46, 24, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#b45309' : '#b08968';
+  ctx.beginPath(); ctx.moveTo(-18, -40); ctx.lineTo(-14, -62); ctx.lineTo(14, -62); ctx.lineTo(18, -40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#fbbf24';
+  ctx.beginPath(); ctx.arc(-6, -52, 4, 0, Math.PI * 2); ctx.arc(6, -52, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#3a2400'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-5, -42); ctx.lineTo(5, -42); ctx.stroke();
+}
+
+function drawElf5() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = 'rgba(224,242,254,.25)';
+  ctx.beginPath(); ctx.arc(0, -6, 60 + Math.sin(t * 3) * 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e0f2fe'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(0, -44, 16, -0.3, Math.PI * 1.25); ctx.stroke();
+  ctx.fillStyle = angry ? '#cbd5e1' : '#e2e8f0';
+  ctx.beginPath(); ctx.moveTo(-18, 34); ctx.lineTo(-6, -14); ctx.lineTo(6, -14); ctx.lineTo(18, 34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fde047';
+  ctx.beginPath(); ctx.arc(0, 6, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath(); ctx.arc(0, -30, 14, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#94a3b8' : '#cbd5e1';
+  ctx.beginPath(); ctx.arc(0, -36, 14, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#64748b';
+  ctx.beginPath(); ctx.arc(-4, -30, 2, 0, Math.PI * 2); ctx.arc(4, -30, 2, 0, Math.PI * 2); ctx.fill();
+  const wf = Math.sin(t * (angry ? 7 : 5)) * 0.45;
+  for (let i = 0; i < 2; i++) {
+    const s = i === 0 ? 1 : -1;
+    ctx.save(); ctx.translate(s * 4, -18); ctx.rotate(s * (0.5 + wf * 0.5)); ctx.globalAlpha = 0.8;
+    ctx.fillStyle = angry ? '#cbd5e1' : '#e0f2fe';
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(s * 34, -18, s * 44, 4); ctx.quadraticCurveTo(s * 30, 8, s * 16, 10); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawElf6() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = angry ? '#854d0e' : '#92660a';
+  ctx.beginPath(); ctx.moveTo(-26, 42); ctx.lineTo(-16, -20); ctx.lineTo(16, -20); ctx.lineTo(26, 42); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#78350f'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(-24, 40); ctx.quadraticCurveTo(-40, 48, -44, 62); ctx.moveTo(24, 40); ctx.quadraticCurveTo(40, 48, 44, 62); ctx.stroke();
+  ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.moveTo(-8, -12); ctx.quadraticCurveTo(-42, -30, -50, -52); ctx.moveTo(8, -12); ctx.quadraticCurveTo(42, -30, 50, -52); ctx.stroke();
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(-50, -52); ctx.lineTo(-62, -66); ctx.moveTo(-50, -52); ctx.lineTo(-44, -70); ctx.moveTo(50, -52); ctx.lineTo(62, -66); ctx.moveTo(50, -52); ctx.lineTo(44, -70); ctx.stroke();
+  ctx.fillStyle = angry ? '#84cc16' : '#4ade80';
+  ctx.beginPath(); ctx.arc(-40, -58, 20, 0, Math.PI * 2); ctx.arc(0, -72, 26, 0, Math.PI * 2); ctx.arc(40, -58, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#78350f';
+  ctx.beginPath(); ctx.arc(0, -38, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#fef3c7';
+  ctx.beginPath(); ctx.arc(-5, -40, 3.5, 0, Math.PI * 2); ctx.arc(5, -40, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#a3e635' : '#86efac';
+  for (let i = 0; i < 6; i++) {
+    const a = t * 1.6 + i * 1.05;
+    const x = Math.cos(a) * 60, y = 20 + ((t * 26 + i * 17) % 90);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    ctx.beginPath(); ctx.ellipse(0, 0, 6, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+}
+
+function drawElf7() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = angry ? '#78716c' : '#a8a29e';
+  ctx.beginPath(); ctx.moveTo(-48, 40); ctx.lineTo(-30, -34); ctx.lineTo(30, -34); ctx.lineTo(48, 40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#e7e5e4' : '#f5f5f4';
+  ctx.beginPath(); ctx.moveTo(-22, -40); ctx.lineTo(0, -74); ctx.lineTo(22, -40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#fbbf24';
+  ctx.beginPath(); ctx.arc(-9, -54, 5, 0, Math.PI * 2); ctx.arc(9, -54, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(40,40,40,.5)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-20, -14); ctx.lineTo(-8, 0); ctx.lineTo(-14, 18); ctx.moveTo(12, -20); ctx.lineTo(20, -4); ctx.lineTo(12, 10); ctx.stroke();
+  ctx.fillStyle = '#a8a29e';
+  ctx.beginPath(); ctx.arc(-56, 24, 14, 0, Math.PI * 2); ctx.arc(56, 24, 14, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#a8a29e'; ctx.lineWidth = 18;
+  ctx.beginPath(); ctx.moveTo(-30, -20); ctx.lineTo(-54, 14); ctx.moveTo(30, -20); ctx.lineTo(54, 14); ctx.stroke();
+  ctx.fillStyle = angry ? '#78716c' : '#d6d3d1';
+  for (let i = 0; i < 4; i++) {
+    const x = -40 + i * 26 + Math.sin(t * 2 + i) * 4, y = -20 + ((t * 20 + i * 21) % 80);
+    ctx.beginPath(); ctx.arc(x, y, 4 + (i % 2) * 2, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawElf8() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = angry ? '#e879f9' : '#d8b4fe';
+  for (let i = 0; i < 4; i++) {
+    ctx.save(); ctx.translate(-30 + i * 20, -10); ctx.rotate((i - 1.5) * 0.35 + Math.sin(t * 2 + i) * 0.1);
+    ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(7, 0); ctx.lineTo(-7, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  ctx.fillStyle = angry ? '#f0abfc' : '#e879f9';
+  ctx.beginPath(); ctx.moveTo(-6, -14); ctx.lineTo(6, -14); ctx.lineTo(16, 34); ctx.lineTo(-16, 34); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,0,180,.4)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, 34); ctx.moveTo(-6, -14); ctx.lineTo(-10, 34); ctx.moveTo(6, -14); ctx.lineTo(10, 34); ctx.stroke();
+  ctx.fillStyle = '#fdf4ff';
+  ctx.beginPath(); ctx.arc(0, -30, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = angry ? '#c084fc' : '#a855f7';
+  ctx.beginPath(); ctx.moveTo(-13, -30); ctx.lineTo(0, -48); ctx.lineTo(13, -30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#7e22ce';
+  ctx.beginPath(); ctx.arc(-4, -30, 2, 0, Math.PI * 2); ctx.arc(4, -30, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < 6; i++) {
+    const a = t * 3 + i * 1.05;
+    const x = Math.cos(a) * 54, y = -6 + Math.sin(a) * 40;
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 5 + i);
+    ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 1.5, y - 1); ctx.lineTo(x + 4, y); ctx.lineTo(x + 1.5, y + 1); ctx.lineTo(x, y + 4); ctx.lineTo(x - 1.5, y + 1); ctx.lineTo(x - 4, y); ctx.lineTo(x - 1.5, y - 1); ctx.closePath(); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawElf9() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = '#57534e';
+  ctx.beginPath(); ctx.moveTo(-28, 40); ctx.lineTo(-22, 20); ctx.lineTo(22, 20); ctx.lineTo(28, 40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#6b5b3e' : '#78716c';
+  ctx.beginPath(); ctx.moveTo(-34, 22); ctx.lineTo(-28, -18); ctx.quadraticCurveTo(0, -32, 28, -18); ctx.lineTo(34, 22); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#78716c'; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(-32, -6); ctx.lineTo(-50, 16); ctx.moveTo(32, -6); ctx.lineTo(50, 16); ctx.stroke();
+  ctx.fillStyle = '#57534e';
+  ctx.beginPath(); ctx.arc(-50, 20, 8, 0, Math.PI * 2); ctx.arc(50, 20, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#78716c';
+  ctx.beginPath(); ctx.moveTo(-16, -40); ctx.lineTo(-12, -60); ctx.lineTo(12, -60); ctx.lineTo(16, -40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#fbbf24';
+  ctx.beginPath(); ctx.arc(-5, -52, 4, 0, Math.PI * 2); ctx.arc(5, -52, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = angry ? '#fde047' : '#fbbf24'; ctx.lineWidth = 2;
+  for (let i = 0; i < 4; i++) {
+    const ry = -10 + i * 9;
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 3 + i * 1.4);
+    ctx.beginPath();
+    ctx.moveTo(-12 + i * 7, ry - 5);
+    ctx.lineTo(-12 + i * 7 + 8, ry);
+    ctx.lineTo(-12 + i * 7, ry + 5);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawElf10() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  const angry = ph === 2;
+  ctx.fillStyle = '#44403c';
+  ctx.beginPath(); ctx.moveTo(-32, 42); ctx.lineTo(-24, 18); ctx.lineTo(24, 18); ctx.lineTo(32, 42); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#92400e' : '#57534e';
+  ctx.beginPath(); ctx.moveTo(-40, 20); ctx.lineTo(-30, -22); ctx.quadraticCurveTo(0, -38, 30, -22); ctx.lineTo(40, 20); ctx.closePath(); ctx.fill();
+  const cg = ctx.createRadialGradient(0, 0, 2, 0, 0, 18);
+  cg.addColorStop(0, angry ? '#ff4d6d' : '#fbbf24'); cg.addColorStop(1, 'rgba(255,140,0,.1)');
+  ctx.fillStyle = cg;
+  ctx.beginPath(); ctx.arc(0, -2, 14 + Math.sin(t * 4) * 2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(30,20,10,.6)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-22, -14); ctx.lineTo(-10, 2); ctx.lineTo(-18, 16); ctx.moveTo(14, -18); ctx.lineTo(24, -2); ctx.moveTo(0, 10); ctx.lineTo(6, 18); ctx.stroke();
+  ctx.strokeStyle = '#57534e'; ctx.lineWidth = 16;
+  ctx.beginPath(); ctx.moveTo(-36, -10); ctx.quadraticCurveTo(-60, 2, -56, 24); ctx.moveTo(36, -10); ctx.quadraticCurveTo(60, 2, 56, 24); ctx.stroke();
+  ctx.fillStyle = '#44403c';
+  ctx.beginPath(); ctx.arc(-56, 28, 11, 0, Math.PI * 2); ctx.arc(56, 28, 11, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#57534e';
+  ctx.beginPath(); ctx.moveTo(-18, -46); ctx.lineTo(-14, -70); ctx.lineTo(14, -70); ctx.lineTo(18, -46); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = angry ? '#ff4d6d' : '#fde047';
+  ctx.beginPath(); ctx.arc(-6, -60, 4.5, 0, Math.PI * 2); ctx.arc(6, -60, 4.5, 0, Math.PI * 2); ctx.fill();
+  if (angry) {
+    ctx.strokeStyle = 'rgba(251,191,36,.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, 62 + Math.sin(t * 4) * 5, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,77,109,.7)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 0, 46, t, t + 1.6); ctx.stroke();
   }
 }
 
@@ -5535,12 +6117,19 @@ const SKY_FLOOR = {
   sky9: '#2b2f36', sky10: '#211a44', sky11: '#3a2a5a'
 };
 
+const ELF_FLOOR = {
+  elf1: '#2d6a3e', elf2: '#274a66', elf3: '#2e5a32', elf4: '#4a3a24',
+  elf5: '#26304a', elf6: '#2d5a2c', elf7: '#3a3a36', elf8: '#3a2a52',
+  elf9: '#4a3a26', elf10: '#2f2f2e'
+};
+
 function drawBoss() {
   if (divine) {
     if (boss.id === 'sky10' && boss.mimic && !boss.mirror) { drawReflectionMimic(); return; }
     drawSkyBoss(); return;
   }
   if (boss.id && boss.id.indexOf('dim') === 0) { drawDimBoss(); return; }
+  if (boss.id && boss.id.indexOf('elf') === 0) { drawElfBoss(); return; }
   const b = boss.hitFx > 0;
   const t = performance.now() / 1000;
   ctx.save();
@@ -6559,6 +7148,193 @@ function drawSkyBackground() {
   }
 }
 
+function drawElfFloor() {
+  const col = ELF_FLOOR[boss.id] || '#2d6a3e';
+  ctx.fillStyle = col;
+  ctx.fillRect(0, canvas.height - 34, canvas.width, 34);
+  ctx.strokeStyle = 'rgba(167,243,208,.25)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < canvas.width + 40; i += 40) {
+    ctx.beginPath(); ctx.moveTo(i, canvas.height - 34);
+    ctx.quadraticCurveTo(i + 20, canvas.height - 22, i + 40, canvas.height - 34);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(134,239,172,.5)';
+  for (let i = 0; i < 8; i++) {
+    const x = 30 + i * 120;
+    ctx.beginPath(); ctx.moveTo(x, canvas.height - 34); ctx.lineTo(x - 4, canvas.height - 42); ctx.moveTo(x, canvas.height - 34); ctx.lineTo(x + 4, canvas.height - 44); ctx.stroke();
+  }
+}
+
+function drawElfBackground() {
+  const t = performance.now() / 1000;
+  const scene = {
+    elf1: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#0f2a1a'); g.addColorStop(0.6, '#1d4a2c'); g.addColorStop(1, '#2d6a3e');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#163b22'; ctx.lineWidth = 6;
+      for (let i = 0; i < 5; i++) {
+        const x = 80 + i * 200, h = 120 + ((i * 37) % 60);
+        ctx.beginPath(); ctx.moveTo(x, canvas.height); ctx.lineTo(x, canvas.height - h); ctx.stroke();
+        ctx.fillStyle = '#1f5a33';
+        ctx.beginPath(); ctx.arc(x, canvas.height - h - 20, 30, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(167,243,208,.12)';
+      for (let i = 0; i < 4; i++) { const x = 100 + i * 240; ctx.beginPath(); ctx.moveTo(x, -10); ctx.lineTo(x + 40, -10); ctx.lineTo(x - 120, canvas.height); ctx.lineTo(x - 200, canvas.height); ctx.closePath(); ctx.fill(); }
+      ctx.fillStyle = '#a7f3d0';
+      for (let i = 0; i < 10; i++) { const x = ((i * 149 + 30) % 960), y = 40 + ((i * 83) % 420); ctx.globalAlpha = 0.3 + 0.3 * Math.sin(t * 2 + i); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    },
+    elf2: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#1a2f44'); g.addColorStop(0.6, '#3a5a78'); g.addColorStop(1, '#5b86a3');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = 'rgba(226,232,240,.5)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const x = 120 + i * 170, y = 60 + (i % 2) * 90;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 30, y + 40, x - 10, y + 80); ctx.quadraticCurveTo(x + 24, y + 120, x, y + 160); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(186,230,253,.7)';
+      for (let i = 0; i < 8; i++) { const x = ((i * 173 + 40) % 960), y = 50 + ((i * 97) % 380); ctx.globalAlpha = 0.35 + 0.3 * Math.sin(t * 2.5 + i); ctx.beginPath(); ctx.ellipse(x, y, 14, 4, Math.sin(t + i) * 0.4, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    },
+    elf3: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#12301c'); g.addColorStop(0.6, '#1d4a2c'); g.addColorStop(1, '#2a5a34');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(74,222,128,.16)';
+      for (let i = 0; i < 9; i++) { const x = ((i * 131 + 20) % 960), y = 30 + ((i * 71) % 400); ctx.globalAlpha = 0.4 + 0.4 * Math.sin(t * 2 + i); ctx.beginPath(); ctx.arc(x, y, 14 + (i % 3) * 6, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#14532d'; ctx.lineWidth = 5;
+      for (let i = 0; i < 4; i++) { const x = 120 + i * 240; ctx.beginPath(); ctx.moveTo(x, canvas.height); ctx.quadraticCurveTo(x + 20, canvas.height - 160, x - 30, canvas.height - 240); ctx.stroke(); }
+    },
+    elf4: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#4a2f14'); g.addColorStop(0.6, '#6b4a26'); g.addColorStop(1, '#8a6a3e');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(120,90,60,.55)';
+      for (let i = 0; i < 6; i++) {
+        const x = i * 170;
+        ctx.beginPath(); ctx.moveTo(x - 30, canvas.height - 90); ctx.lineTo(x + 20, canvas.height - 250); ctx.lineTo(x + 80, canvas.height - 90); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.18)';
+      for (let i = 0; i < 8; i++) { const x = ((i * 191 + 60) % 960), y = 40 + ((i * 73) % 380); ctx.globalAlpha = 0.2 + 0.2 * Math.sin(t * 1.5 + i); ctx.fillRect(x, y, 2, 2); }
+      ctx.globalAlpha = 1;
+    },
+    elf5: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#141b2e'); g.addColorStop(0.6, '#24314d'); g.addColorStop(1, '#3a4a6e');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath(); ctx.arc(760, 100, 46, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#24314d'; ctx.beginPath(); ctx.arc(746, 92, 38, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e2e8f0';
+      for (let i = 0; i < 50; i++) { const x = ((i * 401 + 9) % 960), y = 14 + ((i * 197) % 480); ctx.globalAlpha = 0.3 + 0.4 * Math.abs(Math.sin(t + i * 0.7)); ctx.fillRect(x, y, 2, 2); }
+      ctx.globalAlpha = 1;
+    },
+    elf6: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#0c2415'); g.addColorStop(0.6, '#18391f'); g.addColorStop(1, '#23502c');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(20,60,30,.6)';
+      for (let i = 0; i < 5; i++) {
+        const x = 60 + i * 190;
+        ctx.beginPath(); ctx.moveTo(x - 40, canvas.height); ctx.lineTo(x, canvas.height - 260); ctx.lineTo(x + 40, canvas.height); ctx.closePath(); ctx.fill();
+      }
+      ctx.strokeStyle = '#14532d'; ctx.lineWidth = 3;
+      for (let i = 0; i < 5; i++) {
+        const x = 60 + i * 190;
+        ctx.beginPath(); ctx.moveTo(x - 20, canvas.height - 180); ctx.lineTo(x - 60, canvas.height - 120); ctx.moveTo(x + 20, canvas.height - 180); ctx.lineTo(x + 60, canvas.height - 120); ctx.stroke();
+      }
+      ctx.fillStyle = '#2f6b3b';
+      for (let i = 0; i < 5; i++) {
+        const x = 60 + i * 190, y = canvas.height - 280;
+        ctx.beginPath(); ctx.arc(x - 20, y, 22, 0, Math.PI * 2); ctx.arc(x + 20, y, 22, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#4ade80';
+      for (let i = 0; i < 12; i++) { const x = ((i * 137 + 10) % 960), y = 20 + ((i * 59) % 430); ctx.globalAlpha = 0.3 + 0.3 * Math.sin(t * 2 + i); ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    },
+    elf7: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#2e2e34'); g.addColorStop(0.6, '#4a4a50'); g.addColorStop(1, '#6b6b6e');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(90,90,96,.7)';
+      for (let i = 0; i < 5; i++) {
+        const x = 100 + i * 200;
+        ctx.beginPath(); ctx.moveTo(x - 90, canvas.height - 60); ctx.lineTo(x, canvas.height - 330); ctx.lineTo(x + 90, canvas.height - 60); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      for (let i = 0; i < 5; i++) {
+        const x = 100 + i * 200;
+        ctx.beginPath(); ctx.moveTo(x - 30, canvas.height - 300); ctx.lineTo(x, canvas.height - 330); ctx.lineTo(x + 30, canvas.height - 300); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      for (let i = 0; i < 12; i++) { const x = ((i * 167 + 30) % 960), y = 30 + ((i * 79) % 400); ctx.globalAlpha = 0.3 + 0.3 * Math.sin(t * 1.5 + i); ctx.fillRect(x, y, 3, 3); }
+      ctx.globalAlpha = 1;
+    },
+    elf8: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#2a1240'); g.addColorStop(0.6, '#3a1a5e'); g.addColorStop(1, '#4a2470');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(232,121,249,.6)';
+      for (let i = 0; i < 7; i++) {
+        const x = 60 + i * 140, y = 60 + (i % 2) * 140;
+        ctx.save(); ctx.translate(x, y); ctx.rotate((i - 3) * 0.4);
+        ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(10, 0); ctx.lineTo(0, 22); ctx.lineTo(-10, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.7)';
+      for (let i = 0; i < 10; i++) { const x = ((i * 173 + 20) % 960), y = 30 + ((i * 83) % 420); ctx.globalAlpha = 0.3 + 0.4 * Math.sin(t * 3 + i); ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 1.5, y - 1); ctx.lineTo(x + 4, y); ctx.lineTo(x + 1.5, y + 1); ctx.lineTo(x, y + 4); ctx.lineTo(x - 1.5, y + 1); ctx.lineTo(x - 4, y); ctx.lineTo(x - 1.5, y - 1); ctx.closePath(); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    },
+    elf9: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#3a2c16'); g.addColorStop(0.6, '#5a4526'); g.addColorStop(1, '#7a5f3a');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0,0,0,.3)';
+      for (let i = 0; i < 4; i++) {
+        const x = 60 + i * 260, w = 120, h = 260;
+        ctx.beginPath(); ctx.moveTo(x, canvas.height); ctx.lineTo(x, canvas.height - h); ctx.arc(x + w / 2, canvas.height - h, w / 2, Math.PI, 0); ctx.lineTo(x + w, canvas.height); ctx.closePath(); ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(251,191,36,.5)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const x = 110 + i * 165, y = 40 + ((i * 47) % 200);
+        ctx.globalAlpha = 0.4 + 0.4 * Math.sin(t * 2 + i);
+        ctx.beginPath(); ctx.moveTo(x, y - 10); ctx.lineTo(x + 6, y); ctx.lineTo(x, y + 10); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    },
+    elf10: () => {
+      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      g.addColorStop(0, '#241c14'); g.addColorStop(0.6, '#3a2c1c'); g.addColorStop(1, '#4e3a24');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(90,60,30,.7)';
+      for (let i = 0; i < 4; i++) {
+        const x = 120 + i * 240;
+        ctx.beginPath(); ctx.moveTo(x - 110, canvas.height - 40); ctx.lineTo(x, canvas.height - 360); ctx.lineTo(x + 110, canvas.height - 40); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(251,146,60,.35)';
+      for (let i = 0; i < 6; i++) {
+        const x = 140 + i * 150, y = 30 + ((i * 53) % 300);
+        ctx.globalAlpha = 0.35 + 0.35 * Math.sin(t * 1.5 + i);
+        ctx.beginPath(); ctx.arc(x, y, 5 + (i % 3) * 3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+  };
+  if (scene[boss.id]) scene[boss.id]();
+  else {
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, '#12301c'); g.addColorStop(1, '#2d6a3e');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.save();
+  ctx.globalAlpha = 0.16; ctx.fillStyle = '#a7f3d0';
+  ctx.font = '42px Arial'; ctx.fillText('🧚', canvas.width - 96, 62);
+  ctx.restore();
+}
+
 function drawCracks() {
   if (!anyMode() || !cracks.length) return;
   const t = performance.now() / 1000;
@@ -6741,19 +7517,22 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const mimicMode = boss.id === 'sky10' && boss.mimic && !boss.mirror;
   if (mimicMode) {
-    const svId = boss.id, svD = divine, svDim = dimension;
+    const svId = boss.id, svD = divine, svDim = dimension, svElf = elven;
     boss.id = boss.mimic;
     divine = boss.id.indexOf('sky') === 0;
     dimension = boss.id.indexOf('dim') === 0;
-    if (dimension) drawDimBackground(); else if (divine) drawSkyBackground(); else drawOldBg();
-    if (dimension) drawDimFloor(); else if (divine) drawSkyFloor(); else drawOldFloor();
-    boss.id = svId; divine = svD; dimension = svDim;
+    elven = boss.id.indexOf('elf') === 0;
+    if (dimension) drawDimBackground(); else if (divine) drawSkyBackground(); else if (elven) drawElfBackground(); else drawOldBg();
+    if (dimension) drawDimFloor(); else if (divine) drawSkyFloor(); else if (elven) drawElfFloor(); else drawOldFloor();
+    boss.id = svId; divine = svD; dimension = svDim; elven = svElf;
   } else {
     if (dimension) drawDimBackground();
     else if (divine) drawSkyBackground();
+    else if (elven) drawElfBackground();
     else drawOldBg();
     if (dimension) drawDimFloor();
     else if (divine) drawSkyFloor();
+    else if (elven) drawElfFloor();
     else drawOldFloor();
   }
   ctx.save();
@@ -7613,7 +8392,7 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
   }
 });
 
-const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_skyHpLevel', 'bf_skyDmgLevel', 'bf_skyCritLevel', 'bf_skyAspdLevel', 'bf_skyArmorLevel', 'bf_skyMoveLevel', 'bf_skyRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_skyUnlocked', 'bf_divine', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_skyHpLevel', 'bf_skyDmgLevel', 'bf_skyCritLevel', 'bf_skyAspdLevel', 'bf_skyArmorLevel', 'bf_skyMoveLevel', 'bf_skyRegenLevel', 'bf_elfHpLevel', 'bf_elfDmgLevel', 'bf_elfCritLevel', 'bf_elfAspdLevel', 'bf_elfArmorLevel', 'bf_elfMoveLevel', 'bf_elfRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_skyUnlocked', 'bf_divine', 'bf_elfUnlocked', 'bf_elven', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
 
 function resetProgress() {
   RESET_KEYS.forEach(k => {
@@ -7624,6 +8403,7 @@ function resetProgress() {
   critLevel = 0; atkSpdLevel = 0; armorLevel = 0; moveLevel = 0; regenLevel = 0;
   dimHpLevel = 0; dimDmgLevel = 0; dimCritLevel = 0; dimAspdLevel = 0; dimArmorLevel = 0; dimMoveLevel = 0; dimRegenLevel = 0;
   skyHpLevel = 0; skyDmgLevel = 0; skyCritLevel = 0; skyAspdLevel = 0; skyArmorLevel = 0; skyMoveLevel = 0; skyRegenLevel = 0;
+  elfHpLevel = 0; elfDmgLevel = 0; elfCritLevel = 0; elfAspdLevel = 0; elfArmorLevel = 0; elfMoveLevel = 0; elfRegenLevel = 0;
   totalWins = 0; totalKills = 0; waveBest = 0; unlockedAch = []; combo = 0;
   megaOwned = []; chocoWeaponsOwned = []; skinsOwned = ['classic']; selectedSkin = 'classic';
   activatedCodes = [];
@@ -7631,6 +8411,7 @@ function resetProgress() {
   ultimateUnlocked = false; letterShown = false;
   dimUnlocked = false; dimension = false;
   skyUnlocked = false; divine = false;
+  elfUnlocked = false; elven = false;
   speedMode = false; boomMode = false; nightMode = false;
   try { buildMenu(); } catch (e) {}
   updateAdvBtn();
@@ -7753,7 +8534,7 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_skyHpLevel', 'bf_skyDmgLevel', 'bf_skyCritLevel', 'bf_skyAspdLevel', 'bf_skyArmorLevel', 'bf_skyMoveLevel', 'bf_skyRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_skyUnlocked', 'bf_divine', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_skyHpLevel', 'bf_skyDmgLevel', 'bf_skyCritLevel', 'bf_skyAspdLevel', 'bf_skyArmorLevel', 'bf_skyMoveLevel', 'bf_skyRegenLevel', 'bf_elfHpLevel', 'bf_elfDmgLevel', 'bf_elfCritLevel', 'bf_elfAspdLevel', 'bf_elfArmorLevel', 'bf_elfMoveLevel', 'bf_elfRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_skyUnlocked', 'bf_divine', 'bf_elfUnlocked', 'bf_elven', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
@@ -7779,6 +8560,13 @@ function applyCloudData(data) {
   skyArmorLevel = parseInt(getStore('bf_skyArmorLevel') || '0', 10);
   skyMoveLevel = parseInt(getStore('bf_skyMoveLevel') || '0', 10);
   skyRegenLevel = parseInt(getStore('bf_skyRegenLevel') || '0', 10);
+  elfHpLevel = parseInt(getStore('bf_elfHpLevel') || '0', 10);
+  elfDmgLevel = parseInt(getStore('bf_elfDmgLevel') || '0', 10);
+  elfCritLevel = parseInt(getStore('bf_elfCritLevel') || '0', 10);
+  elfAspdLevel = parseInt(getStore('bf_elfAspdLevel') || '0', 10);
+  elfArmorLevel = parseInt(getStore('bf_elfArmorLevel') || '0', 10);
+  elfMoveLevel = parseInt(getStore('bf_elfMoveLevel') || '0', 10);
+  elfRegenLevel = parseInt(getStore('bf_elfRegenLevel') || '0', 10);
   totalWins = parseInt(getStore('bf_wins') || '0', 10);
   totalKills = parseInt(getStore('bf_kills') || '0', 10);
   waveBest = parseInt(getStore('bf_waveBest') || '0', 10);
@@ -7798,12 +8586,15 @@ function applyCloudData(data) {
   dimension = getStore('bf_dimension') === '1';
   skyUnlocked = getStore('bf_skyUnlocked') === '1';
   divine = getStore('bf_divine') === '1';
+  elfUnlocked = getStore('bf_elfUnlocked') === '1';
+  elven = getStore('bf_elven') === '1';
   speedMode = getStore('bf_speed') === '1';
   boomMode = getStore('bf_boom') === '1';
   nightMode = getStore('bf_night') === '1';
   if (godMode) distorted = true;
   if (dimension) distorted = true;
   if (divine) distorted = true;
+  if (elven) distorted = true;
   try {
     refreshShop();
     buildMenu();
@@ -7968,6 +8759,7 @@ function updateMusic() {
     if (boomMode) bpmMul *= 1.05;
     if (godMode) bpmMul *= 1.1;
     if (divine) bpmMul *= 1.18;
+    if (elven) bpmMul *= 1.22;
     if (boss.type === 'ultimate') bpmMul *= 1.12;
     if (boss.id === 'dim7') { bpmMul *= 1.08; transpose += 1; }
   }
