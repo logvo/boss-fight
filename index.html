@@ -421,6 +421,10 @@
       <button id="nightBtn" class="distort-btn">Ночной режим: ВЫКЛ</button>
       <span id="nightStatus" class="mode-desc"></span>
     </div>
+    <div class="mode-row">
+      <button id="dimBtn" class="distort-btn god">🌌 Новое измерение: 🔒 ЗАКРЫТО</button>
+      <span id="dimStatus" class="mode-desc"></span>
+    </div>
     <button id="advBtn" class="distort-btn adv">🎬 Реклама: +10000 🪙</button>
 
     <div class="menu-cols">
@@ -624,6 +628,16 @@ const BOSSES = [
   { id: 'ultimate', name: 'ФИНАЛЬНЫЙ БОСС',     type: 'ultimate', stars: 18, hp: 16000, dmg: 50, projDmg: 28, speed: 0.8, r: 70, color: '#ffd33d', accent: '#ff4d6d', desc: 'Три фазы: король, ужасный король-призрак, бешенство. Открывается после победы над ВСЕВЫШНИМ в режиме бога.', win: 'ФИНАЛЬНЫЙ БОСС ПОВЕРЖЕН! ТЫ ПРОШЁЛ ИГРУ!', lose: 'Финальный босс поглотил тебя навсегда...', talk: ['Я — конец твоего пути.', 'ТРИ ФАЗЫ ЖДУТ ТЕБЯ.', 'ПОКАЖИ, НА ЧТО СПОСОБЕН!'] }
 ];
 
+const DIM_BOSSES = [
+  { id: 'dim1', name: 'Страж Врат', type: 'knight', stars: 19, hp: 18000, dmg: 60, projDmg: 30, speed: 0.8, r: 44, color: '#9aa7b5', accent: '#58a6ff', desc: 'Первый страж нового измерения. Крепкая броня и мощные рывки.', win: 'Страж Врат пал!', lose: 'Страж Врат сокрушил тебя.', talk: ['ОТСЮДА ДОРОГИ НАЗАД НЕТ.', 'Я — ПЕРВАЯ СТЕНА.', 'ДОКАЖИ, ЧТО ДОСТОИН!'] },
+  { id: 'dim2', name: 'Ловец Снов', type: 'shaman', stars: 20, hp: 22000, dmg: 65, projDmg: 32, speed: 1.0, r: 42, color: '#5ad1e0', accent: '#b7ecf5', desc: 'Плетёт иллюзии и призывает тотемы тьмы.', win: 'Ловец Снов рассеялся!', lose: 'Ты утонул в мире снов.', talk: ['ЭТО ЛИШЬ СОН.', 'ПРОСНИСЬ... ИЛИ НЕТ.', 'ТОТЕМ ЗОВЁТ ГЛУБЖЕ!'] },
+  { id: 'dim3', name: 'Огненный Титан', type: 'titan', stars: 21, hp: 28000, dmg: 70, projDmg: 34, speed: 0.5, r: 78, color: '#f0883e', accent: '#ffd33d', desc: 'Вулканический гигант, сотрясающий землю.', win: 'Огненный Титан остыл!', lose: 'Титан расплавил тебя в лаве.', talk: ['ЖАРКО?!', 'ГОРА ПЫЛАЕТ!', 'РАСПЛАВЛЮ ВСЁ!'] },
+  { id: 'dim4', name: 'Ледяная Королева', type: 'frost', stars: 22, hp: 32000, dmg: 75, projDmg: 36, speed: 1.0, r: 55, color: '#79c0ff', accent: '#c8e3ff', desc: 'Вечная мерзлота заморозит само время.', win: 'Ледяная Королева растаяла!', lose: 'Ты стал её ледяной статуей.', talk: ['ЗАМРИ.', 'ВЕЧНЫЙ ЛЁД.', 'МОЁ ЦАРСТВО — ХОЛОД.'] },
+  { id: 'dim5', name: 'Пожиратель Света', type: 'void', stars: 23, hp: 38000, dmg: 80, projDmg: 38, speed: 1.1, r: 60, color: '#b18cff', accent: '#bc8cff', desc: 'Поглощает весь свет реальности.', win: 'Пожиратель Света ослеп!', lose: 'Свет погас навсегда.', talk: ['ТЕМНОТА ПРИШЛА.', 'СВЕТ — ЭТО СЛАБОСТЬ.', 'ВСЁ ПОГЛОТИТСЯ.'] },
+  { id: 'dim6', name: 'МЕГА-Разрушитель', type: 'mega', stars: 24, hp: 45000, dmg: 90, projDmg: 42, speed: 0.9, r: 80, color: '#ff6b6b', accent: '#ff6b6b', desc: 'Колосс нового измерения: землетрясения и огненный дождь.', win: 'МЕГА-Разрушитель ПОВЕРЖЕН!', lose: 'Разрушитель стёр тебя в пыль.', talk: ['Я — ПРИРОДНАЯ КАТАСТРОФА!', 'ТРЯСЁМ ЭТОТ МИР!', 'СМОТРИ ВВЕРХ!'] },
+  { id: 'dim7', name: 'ВЛАДЫКА ИЗМЕРЕНИЙ', type: 'annihilator', stars: 25, hp: 55000, dmg: 100, projDmg: 48, speed: 1.2, r: 70, color: '#ff4d6d', accent: '#ffd33d', desc: 'Правитель этого измерения. Конец пути.', win: 'ВЛАДЫКА ИЗМЕРЕНИЙ ПОВЕРЖЕН! ИГРА ПРОЙДЕНА ВНОВЬ!', lose: 'Измерение поглотило тебя.', talk: ['ТЫ ОСМЕЛИЛСЯ ВОЙТИ?', 'ЗДЕСЬ НЕТ СПАСЕНИЯ.', 'ПОСЛЕДНИЙ БОЙ!'] }
+];
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const hpBarFill = document.querySelector('#hpBar div');
@@ -657,6 +671,8 @@ let chaosBeaten = false;
 let godBeaten = false;
 let ultimateUnlocked = false;
 let letterShown = false;
+let dimUnlocked = false;
+let dimension = false;
 let distortFlash = 0;
 let cracks = [];
 const keys = {};
@@ -685,6 +701,13 @@ let atkSpdLevel = parseInt(getStore('bf_atkSpdLevel') || '0', 10);
 let armorLevel = parseInt(getStore('bf_armorLevel') || '0', 10);
 let moveLevel = parseInt(getStore('bf_moveLevel') || '0', 10);
 let regenLevel = parseInt(getStore('bf_regenLevel') || '0', 10);
+let dimHpLevel = parseInt(getStore('bf_dimHpLevel') || '0', 10);
+let dimDmgLevel = parseInt(getStore('bf_dimDmgLevel') || '0', 10);
+let dimCritLevel = parseInt(getStore('bf_dimCritLevel') || '0', 10);
+let dimAspdLevel = parseInt(getStore('bf_dimAspdLevel') || '0', 10);
+let dimArmorLevel = parseInt(getStore('bf_dimArmorLevel') || '0', 10);
+let dimMoveLevel = parseInt(getStore('bf_dimMoveLevel') || '0', 10);
+let dimRegenLevel = parseInt(getStore('bf_dimRegenLevel') || '0', 10);
 let advCount = parseInt(getStore('bf_advCount') || '0', 10);
 let chocolates = parseInt(getStore('bf_choco') || '0', 10);
 let megaOwned = (getStore('bf_megaOwned') || '').split(',').filter(Boolean);
@@ -726,10 +749,13 @@ distorted = getStore('bf_distorted') === '1';
 godUnlocked = getStore('bf_godUnlocked') === '1';
 godMode = getStore('bf_god') === '1';
 ultimateUnlocked = getStore('bf_ultimateUnlocked') === '1';
+dimUnlocked = getStore('bf_dimUnlocked') === '1';
+dimension = getStore('bf_dimension') === '1';
 speedMode = getStore('bf_speed') === '1';
 boomMode = getStore('bf_boom') === '1';
 nightMode = getStore('bf_night') === '1';
 if (godMode) distorted = true;
+if (dimension) distorted = true;
 let achBannerTO = null;
 const ACHIEVEMENTS = [
   { id: 'win1', name: 'Первый шаг', desc: 'Победи любого босса', check: () => totalWins >= 1, coins: 100 },
@@ -742,13 +768,15 @@ const ACHIEVEMENTS = [
   { id: 'godun', name: 'Пробуждение', desc: 'Открой режим бога', check: () => godUnlocked, coins: 500 },
   { id: 'godwin', name: 'Богоубийца', desc: 'Победи ВСЕВЫШНЕГО', check: () => (getStore('bf_beaten') || '').split(',').indexOf('god') !== -1, coins: 1200, choco: 15 },
   { id: 'finalwin', name: 'Финиш!', desc: 'Победи финального босса', check: () => (getStore('bf_beaten') || '').split(',').indexOf('ultimate') !== -1, coins: 2000, choco: 30 },
+  { id: 'dimwin1', name: 'Иное измерение', desc: 'Победи Стража Врат', check: () => (getStore('bf_beaten') || '').split(',').indexOf('dim1') !== -1, coins: 1500, choco: 20 },
+  { id: 'dimwin7', name: 'Владыка измерений', desc: 'Победи ВЛАДЫКУ ИЗМЕРЕНИЙ', check: () => (getStore('bf_beaten') || '').split(',').indexOf('dim7') !== -1, coins: 5000, choco: 50 },
   { id: 'rich', name: 'Богач', desc: 'Имей 100000 монет', check: () => coins >= 100000, coins: 300 },
   { id: 'choco500', name: 'Сладкоежка', desc: 'Собери 500 шоколадок', check: () => chocolates >= 500, coins: 300, choco: 50 },
   { id: 'mega5', name: 'Коллекционер', desc: 'Купи все мега-оружия', check: () => Object.keys(MEGA_WEAPONS).every(w => megaOwned.indexOf(w) !== -1), coins: 800, choco: 15 },
   { id: 'codes10', name: 'Кодировщик', desc: 'Активируй 10 кодов', check: () => activatedCodes.length >= 10, coins: 200 },
-  { id: 'max50', name: 'Силач', desc: 'Прокачай HP и урон 50 раз', check: () => hpLevel + dmgLevel >= 50, coins: 400 },
-  { id: 'crit10', name: 'Удачливый', desc: 'Крит 10-го уровня', check: () => critLevel >= 10, coins: 300 },
-  { id: 'armor10', name: 'Неуязвимый', desc: 'Броня 10-го уровня', check: () => armorLevel >= 10, coins: 300 }
+  { id: 'max50', name: 'Силач', desc: 'Прокачай HP и урон 50 раз', check: () => lv('hp') + lv('dmg') >= 50, coins: 400 },
+  { id: 'crit10', name: 'Удачливый', desc: 'Крит 10-го уровня', check: () => lv('crit') >= 10, coins: 300 },
+  { id: 'armor10', name: 'Неуязвимый', desc: 'Броня 10-го уровня', check: () => lv('armor') >= 10, coins: 300 }
 ];
 function grantAchievement(a) {
   if (unlockedAch.indexOf(a.id) !== -1) return;
@@ -802,6 +830,40 @@ const UP_ARMOR_COST = l => 450 + l * 300;
 const UP_MOVE_COST = l => 500 + l * 350;
 const UP_REG_COST = l => 600 + l * 400;
 const MAX_CRIT = 12, MAX_ASPD = 10, MAX_ARMOR = 10, MAX_MOVE = 10, MAX_REG = 10;
+function lv(k) {
+  if (dimension) return { hp: dimHpLevel, dmg: dimDmgLevel, crit: dimCritLevel, aspd: dimAspdLevel, armor: dimArmorLevel, move: dimMoveLevel, regen: dimRegenLevel }[k];
+  return { hp: hpLevel, dmg: dmgLevel, crit: critLevel, aspd: atkSpdLevel, armor: armorLevel, move: moveLevel, regen: regenLevel }[k];
+}
+function lvMax(k) { return k === 'crit' ? MAX_CRIT : k === 'aspd' ? MAX_ASPD : k === 'armor' ? MAX_ARMOR : k === 'move' ? MAX_MOVE : k === 'regen' ? MAX_REG : 999; }
+function upCost(k) {
+  const base = k === 'hp' ? UP_HP_COST : k === 'dmg' ? UP_DMG_COST : k === 'crit' ? UP_CRIT_COST : k === 'aspd' ? UP_ASPD_COST : k === 'armor' ? UP_ARMOR_COST : k === 'move' ? UP_MOVE_COST : UP_REG_COST;
+  return Math.round(base(lv(k)) * (dimension ? 3 : 1));
+}
+function buyUp(k) {
+  if (lv(k) >= lvMax(k)) return;
+  const cost = upCost(k);
+  if (coins < cost) return;
+  coins -= cost;
+  if (dimension) {
+    if (k === 'hp') dimHpLevel++;
+    else if (k === 'dmg') dimDmgLevel++;
+    else if (k === 'crit') dimCritLevel++;
+    else if (k === 'aspd') dimAspdLevel++;
+    else if (k === 'armor') dimArmorLevel++;
+    else if (k === 'move') dimMoveLevel++;
+    else dimRegenLevel++;
+  } else {
+    if (k === 'hp') hpLevel++;
+    else if (k === 'dmg') dmgLevel++;
+    else if (k === 'crit') critLevel++;
+    else if (k === 'aspd') atkSpdLevel++;
+    else if (k === 'armor') armorLevel++;
+    else if (k === 'move') moveLevel++;
+    else regenLevel++;
+  }
+  saveProgress();
+  refreshShop();
+}
 let combo = 0;
 let lastCrit = false;
 let dashCd = 0, dashTimer = 0, dashInv = 0, dashVX = 0, dashVY = 0;
@@ -822,6 +884,15 @@ function saveProgress() {
   setStore('bf_armorLevel', armorLevel);
   setStore('bf_moveLevel', moveLevel);
   setStore('bf_regenLevel', regenLevel);
+  setStore('bf_dimHpLevel', dimHpLevel);
+  setStore('bf_dimDmgLevel', dimDmgLevel);
+  setStore('bf_dimCritLevel', dimCritLevel);
+  setStore('bf_dimAspdLevel', dimAspdLevel);
+  setStore('bf_dimArmorLevel', dimArmorLevel);
+  setStore('bf_dimMoveLevel', dimMoveLevel);
+  setStore('bf_dimRegenLevel', dimRegenLevel);
+  setStore('bf_dimUnlocked', dimUnlocked ? '1' : '0');
+  setStore('bf_dimension', dimension ? '1' : '0');
   setStore('bf_choco', chocolates);
   setStore('bf_chocoWeapons', chocoWeaponsOwned.join(','));
   setStore('bf_skins', skinsOwned.join(','));
@@ -833,12 +904,12 @@ function saveProgress() {
   setStore('bf_ach', unlockedAch.join(','));
 }
 function weaponDmg() {
-  lastCrit = Math.random() < 0.05 + critLevel * 0.03;
-  const dmg = (weapon.dmg + dmgLevel * 5) * (lastCrit ? 2 : 1) * (1 + combo * 0.02);
+  lastCrit = Math.random() < 0.05 + lv('crit') * 0.03;
+  const dmg = (weapon.dmg + lv('dmg') * 5) * (lastCrit ? 2 : 1) * (1 + combo * 0.02);
   return Math.max(1, Math.round(dmg));
 }
-function playerAtkCd() { return Math.max(4, Math.round(weapon.cd * (1 - atkSpdLevel * 0.04))); }
-function playerBaseSpeed() { return (3.2 * (speedMode ? 1.3 : 1)) + moveLevel * 0.12; }
+function playerAtkCd() { return Math.max(4, Math.round(weapon.cd * (1 - lv('aspd') * 0.04))); }
+function playerBaseSpeed() { return (3.2 * (speedMode ? 1.3 : 1)) + lv('move') * 0.12; }
 function addFloat(x, y, text, color) {
   floatTexts.push({ x, y, text, color, life: 55 });
   if (floatTexts.length > 24) floatTexts.shift();
@@ -1281,7 +1352,7 @@ function buildWeaponList() {
   allWeapons().forEach((w, i) => {
     const d = document.createElement('div');
     d.className = 'card' + (i === selectedWeapon ? ' selected' : '');
-    d.innerHTML = `<div class="icon">${w.icon}</div><div><h3>${w.name}</h3><div class="mini">💥 урон <b>${w.dmg + dmgLevel * 5}</b></div><div class="mini">${w.desc}</div></div>`;
+    d.innerHTML = `<div class="icon">${w.icon}</div><div><h3>${w.name}</h3><div class="mini">💥 урон <b>${w.dmg + lv('dmg') * 5}</b></div><div class="mini">${w.desc}</div></div>`;
     d.onclick = () => { selectedWeapon = i; wl.querySelectorAll('.card').forEach(c => c.classList.remove('selected')); d.classList.add('selected'); };
     wl.appendChild(d);
   });
@@ -1290,13 +1361,13 @@ function buildWeaponList() {
 function buildBossList() {
   const bl = document.getElementById('bossList');
   bl.innerHTML = '';
-  const prevId = (BOSSES[selectedBoss] || BOSSES[0]).id;
-  const list = BOSSES.filter(b => (b.id !== 'god' || godUnlocked) && (b.id !== 'ultimate' || ultimateUnlocked));
+  const list = dimension ? DIM_BOSSES : BOSSES.filter(b => (b.id !== 'god' || godUnlocked) && (b.id !== 'ultimate' || ultimateUnlocked));
+  const prevId = (list[selectedBoss] || list[0]).id;
   list.forEach((b, i) => {
     const d = document.createElement('div');
     d.className = 'card' + (i === selectedBoss ? ' selected' : '');
     d.style.borderColor = i === selectedBoss ? b.accent : '';
-    d.innerHTML = `<div><h3>${b.name}</h3><div class="stars">${'★'.repeat(b.stars)}${'☆'.repeat(Math.max(0, 10 - b.stars))}</div><div class="mini">❤️ <b>${b.hp}</b> · 💥 <b>${b.dmg}</b></div></div><div class="mini">${b.desc}</div><div class="mini">🪙 награда: <b>${b.stars * 50}</b></div>`;
+    d.innerHTML = `<div><h3>${dimension ? '🌌 ' : ''}${b.name}</h3><div class="stars">${'★'.repeat(Math.min(10, b.stars))}${'☆'.repeat(Math.max(0, 10 - b.stars))}</div><div class="mini">❤️ <b>${b.hp}</b> · 💥 <b>${b.dmg}</b></div></div><div class="mini">${b.desc}</div><div class="mini">🪙 награда: <b>${b.stars * 360}</b></div>`;
     d.onclick = () => {
       selectedBoss = i;
       bl.querySelectorAll('.card').forEach((c, ci) => { c.classList.remove('selected'); c.style.borderColor = ''; });
@@ -1317,6 +1388,7 @@ function buildMenu() {
   updateSpeedUI();
   updateBoomUI();
   updateNightUI();
+  updateDimUI();
   updateDistortOverlay();
   buildWeaponList();
   buildBossList();
@@ -1330,26 +1402,32 @@ function maxUpgrade() {
   let guards = 0;
   while (guards < 1000000) {
     guards++;
-    const ups = [
-      { lvl: hpLevel, cost: UP_HP_COST(hpLevel), max: 999 },
-      { lvl: dmgLevel, cost: UP_DMG_COST(dmgLevel), max: 999 },
-      { lvl: critLevel, cost: UP_CRIT_COST(critLevel), max: MAX_CRIT },
-      { lvl: atkSpdLevel, cost: UP_ASPD_COST(atkSpdLevel), max: MAX_ASPD },
-      { lvl: armorLevel, cost: UP_ARMOR_COST(armorLevel), max: MAX_ARMOR },
-      { lvl: moveLevel, cost: UP_MOVE_COST(moveLevel), max: MAX_MOVE },
-      { lvl: regenLevel, cost: UP_REG_COST(regenLevel), max: MAX_REG }
-    ].filter(u => u.lvl < u.max);
-    let best = null;
-    for (const u of ups) if (coins >= u.cost && (!best || u.cost < best.cost)) best = u;
+    const kinds = ['hp', 'dmg', 'crit', 'aspd', 'armor', 'move', 'regen'];
+    let best = null, bestCost = Infinity;
+    for (const k of kinds) {
+      if (lv(k) >= lvMax(k)) continue;
+      const cost = upCost(k);
+      if (coins >= cost && cost < bestCost) { best = k; bestCost = cost; }
+    }
     if (!best) break;
-    coins -= best.cost;
-    if (best === ups[0]) hpLevel++;
-    else if (best === ups[1]) dmgLevel++;
-    else if (best === ups[2]) critLevel++;
-    else if (best === ups[3]) atkSpdLevel++;
-    else if (best === ups[4]) armorLevel++;
-    else if (best === ups[5]) moveLevel++;
-    else regenLevel++;
+    coins -= bestCost;
+    if (dimension) {
+      if (best === 'hp') dimHpLevel++;
+      else if (best === 'dmg') dimDmgLevel++;
+      else if (best === 'crit') dimCritLevel++;
+      else if (best === 'aspd') dimAspdLevel++;
+      else if (best === 'armor') dimArmorLevel++;
+      else if (best === 'move') dimMoveLevel++;
+      else dimRegenLevel++;
+    } else {
+      if (best === 'hp') hpLevel++;
+      else if (best === 'dmg') dmgLevel++;
+      else if (best === 'crit') critLevel++;
+      else if (best === 'aspd') atkSpdLevel++;
+      else if (best === 'armor') armorLevel++;
+      else if (best === 'move') moveLevel++;
+      else regenLevel++;
+    }
   }
   saveProgress();
   refreshShop();
@@ -1359,13 +1437,13 @@ function refreshShop() {
   document.getElementById('coinBalance').textContent = coins;
   const cb = document.getElementById('chocoBalance');
   if (cb) cb.textContent = chocolates;
-  document.getElementById('hpStat').textContent = 100 + hpLevel * 25;
-  document.getElementById('dmgStat').textContent = '+' + dmgLevel * 5;
-  document.getElementById('critStat').textContent = Math.min(41, Math.round((5 + critLevel * 3) * 100) / 100) + '%';
+  document.getElementById('hpStat').textContent = 100 + lv('hp') * 25;
+  document.getElementById('dmgStat').textContent = '+' + lv('dmg') * 5;
+  document.getElementById('critStat').textContent = Math.min(41, Math.round((5 + lv('crit') * 3) * 100) / 100) + '%';
   document.getElementById('aspdStat').textContent = Math.round(playerAtkCd() / weapon.cd * 100) + '%';
-  document.getElementById('armorStat').textContent = armorLevel * 3;
-  document.getElementById('moveStat').textContent = moveLevel * 0.12;
-  document.getElementById('regenStat').textContent = regenLevel;
+  document.getElementById('armorStat').textContent = lv('armor') * 3;
+  document.getElementById('moveStat').textContent = lv('move') * 0.12;
+  document.getElementById('regenStat').textContent = lv('regen');
   const hpBtn = document.getElementById('hpBtn');
   const dmgBtn = document.getElementById('dmgBtn');
   const maxBtn = document.getElementById('maxBtn');
@@ -1374,62 +1452,31 @@ function refreshShop() {
   const armorBtn = document.getElementById('armorBtn');
   const moveBtn = document.getElementById('moveBtn');
   const regenBtn = document.getElementById('regenBtn');
-  hpBtn.textContent = `+25 HP (${UP_HP_COST(hpLevel)} 🪙)`;
-  dmgBtn.textContent = `+5 урона (${UP_DMG_COST(dmgLevel)} 🪙)`;
-  critBtn.textContent = critLevel >= MAX_CRIT ? 'МАКС' : `+3% крита (${UP_CRIT_COST(critLevel)} 🪙)`;
-  aspdBtn.textContent = atkSpdLevel >= MAX_ASPD ? 'МАКС' : `-5% времени (${UP_ASPD_COST(atkSpdLevel)} 🪙)`;
-  armorBtn.textContent = armorLevel >= MAX_ARMOR ? 'МАКС' : `+3 брони (${UP_ARMOR_COST(armorLevel)} 🪙)`;
-  moveBtn.textContent = moveLevel >= MAX_MOVE ? 'МАКС' : `+0.12 (${UP_MOVE_COST(moveLevel)} 🪙)`;
-  regenBtn.textContent = regenLevel >= MAX_REG ? 'МАКС' : `+1 HP (${UP_REG_COST(regenLevel)} 🪙)`;
-  const one = [UP_HP_COST(hpLevel), UP_DMG_COST(dmgLevel)];
-  if (critLevel < MAX_CRIT) one.push(UP_CRIT_COST(critLevel));
-  if (atkSpdLevel < MAX_ASPD) one.push(UP_ASPD_COST(atkSpdLevel));
-  if (armorLevel < MAX_ARMOR) one.push(UP_ARMOR_COST(armorLevel));
-  if (moveLevel < MAX_MOVE) one.push(UP_MOVE_COST(moveLevel));
-  if (regenLevel < MAX_REG) one.push(UP_REG_COST(regenLevel));
+  hpBtn.textContent = `+25 HP (${upCost('hp')} 🪙)`;
+  dmgBtn.textContent = `+5 урона (${upCost('dmg')} 🪙)`;
+  critBtn.textContent = lv('crit') >= MAX_CRIT ? 'МАКС' : `+3% крита (${upCost('crit')} 🪙)`;
+  aspdBtn.textContent = lv('aspd') >= MAX_ASPD ? 'МАКС' : `-5% времени (${upCost('aspd')} 🪙)`;
+  armorBtn.textContent = lv('armor') >= MAX_ARMOR ? 'МАКС' : `+3 брони (${upCost('armor')} 🪙)`;
+  moveBtn.textContent = lv('move') >= MAX_MOVE ? 'МАКС' : `+0.12 (${upCost('move')} 🪙)`;
+  regenBtn.textContent = lv('regen') >= MAX_REG ? 'МАКС' : `+1 HP (${upCost('regen')} 🪙)`;
+  const one = ['hp', 'dmg', 'crit', 'aspd', 'armor', 'move', 'regen'].filter(k => lv(k) < lvMax(k)).map(upCost);
   maxBtn.disabled = coins < Math.min.apply(null, one);
-  hpBtn.disabled = coins < UP_HP_COST(hpLevel);
-  dmgBtn.disabled = coins < UP_DMG_COST(dmgLevel);
-  critBtn.disabled = critLevel >= MAX_CRIT || coins < UP_CRIT_COST(critLevel);
-  aspdBtn.disabled = atkSpdLevel >= MAX_ASPD || coins < UP_ASPD_COST(atkSpdLevel);
-  armorBtn.disabled = armorLevel >= MAX_ARMOR || coins < UP_ARMOR_COST(armorLevel);
-  moveBtn.disabled = moveLevel >= MAX_MOVE || coins < UP_MOVE_COST(moveLevel);
-  regenBtn.disabled = regenLevel >= MAX_REG || coins < UP_REG_COST(regenLevel);
+  hpBtn.disabled = coins < upCost('hp');
+  dmgBtn.disabled = coins < upCost('dmg');
+  critBtn.disabled = lv('crit') >= MAX_CRIT || coins < upCost('crit');
+  aspdBtn.disabled = lv('aspd') >= MAX_ASPD || coins < upCost('aspd');
+  armorBtn.disabled = lv('armor') >= MAX_ARMOR || coins < upCost('armor');
+  moveBtn.disabled = lv('move') >= MAX_MOVE || coins < upCost('move');
+  regenBtn.disabled = lv('regen') >= MAX_REG || coins < upCost('regen');
 }
 
-document.getElementById('hpBtn').onclick = () => {
-  const cost = UP_HP_COST(hpLevel);
-  if (coins >= cost) { coins -= cost; hpLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('dmgBtn').onclick = () => {
-  const cost = UP_DMG_COST(dmgLevel);
-  if (coins >= cost) { coins -= cost; dmgLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('critBtn').onclick = () => {
-  if (critLevel >= MAX_CRIT) return;
-  const cost = UP_CRIT_COST(critLevel);
-  if (coins >= cost) { coins -= cost; critLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('aspdBtn').onclick = () => {
-  if (atkSpdLevel >= MAX_ASPD) return;
-  const cost = UP_ASPD_COST(atkSpdLevel);
-  if (coins >= cost) { coins -= cost; atkSpdLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('armorBtn').onclick = () => {
-  if (armorLevel >= MAX_ARMOR) return;
-  const cost = UP_ARMOR_COST(armorLevel);
-  if (coins >= cost) { coins -= cost; armorLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('moveBtn').onclick = () => {
-  if (moveLevel >= MAX_MOVE) return;
-  const cost = UP_MOVE_COST(moveLevel);
-  if (coins >= cost) { coins -= cost; moveLevel++; saveProgress(); refreshShop(); }
-};
-document.getElementById('regenBtn').onclick = () => {
-  if (regenLevel >= MAX_REG) return;
-  const cost = UP_REG_COST(regenLevel);
-  if (coins >= cost) { coins -= cost; regenLevel++; saveProgress(); refreshShop(); }
-};
+document.getElementById('hpBtn').onclick = () => buyUp('hp');
+document.getElementById('dmgBtn').onclick = () => buyUp('dmg');
+document.getElementById('critBtn').onclick = () => buyUp('crit');
+document.getElementById('aspdBtn').onclick = () => buyUp('aspd');
+document.getElementById('armorBtn').onclick = () => buyUp('armor');
+document.getElementById('moveBtn').onclick = () => buyUp('move');
+document.getElementById('regenBtn').onclick = () => buyUp('regen');
 
 document.getElementById('distortBtn').onclick = () => {
   distorted = !distorted;
@@ -1474,6 +1521,32 @@ document.getElementById('nightBtn').onclick = () => {
 };
 
 document.getElementById('maxBtn').onclick = maxUpgrade;
+
+function updateDimUI() {
+  const btn = document.getElementById('dimBtn');
+  const st = document.getElementById('dimStatus');
+  if (!btn || !st) return;
+  if (!dimUnlocked) {
+    btn.textContent = '🌌 Новое измерение: 🔒 ЗАКРЫТО';
+    st.textContent = 'Открывается после победы над ФИНАЛЬНЫМ БОССОМ';
+    return;
+  }
+  btn.textContent = dimension ? '🌌 Новое измерение: ВКЛ' : '🌌 Новое измерение: ВЫКЛ';
+  st.textContent = dimension
+    ? 'Играешь с чистого листа: прокачка x3 дороже, 7 новых боссов, все сложнее'
+    : 'Вернуться в прошлое измерение со старой прокачкой';
+}
+document.getElementById('dimBtn').onclick = () => {
+  if (!dimUnlocked) return;
+  dimension = !dimension;
+  setStore('bf_dimension', dimension ? '1' : '0');
+  if (dimension) genCracks();
+  updateDimUI();
+  updateDistortOverlay();
+  buildBossList();
+  refreshShop();
+  buildAchievements();
+};
 
 function advReward() { return 10000 * (advCount + 1); }
 function updateAdvBtn() {
@@ -1538,14 +1611,15 @@ function toMenu() {
 }
 
 function reset() {
-  const bdef = BOSSES[selectedBoss];
+  const blist = dimension ? DIM_BOSSES : BOSSES;
+  const bdef = blist[selectedBoss];
   const isUlt = bdef.type === 'ultimate';
   const godDmgMult = (godMode && !isUlt) ? 2.5 : 1;
   const godHpMult = (godMode && !isUlt) ? 3 : 1;
   const nightHpMult = nightMode ? 1.25 : 1;
   const nightDmgMult = nightMode ? 1.2 : 1;
   player.x = 150; player.y = 340;
-  player.maxHp = (100 + hpLevel * 25) * (boomMode ? 0.75 : 1) * (nightMode ? 1.15 : 1);
+  player.maxHp = (100 + lv('hp') * 25) * (boomMode ? 0.75 : 1) * (nightMode ? 1.15 : 1);
   player.hp = player.maxHp;
   player.speed = playerBaseSpeed();
   player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
@@ -1573,7 +1647,11 @@ function registerBossDefeat() {
   setStore('bf_wins', totalWins);
   if (boss.id === 'chaos') chaosBeaten = true;
   if (boss.id === 'god') { godBeaten = true; if (godMode) { ultimateUnlocked = true; setStore('bf_ultimateUnlocked', '1'); } }
-  if (boss.id === 'ultimate') letterShown = true;
+  if (boss.id === 'ultimate') {
+    letterShown = true;
+    dimUnlocked = true;
+    setStore('bf_dimUnlocked', '1');
+  }
   const c = CODE_BY_BOSS[boss.id];
   if (c && activatedCodes.indexOf(c) === -1) showCode = c;
   checkAchievements();
@@ -1582,7 +1660,7 @@ function registerBossDefeat() {
 function hurtPlayer(dmg) {
   if (player.hp <= 0) return;
   if (dashInv > 0) return;
-  const real = Math.max(1, dmg - armorLevel * 3);
+  const real = Math.max(1, dmg - lv('armor') * 3);
   player.hp -= real;
   combo = 0;
   player.hitFx = 10;
@@ -1647,8 +1725,8 @@ function update() {
   player.y = clamp(player.y, 0, canvas.height - player.h);
 
   frameCount++;
-  if (regenLevel > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
-    player.hp = Math.min(player.maxHp, player.hp + regenLevel);
+  if (lv('regen') > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
+    player.hp = Math.min(player.maxHp, player.hp + lv('regen'));
   }
   dashCd--; if (dashInv > 0) dashInv--;
   if ((keys['e'] || keys['E'] || keys['у'] || keys['У'] || touchDash) && dashCd <= 0 && dashTimer <= 0) {
@@ -2417,7 +2495,7 @@ function startWaves() {
 
 function startWaveRun() {
   player.x = 150; player.y = 340;
-  player.maxHp = 100 + hpLevel * 25;
+  player.maxHp = 100 + lv('hp') * 25;
   player.hp = player.maxHp;
   player.speed = playerBaseSpeed();
   player.facing = 1; player.atkCd = 0; player.atkAnim = 0; player.hitFx = 0;
@@ -2615,8 +2693,8 @@ function updateWaves() {
   player.x = clamp(player.x, 0, canvas.width - player.w);
   player.y = clamp(player.y, 0, canvas.height - player.h);
   frameCount++;
-  if (regenLevel > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
-    player.hp = Math.min(player.maxHp, player.hp + regenLevel);
+  if (lv('regen') > 0 && frameCount % 60 === 0 && player.hp < player.maxHp) {
+    player.hp = Math.min(player.maxHp, player.hp + lv('regen'));
   }
   dashCd--; if (dashInv > 0) dashInv--;
   if ((keys['e'] || keys['E'] || keys['у'] || keys['У'] || touchDash) && dashCd <= 0 && dashTimer <= 0) {
@@ -3597,16 +3675,19 @@ function drawDevLetter() {
     '',
     'Ты сделал невозможное: победил всех боссов,',
     'ВСЕВЫШНЕГО в режиме бога и его финальную форму.',
-    'Игра пройдена до самого конца!',
     '',
-    'Спасибо, что играл в «Бой с боссом».',
-    'Это была долгая дорога, но ты справился.',
+    'Ты открыл НОВОЕ ИЗМЕРЕНИЕ! 🌌',
+    'В нём всё начинается заново: твоя старая',
+    'прокачка осталась в прошлом измерении,',
+    'новая даётся в 3 раза медленнее, а боссы',
+    'всё сложнее и сложнее. Семь стражей ждут тебя.',
     '',
-    'С любовью и благодарностью,',
-    'твой разработчик ❤️'
+    'Это была долгая дорога... но она ещё не закончена.',
+    '',
+    'С любовью, твой разработчик ❤️'
   ];
-  let ly = by + 82;
-  lines.forEach(l => { ctx.fillText(l, canvas.width / 2, ly); ly += 26; });
+  let ly = by + 66;
+  lines.forEach(l => { ctx.fillText(l, canvas.width / 2, ly); ly += 23; });
   ctx.fillStyle = '#a9743f';
   ctx.font = '15px Segoe UI, Arial';
   ctx.fillText('Нажми R — реванш · Esc — меню', canvas.width / 2, by + h - 24);
@@ -3791,7 +3872,7 @@ document.getElementById('codeInput').addEventListener('keydown', e => {
   }
 });
 
-const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
+const RESET_KEYS = ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach'];
 
 function resetProgress() {
   RESET_KEYS.forEach(k => {
@@ -3800,11 +3881,13 @@ function resetProgress() {
   });
   coins = 0; hpLevel = 0; dmgLevel = 0; advCount = 0; chocolates = 0;
   critLevel = 0; atkSpdLevel = 0; armorLevel = 0; moveLevel = 0; regenLevel = 0;
+  dimHpLevel = 0; dimDmgLevel = 0; dimCritLevel = 0; dimAspdLevel = 0; dimArmorLevel = 0; dimMoveLevel = 0; dimRegenLevel = 0;
   totalWins = 0; totalKills = 0; waveBest = 0; unlockedAch = []; combo = 0;
   megaOwned = []; chocoWeaponsOwned = []; skinsOwned = ['classic']; selectedSkin = 'classic';
   activatedCodes = [];
   distorted = false; godUnlocked = false; godMode = false;
   ultimateUnlocked = false; letterShown = false;
+  dimUnlocked = false; dimension = false;
   speedMode = false; boomMode = false; nightMode = false;
   try { buildMenu(); } catch (e) {}
   updateAdvBtn();
@@ -3918,7 +4001,7 @@ function toggleFullscreen() {
 
 function applyCloudData(data) {
   if (!data || typeof data !== 'object') return;
-  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
+  for (const k of ['bf_coins', 'bf_hpLevel', 'bf_dmgLevel', 'bf_critLevel', 'bf_atkSpdLevel', 'bf_armorLevel', 'bf_moveLevel', 'bf_regenLevel', 'bf_dimHpLevel', 'bf_dimDmgLevel', 'bf_dimCritLevel', 'bf_dimAspdLevel', 'bf_dimArmorLevel', 'bf_dimMoveLevel', 'bf_dimRegenLevel', 'bf_dimUnlocked', 'bf_dimension', 'bf_advCount', 'bf_distorted', 'bf_godUnlocked', 'bf_god', 'bf_speed', 'bf_boom', 'bf_night', 'bf_megaOwned', 'bf_choco', 'bf_chocoWeapons', 'bf_skins', 'bf_skin', 'bf_codes', 'bf_beaten', 'bf_ultimateUnlocked', 'bf_wins', 'bf_kills', 'bf_waveBest', 'bf_ach']) {
     if (data[k] !== undefined) setStore(k, String(data[k]));
   }
   activatedCodes = (getStore('bf_codes') || '').split(',').filter(Boolean);
@@ -3930,6 +4013,13 @@ function applyCloudData(data) {
   armorLevel = parseInt(getStore('bf_armorLevel') || '0', 10);
   moveLevel = parseInt(getStore('bf_moveLevel') || '0', 10);
   regenLevel = parseInt(getStore('bf_regenLevel') || '0', 10);
+  dimHpLevel = parseInt(getStore('bf_dimHpLevel') || '0', 10);
+  dimDmgLevel = parseInt(getStore('bf_dimDmgLevel') || '0', 10);
+  dimCritLevel = parseInt(getStore('bf_dimCritLevel') || '0', 10);
+  dimAspdLevel = parseInt(getStore('bf_dimAspdLevel') || '0', 10);
+  dimArmorLevel = parseInt(getStore('bf_dimArmorLevel') || '0', 10);
+  dimMoveLevel = parseInt(getStore('bf_dimMoveLevel') || '0', 10);
+  dimRegenLevel = parseInt(getStore('bf_dimRegenLevel') || '0', 10);
   totalWins = parseInt(getStore('bf_wins') || '0', 10);
   totalKills = parseInt(getStore('bf_kills') || '0', 10);
   waveBest = parseInt(getStore('bf_waveBest') || '0', 10);
@@ -3945,10 +4035,13 @@ function applyCloudData(data) {
   godUnlocked = getStore('bf_godUnlocked') === '1';
   godMode = getStore('bf_god') === '1';
   ultimateUnlocked = getStore('bf_ultimateUnlocked') === '1';
+  dimUnlocked = getStore('bf_dimUnlocked') === '1';
+  dimension = getStore('bf_dimension') === '1';
   speedMode = getStore('bf_speed') === '1';
   boomMode = getStore('bf_boom') === '1';
   nightMode = getStore('bf_night') === '1';
   if (godMode) distorted = true;
+  if (dimension) distorted = true;
   try {
     refreshShop();
     buildMenu();
