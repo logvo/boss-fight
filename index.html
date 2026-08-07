@@ -743,7 +743,7 @@ const SKY_BOSSES = [
   { id: 'sky7', name: 'Хронос Времени', type: 'timeg', stars: 36, hp: 135000, dmg: 115, projDmg: 52, speed: 1.0, r: 75, color: '#a5f3fc', accent: '#fcd34d', desc: 'Владыка времени: вращающиеся стрелки и сферы вечности.', win: 'Время пошло против Хроноса!', lose: 'Время остановилось для тебя.', talk: ['ВРЕМЯ МНЕ ПОДЧИНЕНО.', 'ТИК-ТАК.', 'ТВОЁ ВРЕМЯ ИСТЕКАЕТ.'] },
   { id: 'sky8', name: 'Пожиратель Звёзд', type: 'starq', stars: 37, hp: 165000, dmg: 125, projDmg: 55, speed: 1.2, r: 85, color: '#0f172a', accent: '#fbbf24', desc: 'Голодная бездна неба: метеоры, аккреция и сверхновые.', win: 'Звёздный голод утолён!', lose: 'Ты стал его добычей.', talk: ['ЗВЁЗДЫ ВКУСНЫ.', 'ГОЛОД НЕ УТОЛИТЬ.', 'ПОСЛЕДНЯЯ СВЕРХНОВА!'] },
   { id: 'sky9', name: 'Верховный Пантеон', type: 'pantheon', stars: 38, hp: 210000, dmg: 135, projDmg: 60, speed: 1.0, r: 95, color: '#e2e8f0', accent: '#fbbf24', desc: 'Суд всех богов: колонны, судные кольца и землетрясения.', win: 'Пантеон низвергнут!', lose: 'Боги осудили тебя.', talk: ['СУД БОГОВ НАЧАЛСЯ.', 'ВИНОВЕН.', 'ПРИГОВОР ОКОНЧАТЕЛЕН.'] },
-  { id: 'sky10', name: 'ПРАРОДИТЕЛЬ ВСЕЛЕННОЙ', type: 'primalgod', stars: 39, hp: 360000, dmg: 150, projDmg: 70, speed: 0.9, r: 110, color: '#312e81', accent: '#f0abfc', phases: 5, desc: 'Создатель всех измерений и богов. Пять фаз космической ярости — финал пути!', win: 'ПРАРОДИТЕЛЬ ПОВЕРЖЕН! ТЫ СТАЛ ЛЕГЕНДОЙ ВСЕХ МИРОВ!', lose: 'Вселенная схлопнулась вместе с тобой...', talk: ['Я СОЗДАЛ ВСЁ.', 'ДО СЕБЯ ВСЕМ ДАЛЕКО.', 'ПОКАЖИ СВОЮ ВСЕЛЕННУЮ.'] }
+  { id: 'sky10', name: 'НЕБЕСНОЕ ОТРАЖЕНИЕ', type: 'reflection', stars: 39, hp: 380000, dmg: 155, projDmg: 72, speed: 1.05, r: 110, color: '#a5f3fc', accent: '#f0abfc', phases: 3, desc: 'Живое зеркало всех измерений: 15 перевоплощений в любого босса, а затем его истинная форма — 3 фазы. Ты против ВСЕХ сразу!', win: 'НЕБЕСНОЕ ОТРАЖЕНИЕ РАЗБИТО! ТЫ ПОБЕДИЛ САМОГО СЕБЯ!', lose: 'Ты затерялся среди своих же отражений...', talk: ['Я — твоё отражение.', 'Все боги — лишь мои маски.', 'Покажи, кто ты без масок!'] }
 ];
 
 const canvas = document.getElementById('game');
@@ -759,7 +759,7 @@ const fightEl = document.getElementById('fight');
 
 const player = { x: 120, y: 300, w: 46, h: 64, hp: 100, maxHp: 100, speed: 3.2, atkCd: 0, atkAnim: 0, facing: 1, hitFx: 0 };
 
-const boss = { x: 620, y: 280, r: 40, hp: 1, maxHp: 1, dmg: 0, projDmg: 0, speed: 0, type: 'slime', atkCd: 0, hitFx: 0, mood: 'neutral', state: 'idle', timer: 120, dirX: 1, dirY: 0, burnT: 0, burnTick: 0, dying: false, deathT: 0, tx: 0, ty: 0, name: '', stars: 1, color: '#7ec850', accent: '#7ec850', talk: [], win: '', lose: '' };
+const boss = { x: 620, y: 280, r: 40, hp: 1, maxHp: 1, dmg: 0, projDmg: 0, speed: 0, type: 'slime', atkCd: 0, hitFx: 0, mood: 'neutral', state: 'idle', timer: 120, dirX: 1, dirY: 0, burnT: 0, burnTick: 0, dying: false, deathT: 0, tx: 0, ty: 0, name: '', stars: 1, color: '#7ec850', accent: '#7ec850', talk: [], win: '', lose: '', mimic: null, mimicList: [], mimicIdx: 0, mirror: false, pipCount: 1, transformFx: 0 };
 
 let weapon = WEAPONS.sword;
 let selectedWeapon = 0;
@@ -916,7 +916,7 @@ const ACHIEVEMENTS = [
   { id: 'dimwin7', name: 'Владыка измерений', desc: 'Победи ВЛАДЫКУ ИЗМЕРЕНИЙ', check: () => (getStore('bf_beaten') || '').split(',').indexOf('dim7') !== -1, coins: 5000, choco: 50 },
   { id: 'skywin1', name: 'Возвращение света', desc: 'Победи ПОХИТИТЕЛЯ СВЕТА и открой Божественное измерение', check: () => skyUnlocked, coins: 4000, choco: 40 },
   { id: 'skywin4', name: 'Укротитель жал', desc: 'Победи БОЖЕСТВЕННУЮ ОСУ', check: () => (getStore('bf_beaten') || '').split(',').indexOf('sky4') !== -1, coins: 8000, choco: 60 },
-  { id: 'skywin10', name: 'Создатель миров', desc: 'Победи ПРАРОДИТЕЛЯ ВСЕЛЕННОЙ', check: () => (getStore('bf_beaten') || '').split(',').indexOf('sky10') !== -1, coins: 20000, choco: 150 },
+  { id: 'skywin10', name: 'Разбитое зеркало', desc: 'Победи НЕБЕСНОЕ ОТРАЖЕНИЕ', check: () => (getStore('bf_beaten') || '').split(',').indexOf('sky10') !== -1, coins: 20000, choco: 150 },
   { id: 'rich', name: 'Богач', desc: 'Имей 100000 монет', check: () => coins >= 100000, coins: 300 },
   { id: 'choco500', name: 'Сладкоежка', desc: 'Собери 500 шоколадок', check: () => chocolates >= 500, coins: 300, choco: 50 },
   { id: 'mega5', name: 'Коллекционер', desc: 'Купи все мега-оружия', check: () => Object.keys(MEGA_WEAPONS).every(w => megaOwned.indexOf(w) !== -1), coins: 800, choco: 15 },
@@ -1910,6 +1910,7 @@ function reset() {
   boss.type = bdef.type;
   boss.atkCd = 0; boss.hitFx = 0; boss.mood = 'neutral'; boss.state = 'idle'; boss.timer = 120; boss.dirX = 1; boss.dirY = 0; boss.burnT = 0; boss.burnTick = 0; boss.dying = false; boss.deathT = 0; boss.tx = 0; boss.ty = 0; boss.phase = 1; boss.phaseFlash = 0; boss.atkCd2 = 0; boss.phases = bdef.phases || 1;
   boss.name = bdef.name; boss.id = bdef.id; boss.stars = bdef.stars; boss.color = bdef.color; boss.accent = bdef.accent; boss.talk = bdef.talk; boss.win = bdef.win; boss.lose = bdef.lose;
+  if (boss.id === 'sky10') buildReflectionSetup();
   gameOver = false; win = false; shake = 0; talkTimer = 0; coinDrop = 0; chaosBeaten = false; godBeaten = false; showCode = null; letterShown = false;
   particles.length = 0; projs.length = 0;
   bossNameLabel.textContent = boss.name;
@@ -1936,6 +1937,9 @@ function registerBossDefeat() {
     letterShown = true;
     skyUnlocked = true;
     setStore('bf_skyUnlocked', '1');
+  }
+  if (boss.id === 'sky10') {
+    letterShown = true;
   }
   const c = CODE_BY_BOSS[boss.id];
   if (c && activatedCodes.indexOf(c) === -1) showCode = c;
@@ -2148,6 +2152,7 @@ function update() {
 function updateBoss() {
   if (boss.hp <= 0) return;
   boss.atkCd--;
+  if (boss.id === 'sky10') updateReflectionLogic();
   const dx = player.x + player.w / 2 - boss.x;
   const dy = player.y + player.h / 2 - boss.y;
   const d = Math.hypot(dx, dy);
@@ -3577,10 +3582,146 @@ function updateBoss() {
     }
     boss.x = clamp(boss.x, 60, canvas.width - 60);
     boss.y = clamp(boss.y, 60, canvas.height - 100);
+  } else if (t === 'reflection') {
+    const ph = boss.phase || 1;
+    const sp = boss.speed * (ph === 3 ? 1.45 : ph === 2 ? 1.25 : 1.05);
+    if (boss.state === 'idle') {
+      boss.x += nx * sp; boss.y += ny * sp;
+      if (boss.atkCd <= 0 && d < 640) {
+        boss.atkCd = ph === 3 ? 46 : ph === 2 ? 56 : 66;
+        const roll = Math.random();
+        const opts = ph === 1 ? ['shards', 'beam', 'copy', 'burst'] : ph === 2 ? ['shards', 'beam', 'prism', 'copy', 'walls'] : ['shards', 'prism', 'walls', 'doom', 'copy', 'beam'];
+        boss.state = opts[Math.floor(roll * opts.length)] || 'shards';
+        boss.timer = (boss.state === 'walls' || boss.state === 'doom') ? 70 : boss.state === 'prism' ? 55 : 50;
+      }
+    } else if (boss.state === 'shards') {
+      boss.timer--;
+      if (boss.timer % 6 === 0) {
+        const a = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.9;
+        shootBossProj(Math.cos(a) * 4.6, Math.sin(a) * 4.6, boss.projDmg, 8, ph === 3 ? '#fde047' : '#a5f3fc');
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'beam') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        const a = Math.atan2(dy, dx) + (ph >= 2 ? (Math.random() - 0.5) * 0.5 : 0);
+        shootBossProj(Math.cos(a) * 5.4, Math.sin(a) * 5.4, boss.projDmg, 6, '#f0abfc');
+      }
+      if (boss.timer === 22 && ph === 3) for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 9, '#fde047'); }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'burst') {
+      boss.timer--;
+      if (boss.timer === 26) { burst(boss.x, boss.y, '#a5f3fc', 40); for (let i = 0; i < 18; i++) { const a = (i / 18) * Math.PI * 2; shootBossProj(Math.cos(a) * 4, Math.sin(a) * 4, boss.projDmg, 9, '#a5f3fc'); } }
+      if (boss.timer === 8) for (let i = 0; i < 22; i++) { const a = (i / 22) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 9, '#f0abfc'); }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'copy') {
+      boss.timer--;
+      if (boss.timer % 9 === 0) projs.push({ x: boss.x, y: boss.y, vx: nx * 3.2, vy: ny * 3.2, dmg: boss.projDmg, r: 10, friendly: false, color: '#fde047', homing: true });
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'prism') {
+      boss.timer--;
+      if (boss.timer % 4 === 0) {
+        const a = boss.timer * 0.45;
+        for (const s of [1, -1]) shootBossProj(Math.cos(a * s) * 4.2, Math.sin(a * s) * 4.2, boss.projDmg, 8, ['#a5f3fc', '#f0abfc', '#fde047'][boss.timer % 3]);
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'walls') {
+      boss.timer--;
+      if (boss.timer % 2 === 0) {
+        const side = boss.timer % 4;
+        if (side === 0) projs.push({ x: -20, y: player.y + player.h / 2 + (Math.random() * 300 - 150), vx: 10, vy: 0, dmg: boss.projDmg, r: 10, friendly: false, color: '#a5f3fc' });
+        else if (side === 1) projs.push({ x: canvas.width + 20, y: player.y + player.h / 2 + (Math.random() * 300 - 150), vx: -10, vy: 0, dmg: boss.projDmg, r: 10, friendly: false, color: '#f0abfc' });
+        else if (side === 2) projs.push({ x: player.x + player.w / 2 + (Math.random() * 520 - 260), y: -20, vx: 0, vy: 9.5, dmg: boss.projDmg, r: 10, friendly: false, color: '#fde047' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+    } else if (boss.state === 'doom') {
+      boss.timer--;
+      if (boss.timer % 2 === 0) {
+        const side = Math.floor(Math.random() * 3);
+        if (side === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 640 - 320), y: -20, vx: 0, vy: 11, dmg: boss.projDmg, r: 11, friendly: false, color: '#fde047' });
+        else if (side === 1) projs.push({ x: -20, y: player.y + (Math.random() * 400 - 200), vx: 11, vy: 0, dmg: boss.projDmg, r: 11, friendly: false, color: '#a5f3fc' });
+        else projs.push({ x: canvas.width + 20, y: player.y + (Math.random() * 400 - 200), vx: -11, vy: 0, dmg: boss.projDmg, r: 11, friendly: false, color: '#f0abfc' });
+      }
+      if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 34; }
+    }
+    boss.x = clamp(boss.x, 60, canvas.width - 60);
+    boss.y = clamp(boss.y, 60, canvas.height - 100);
   }
 
   talkTimer--;
   if (talkTimer <= 0) talkTimer = 160;
+}
+
+function getBossDef(id) {
+  for (const b of BOSSES) if (b.id === id) return b;
+  for (const b of DIM_BOSSES) if (b.id === id) return b;
+  for (const b of SKY_BOSSES) if (b.id === id) return b;
+  return null;
+}
+
+function buildReflectionSetup() {
+  const pool = BOSSES.concat(DIM_BOSSES, SKY_BOSSES).filter(b => b.id !== 'sky10');
+  const picked = [];
+  while (picked.length < 15 && pool.length) {
+    const idx = Math.floor(Math.random() * pool.length);
+    picked.push(pool[idx].id);
+    pool.splice(idx, 1);
+  }
+  boss.mimicList = picked;
+  boss.mimic = null;
+  boss.mimicIdx = 0;
+  boss.mirror = false;
+  boss.pipCount = 15;
+  boss.transformFx = 0;
+}
+
+function updateReflectionLogic() {
+  const seg = boss.maxHp / 18;
+  const segNum = Math.max(0, Math.min(17, Math.floor((boss.maxHp - boss.hp) / seg)));
+  if (!boss.mirror) {
+    if (segNum > 14) {
+      const selfDef = getBossDef('sky10');
+      boss.mirror = true;
+      boss.mimic = null;
+      boss.type = 'reflection';
+      boss.pipCount = 3;
+      boss.phase = 1; boss.phaseFlash = 130;
+      boss.state = 'idle'; boss.timer = 90; boss.atkCd = 40;
+      if (selfDef) { boss.talk = selfDef.talk; boss.win = selfDef.win; boss.lose = selfDef.lose; }
+      projs.length = 0;
+      try { setupBossBar(); } catch (e) {}
+      burst(boss.x, boss.y, '#a5f3fc', 50); burst(boss.x, boss.y, '#f0abfc', 50);
+      shake = 20;
+      boss.transformFx = 90;
+      return;
+    }
+    const nm = boss.mimicList[segNum];
+    if (boss.mimic !== nm) {
+      const mb = getBossDef(nm);
+      if (mb) {
+        boss.mimic = nm;
+        boss.mimicIdx = segNum;
+        boss.type = mb.type;
+        boss.color = mb.color; boss.accent = mb.accent; boss.r = mb.r;
+        boss.talk = mb.talk;
+        boss.state = 'idle'; boss.timer = 70; boss.atkCd = 40;
+        projs.length = 0;
+        boss.transformFx = 50;
+        shake = 10;
+        burst(boss.x, boss.y, mb.accent, 30);
+      }
+    }
+  } else {
+    const ph = Math.min(3, Math.max(1, segNum - 14));
+    if (ph !== boss.phase) {
+      boss.phase = ph;
+      boss.phaseFlash = 130;
+      boss.state = 'idle'; boss.timer = 80; boss.atkCd = 40;
+      projs.length = 0;
+      burst(boss.x, boss.y, ['#a5f3fc', '#f0abfc', '#fde047'][ph - 1], 45);
+      shake = 18;
+    }
+  }
 }
 
 function updateBars() {
@@ -3601,7 +3742,11 @@ function updateBars() {
   }
   bossBarFill.style.width = Math.max(0, boss.hp / boss.maxHp * 100) + '%';
   let t = Math.max(0, Math.round(boss.hp)) + ' / ' + boss.maxHp;
-  if (boss.phases >= 2) {
+  if (boss.id === 'sky10') {
+    if (boss.mirror) t += ' · ЗЕРКАЛО ' + boss.phase + '/3';
+    else t += ' · Перевоплощение ' + (boss.mimicIdx + 1) + '/15';
+    updateBossPips();
+  } else if (boss.phases >= 2) {
     t += ' · Фаза ' + boss.phase + '/' + boss.phases;
     updateBossPips();
   }
@@ -3611,21 +3756,24 @@ function updateBars() {
 let bossPips = [];
 function setupBossBar() {
   clearBossPips();
-  if (!boss.phases || boss.phases < 2) return;
+  const n = boss.id === 'sky10' ? (boss.pipCount || 3) : (boss.phases || 1);
+  if (n < 2) return;
   const bar = document.getElementById('bossBar');
   if (!bar) return;
-  for (let i = 0; i < boss.phases; i++) {
+  for (let i = 0; i < n; i++) {
     const pip = document.createElement('div');
     pip.className = 'phase-pip' + (i === 0 ? ' on' : '');
-    pip.style.left = ((i + 0.5) / boss.phases * 100) + '%';
+    pip.style.left = ((i + 0.5) / n * 100) + '%';
     bar.appendChild(pip);
     bossPips.push(pip);
   }
 }
 function updateBossPips() {
-  if (bossPips.length !== (boss.phases || 1)) return;
+  const n = boss.id === 'sky10' ? (boss.pipCount || 3) : (boss.phases || 1);
+  if (bossPips.length !== n) return;
+  const cur = boss.id === 'sky10' ? (boss.mirror ? boss.phase - 1 : boss.mimicIdx) : boss.phase - 1;
   for (let i = 0; i < bossPips.length; i++) {
-    bossPips[i].classList.toggle('on', i === boss.phase - 1);
+    bossPips[i].classList.toggle('on', i === cur);
   }
 }
 function clearBossPips() {
@@ -4557,6 +4705,40 @@ function drawSkyBoss() {
   ctx.restore();
 }
 
+function drawReflectionMimic() {
+  const t = performance.now() / 1000;
+  if (boss.deathT <= 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.55 + 0.45 * Math.sin(t * 4);
+    ctx.fillStyle = boss.accent + '40';
+    ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.r * 1.7 + Math.sin(t * 4) * 8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.25)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.r * 1.7 + Math.sin(t * 4) * 8, t * 1.5, t * 1.5 + 0.9); ctx.stroke();
+    ctx.restore();
+  }
+  const mb = getBossDef(boss.mimic);
+  const savedId = boss.id, savedType = boss.type, savedDivine = divine;
+  const savedCol = boss.color, savedAcc = boss.accent, savedR = boss.r, savedTalk = boss.talk;
+  if (mb) {
+    boss.id = boss.mimic;
+    boss.type = mb.type;
+    boss.color = mb.color; boss.accent = mb.accent; boss.r = mb.r;
+    if (boss.mimic.indexOf('dim') === 0) drawDimBoss();
+    else if (boss.mimic.indexOf('sky') === 0) drawSkyBoss();
+    else { divine = false; drawBoss(); }
+  }
+  boss.id = savedId; boss.type = savedType; boss.color = savedCol; boss.accent = savedAcc; boss.r = savedR; boss.talk = savedTalk;
+  divine = savedDivine;
+  if (boss.hitFx > 0) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(0.45, 0.45 * (boss.hitFx / 8));
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+}
+
 function drawSky1() {
   const t = performance.now() / 1000;
   ctx.strokeStyle = '#fff8dc'; ctx.lineWidth = 3;
@@ -4725,21 +4907,56 @@ function drawSky9() {
 function drawSky10() {
   const t = performance.now() / 1000;
   const ph = boss.phase || 1;
-  ctx.fillStyle = '#1e1b4b';
-  ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#f0abfc'; ctx.lineWidth = 3;
-  for (let i = 0; i < ph + 2; i++) {
-    const a = t * 0.8 + i * (Math.PI * 2 / (ph + 2));
-    ctx.beginPath(); ctx.arc(0, 0, 46 + i * 6 + Math.sin(t * 2 + i) * 3, a, a + 1.1); ctx.stroke();
+  const cols = ['#a5f3fc', '#f0abfc', '#fde047'];
+  const col = cols[ph - 1];
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2;
+  for (let i = 0; i < 8; i++) {
+    const a = i * 2.399963 + t * 0.5;
+    const d2 = Math.sqrt(i + 1) * 26;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a) * d2, Math.sin(a) * d2); ctx.lineTo(Math.cos(a) * (d2 + 14), Math.sin(a) * (d2 + 14)); ctx.stroke();
   }
-  ctx.fillStyle = '#f0abfc';
-  ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#312e81';
-  ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(240,171,252,.6)'; ctx.lineWidth = 2;
-  for (let i = 0; i < 10; i++) {
-    const a = i * 2.399963 + t * 0.4, d2 = Math.sqrt(i) * 30;
-    ctx.beginPath(); ctx.moveTo(Math.cos(a) * d2, Math.sin(a) * d2); ctx.lineTo(Math.cos(a) * (d2 + 6), Math.sin(a) * (d2 + 6)); ctx.stroke();
+  const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 58);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, col); g.addColorStop(1, '#1e1b4b');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(0, -54); ctx.lineTo(38, -38); ctx.lineTo(54, 0); ctx.lineTo(38, 38); ctx.lineTo(0, 54); ctx.lineTo(-38, 38); ctx.lineTo(-54, 0); ctx.lineTo(-38, -38);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, -54); ctx.lineTo(38, -38); ctx.lineTo(54, 0); ctx.lineTo(38, 38); ctx.lineTo(0, 54); ctx.lineTo(-38, 38); ctx.lineTo(-54, 0); ctx.lineTo(-38, -38);
+  ctx.closePath(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3 + t * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * 30, Math.sin(a) * 30);
+    ctx.lineTo(Math.cos(a) * 52, Math.sin(a) * 52);
+    ctx.stroke();
+  }
+  ctx.save();
+  ctx.rotate(Math.sin(t * 1.5) * 0.15);
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  rr(-20, -30, 40, 60, 8);
+  ctx.fillStyle = '#1e1b4b';
+  ctx.fillRect(-16, -14, 32, 36);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(0, -2, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = col;
+  ctx.beginPath(); ctx.arc(0, -2, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(0, -20); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = col;
+  for (let i = 0; i < 5; i++) {
+    const a = t * 1.2 + i * 1.2566;
+    ctx.beginPath(); ctx.arc(Math.cos(a) * 62, Math.sin(a) * 62, 3 + Math.sin(t * 3 + i) * 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+  if (ph >= 2) {
+    ctx.strokeStyle = 'rgba(' + (ph === 2 ? '240,171,252' : '253,224,71') + ',.6)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const a = t * 0.9 + i * 2.1;
+      ctx.beginPath(); ctx.arc(0, 0, 66 + i * 10, a, a + 1.7); ctx.stroke();
+    }
   }
 }
 
@@ -4936,7 +5153,10 @@ const SKY_FLOOR = {
 };
 
 function drawBoss() {
-  if (divine) { drawSkyBoss(); return; }
+  if (divine) {
+    if (boss.id === 'sky10' && boss.mimic && !boss.mirror) { drawReflectionMimic(); return; }
+    drawSkyBoss(); return;
+  }
   if (boss.id && boss.id.indexOf('dim') === 0) { drawDimBoss(); return; }
   const b = boss.hitFx > 0;
   const t = performance.now() / 1000;
@@ -5991,6 +6211,21 @@ function drawDevLetter() {
     'Соберись: там тебя ждёт ещё сложнее!',
     '',
     'С любовью, твой разработчик ❤️'
+  ] : boss.id === 'sky10' ? [
+    'Дорогой игрок!',
+    '',
+    'Ты разбил НЕБЕСНОЕ ОТРАЖЕНИЕ — последнее,',
+    'что стояло между тобой и концом пути.',
+    'Пятнадцать масок, пятнадцать богов — и в каждой',
+    'ты победил самого себя. Это ты, а не я,',
+    'перестал быть отражением своих страхов.',
+    '',
+    'Небо больше не искажает твой образ —',
+    'теперь оно отражает только правду о тебе.',
+    'Путь пройден. Каждое измерение пало.',
+    'Спасибо за то, что дошёл до конца.',
+    '',
+    'С любовью, твой разработчик ❤️'
   ] : [
     'Дорогой игрок!',
     '',
@@ -6076,14 +6311,25 @@ function drawGameOver() {
 function draw() {
   if (waveMode) { drawWaves(); return; }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (dimension) drawDimBackground();
-  else if (divine) drawSkyBackground();
-  else drawOldBg();
+  const mimicMode = boss.id === 'sky10' && boss.mimic && !boss.mirror;
+  if (mimicMode) {
+    const svId = boss.id, svD = divine, svDim = dimension;
+    boss.id = boss.mimic;
+    divine = boss.id.indexOf('sky') === 0;
+    dimension = boss.id.indexOf('dim') === 0;
+    if (dimension) drawDimBackground(); else if (divine) drawSkyBackground(); else drawOldBg();
+    if (dimension) drawDimFloor(); else if (divine) drawSkyFloor(); else drawOldFloor();
+    boss.id = svId; divine = svD; dimension = svDim;
+  } else {
+    if (dimension) drawDimBackground();
+    else if (divine) drawSkyBackground();
+    else drawOldBg();
+    if (dimension) drawDimFloor();
+    else if (divine) drawSkyFloor();
+    else drawOldFloor();
+  }
   ctx.save();
   if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  if (dimension) drawDimFloor();
-  else if (divine) drawSkyFloor();
-  else drawOldFloor();
   drawParticles();
   drawTeleportMarker();
   drawProjs();
@@ -6100,6 +6346,23 @@ function draw() {
     ctx.strokeText('⚠️ ФАЗА ' + boss.phase + '!', boss.x, boss.y - boss.r - 42);
     ctx.fillStyle = phaseColor();
     ctx.fillText('⚠️ ФАЗА ' + boss.phase + '!', boss.x, boss.y - boss.r - 42);
+  }
+
+  if (boss.id === 'sky10' && boss.transformFx > 0) {
+    boss.transformFx--;
+    let ttxt = '';
+    if (boss.mirror) ttxt = '🪞 ЗЕРКАЛЬНАЯ ФОРМА — ФАЗА ' + boss.phase + '/3!';
+    else {
+      const mb = getBossDef(boss.mimic);
+      ttxt = '🌀 ПЕРЕВОПЛОЩЕНИЕ ' + (boss.mimicIdx + 1) + '/15' + (mb ? ' → ' + mb.name : '');
+    }
+    ctx.font = 'bold 24px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(0,0,0,.7)';
+    ctx.lineWidth = 5;
+    ctx.strokeText(ttxt, boss.x, boss.y - boss.r - 70);
+    ctx.fillStyle = boss.mirror ? '#fde047' : boss.accent;
+    ctx.fillText(ttxt, boss.x, boss.y - boss.r - 70);
   }
 
   drawCracks();
