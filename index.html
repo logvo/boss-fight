@@ -761,7 +761,8 @@ const ELF_BOSSES = [
   { id: 'elf7', name: 'Горный Колосс', type: 'colossus', stars: 47, hp: 500000, dmg: 160, projDmg: 75, speed: 0.55, r: 90, phases: 2, color: '#a8a29e', accent: '#e7e5e4', desc: 'Ожившая гора: обвалы, метеоритный дождь и ударные волны.', win: 'Горный Колосс рухнул вниз по склону!', lose: 'Обвал похоронил тебя.', talk: ['ГОРА ВСТАЛА!', 'СКАЛЫ ОБРУШАТСЯ!', 'ТОПОТ ГОР ВЕЧЕН.'] },
   { id: 'elf8', name: 'Фея Кристалла', type: 'crystfey', stars: 48, hp: 550000, dmg: 155, projDmg: 78, speed: 1.1, r: 60, phases: 2, color: '#f0abfc', accent: '#e879f9', desc: 'Хранительница самоцветов: осколки кристаллов и вспышки света.', win: 'Фея Кристалла засияла вновь!', lose: 'Кристаллы пронзили тебя.', talk: ['СВЕТ В КАМНЕ ВЕЧЕН.', 'ОСКОЛКИ ПОЛЕТЯТ!', 'СМОТРИ ВНИМАТЕЛЬНО!'] },
   { id: 'elf9', name: 'Голем-Хранитель', type: 'guardgol', stars: 49, hp: 620000, dmg: 170, projDmg: 80, speed: 0.6, r: 85, phases: 2, color: '#78716c', accent: '#fbbf24', desc: 'Гигантский страж рун: самонаводящиеся камни и рунные кольца.', win: 'Голем-Хранитель встал на колени!', lose: 'Руны хранителя стёрли тебя.', talk: ['РУНЫ ЗОВУТ.', 'СДВИНУСЬ ЛИ ШАГ?', 'ПЫЛЬ К РАССВЕТУ!'] },
-  { id: 'elf10', name: 'Гигантский Голем', type: 'giantgol', stars: 50, hp: 720000, dmg: 185, projDmg: 85, speed: 0.6, r: 95, phases: 2, color: '#57534e', accent: '#d97706', desc: 'Последний страж эльфийского измерения, колосс из древнего гранита. Две фазы: сонный гигант и разъярённая гора.', win: 'ГИГАНТСКИЙ ГОЛЕМ ПОВЕРЖЕН! ЦАРСТВО ЭЛЬФОВ ОТКРЫТО!', lose: 'Гранитный кулак стёр тебя в пыль.', talk: ['КТО ПОТРЕВОЖИЛ ГОРУ?', 'ГРАНИТ НЕ ПЛАЧЕТ.', 'ПОСЛЕДНИЙ ШАГ!'] }
+  { id: 'elf10', name: 'Гигантский Голем', type: 'giantgol', stars: 50, hp: 720000, dmg: 185, projDmg: 85, speed: 0.6, r: 95, phases: 2, color: '#57534e', accent: '#d97706', desc: 'Последний страж эльфийского измерения, колосс из древнего гранита. Две фазы: сонный гигант и разъярённая гора.', win: 'ГИГАНТСКИЙ ГОЛЕМ ПОВЕРЖЕН! ЦАРСТВО ЭЛЬФОВ ОТКРЫТО!', lose: 'Гранитный кулак стёр тебя в пыль.', talk: ['КТО ПОТРЕВОЖИЛ ГОРУ?', 'ГРАНИТ НЕ ПЛАЧЕТ.', 'ПОСЛЕДНИЙ ШАГ!'] },
+  { id: 'elf11', name: 'Гайя', type: 'gaia', stars: 51, hp: 1100000, dmg: 200, projDmg: 95, speed: 0.5, r: 115, phases: 5, color: '#6ee7a0', accent: '#fbbf24', desc: 'Древняя нестабильная сущность, мать миров, раздираемая злом изнутри. Пять фаз ярости. Победи — и она изгонит всё зло из мира.', win: 'ГАЙЯ ИЗГНАЛА ВСЁ ЗЛО ИЗ МИРА! ТЫ ПОБЕДИЛ, ГЕРОЙ!', lose: 'Нестабильность Гайи поглотила тебя.', talk: ['Я — Гайя, мать миров.', 'ЗЛО РАЗРЫВАЕТ МЕНЯ ИЗНУТРИ!', 'ИЗГОНИ ЕГО ИЛИ ПОГИБНИ!'] }
 ];
 
 const ELF_TYPES = ['elfguard', 'sylph', 'dryad', 'rockgol', 'moonfey', 'treant', 'colossus', 'crystfey', 'guardgol', 'giantgol'];
@@ -806,6 +807,7 @@ let skyUnlocked = false;
 let divine = false;
 let elfUnlocked = false;
 let elven = false;
+let gaiaOutro = null;
 let distortFlash = 0;
 let cracks = [];
 const keys = {};
@@ -2103,8 +2105,11 @@ function damageBoss(dmg) {
     boss.dying = true;
     boss.deathT = DEATH_TIME;
     win = true;
-    dropCoins();
-    shake = 14;
+    if (boss.id === 'elf11') { startGaiaOutro(); }
+    else {
+      dropCoins();
+      shake = 14;
+    }
   }
 }
 
@@ -2212,17 +2217,21 @@ function update() {
   }
 
   if (boss.deathT > 0) {
-    boss.deathT--;
-    if (Math.random() < 0.4) burst(boss.x + (Math.random() - 0.5) * boss.r * 2, boss.y + (Math.random() - 0.5) * boss.r * 2, boss.color, 2);
-    if (boss.deathT <= 0) {
-      gameOver = true; win = true;
-      registerBossDefeat();
-      burst(boss.x, boss.y, boss.color, 50);
-      burst(boss.x, boss.y, '#ffffff', 40);
-      shake = 10;
-      if (boss.type === 'chaos') {
-        if (!distorted) activateDistortion();
-        else if (!godMode) activateGodMode();
+    if (boss.id === 'elf11' && gaiaOutro) {
+      updateGaiaOutro();
+    } else {
+      boss.deathT--;
+      if (Math.random() < 0.4) burst(boss.x + (Math.random() - 0.5) * boss.r * 2, boss.y + (Math.random() - 0.5) * boss.r * 2, boss.color, 2);
+      if (boss.deathT <= 0) {
+        gameOver = true; win = true;
+        registerBossDefeat();
+        burst(boss.x, boss.y, boss.color, 50);
+        burst(boss.x, boss.y, '#ffffff', 40);
+        shake = 10;
+        if (boss.type === 'chaos') {
+          if (!distorted) activateDistortion();
+          else if (!godMode) activateGodMode();
+        }
       }
     }
   }
@@ -3783,6 +3792,8 @@ function updateBoss() {
     boss.y = clamp(boss.y, 60, canvas.height - 100);
   } else if (t === 'empress') {
     updateEmpressLogic();
+  } else if (t === 'gaia') {
+    updateGaiaLogic();
   } else if (ELF_TYPES.indexOf(t) >= 0) {
     updateElfLogic();
   }
@@ -4139,6 +4150,232 @@ function updateElfLogic() {
     }
     if (boss.timer % 3 === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 460 - 230), y: -30, vx: 0, vy: 6, dmg: boss.projDmg * (ph === 2 ? 1.15 : 1), r: 13, friendly: false, color: '#b0875b' });
     if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  }
+}
+
+const GAIA_COLORS = ['#6ee7a0', '#86efac', '#a3e635', '#fbbf24', '#ff4d6d'];
+const GAIA_POOLS = {
+  1: ['groot', 'gleaf', 'gseed'],
+  2: ['groot', 'gleaf', 'gseed', 'gvine', 'gring'],
+  3: ['groot', 'gleaf', 'gseed', 'gvine', 'gring', 'gbeam', 'gstorm'],
+  4: ['groot', 'gleaf', 'gseed', 'gvine', 'gring', 'gbeam', 'gstorm', 'gquake', 'gbloom'],
+  5: ['groot', 'gleaf', 'gseed', 'gvine', 'gring', 'gbeam', 'gstorm', 'gquake', 'gbloom', 'grage']
+};
+
+function checkGaiaPhase(b) {
+  const hpr = b.hp / b.maxHp;
+  let want = 1;
+  if (hpr <= 0.8) want = 2;
+  if (hpr <= 0.6) want = 3;
+  if (hpr <= 0.4) want = 4;
+  if (hpr <= 0.2) want = 5;
+  if (b.phase !== want) {
+    b.phase = want;
+    b.phaseFlash = 130;
+    b.state = 'idle'; b.timer = 70; b.atkCd = 40;
+    projs.length = 0;
+    burst(b.x, b.y, GAIA_COLORS[want - 1], 50);
+    shake = 16;
+  }
+}
+
+function updateGaiaLogic() {
+  checkGaiaPhase(boss);
+  const ph = boss.phase || 1;
+  const spdMul = 0.6 + ph * 0.22;
+  const dx = player.x + player.w / 2 - boss.x;
+  const dy = player.y + player.h / 2 - boss.y;
+  const d = Math.hypot(dx, dy);
+  const nx = (dx / d) || 1, ny = (dy / d) || 0;
+  boss.x += nx * boss.speed * spdMul;
+  boss.y += ny * boss.speed * spdMul;
+  boss.x = clamp(boss.x, 70, canvas.width - 70);
+  boss.y = clamp(boss.y, 90, canvas.height - 150);
+
+  if (boss.state === 'idle') {
+    if (d < 140 && boss.atkCd <= 0) { boss.atkCd = 55; hurtPlayer(boss.dmg); boss.hitFx = 8; }
+    else if (boss.atkCd <= 0 && d < 700) {
+      boss.atkCd = 40 + (5 - ph) * 6;
+      const pool = GAIA_POOLS[ph];
+      boss.state = pool[Math.floor(Math.random() * pool.length)];
+      boss.timer = (boss.state === 'gstorm' || boss.state === 'gquake' || boss.state === 'gbloom' || boss.state === 'grage') ? 80 : 50;
+    }
+  } else if (boss.state === 'groot') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      shake = 8;
+      const n = 10 + ph;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + 0.13; shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 10, '#4ade80'); }
+    }
+    if (boss.timer === 10) { const n = 8; for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 4.4, Math.sin(a) * 4.4, boss.projDmg, 10, '#86efac'); } }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gleaf') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const a = Math.atan2(dy, dx);
+      const n = 5 + Math.min(6, ph * 2);
+      for (let i = -(n >> 1); i <= (n >> 1); i++) {
+        shootBossProj(Math.cos(a + i * 0.18) * 5, Math.sin(a + i * 0.18) * 5, boss.projDmg, 8, '#a3e635');
+      }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gseed') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      burst(boss.x, boss.y, '#6ee7a0', 26);
+      const n = 12 + ph * 2;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.2, Math.sin(a) * 3.2, boss.projDmg, 8, '#6ee7a0'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gvine') {
+    boss.timer--;
+    if (boss.timer === 20) {
+      const a = Math.atan2(dy, dx);
+      for (let i = -2; i <= 2; i++) projs.push({ x: boss.x, y: boss.y, vx: Math.cos(a + i * 0.26) * 3.4, vy: Math.sin(a + i * 0.26) * 3.4, dmg: boss.projDmg, r: 10, friendly: false, color: '#4ade80', homing: true });
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'gring') {
+    boss.timer--;
+    if (boss.timer === 22) {
+      const n = 14 + ph * 2;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.9, Math.sin(a) * 3.9, boss.projDmg, 9, '#fde047'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gbeam') {
+    boss.timer--;
+    if (boss.timer % 5 === 0) {
+      const a = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.28;
+      shootBossProj(Math.cos(a) * 6, Math.sin(a) * 6, boss.projDmg, 6, '#fbbf24');
+      shootBossProj(Math.cos(a) * 6, Math.sin(a) * 6, boss.projDmg, 8, '#fff3c4');
+    }
+    if (boss.timer === 24) for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.8, Math.sin(a) * 3.8, boss.projDmg, 10, '#a3e635'); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 26; }
+  } else if (boss.state === 'gstorm') {
+    boss.timer--;
+    if (boss.timer % 3 === 0) projs.push({ x: player.x + player.w / 2 + (Math.random() * 520 - 260), y: -30, vx: 0, vy: 5.6, dmg: boss.projDmg * (ph >= 4 ? 1.15 : 1), r: 11, friendly: false, color: ph >= 4 ? '#fbbf24' : '#a3e635' });
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'gquake') {
+    boss.timer--;
+    if (boss.timer === 30) {
+      shake = 18;
+      const wy = canvas.height - 70;
+      projs.push({ x: boss.x - 46, y: wy, vx: -5.5, vy: 0, dmg: boss.projDmg, r: 18, friendly: false, color: '#6ee7a0', shock: true });
+      projs.push({ x: boss.x + 46, y: wy, vx: 5.5, vy: 0, dmg: boss.projDmg, r: 18, friendly: false, color: '#6ee7a0', shock: true });
+    }
+    if (boss.timer === 10) { burst(boss.x, boss.y, '#86efac', 26); if (d < 200) hurtPlayer(boss.dmg); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 28; }
+  } else if (boss.state === 'gbloom') {
+    boss.timer--;
+    if (boss.timer === 34) {
+      shake = 12;
+      const n = 16;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.6, Math.sin(a) * 3.6, boss.projDmg, 9, '#fde047'); }
+    }
+    if (boss.timer === 16) {
+      const n = 16;
+      for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + 0.15; shootBossProj(Math.cos(a) * 4.6, Math.sin(a) * 4.6, boss.projDmg * 1.1, 10, '#ff4d6d'); }
+    }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  } else if (boss.state === 'grage') {
+    boss.timer--;
+    if (boss.timer === 24) {
+      burst(boss.x, boss.y, '#ff4d6d', 60);
+      shake = 22;
+      for (let i = 0; i < 30; i++) { const a = (i / 30) * Math.PI * 2; shootBossProj(Math.cos(a) * 4.6, Math.sin(a) * 4.6, boss.projDmg * 1.1, 9, '#ff4d6d'); }
+    }
+    if (boss.timer === 10) for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; shootBossProj(Math.cos(a) * 3.4, Math.sin(a) * 3.4, boss.projDmg, 9, '#fde047'); }
+    if (boss.timer <= 0) { boss.state = 'idle'; boss.atkCd = 30; }
+  }
+}
+
+const GAIA_TALK = [
+  'Я — Гайя. Мать всех лесов и гор...',
+  'Зло проникло в моё сердце и раздирает его.',
+  'Ты очистил моих стражей от тьмы.',
+  'Теперь прими мою силу — и ИЗГОНИ ЗЛО НАВЕКИ!'
+];
+
+function startGaiaOutro() {
+  gaiaOutro = { t: 0, exploded: false, flash: 0, cores: [] };
+  boss.deathT = DEATH_TIME;
+  projs.length = 0;
+  shake = 12;
+}
+
+function updateGaiaOutro() {
+  const o = gaiaOutro;
+  o.t++;
+  if (!o.exploded) {
+    if (o.t === 140) {
+      o.exploded = true;
+      shake = 32;
+      burst(boss.x, boss.y, '#a7f3d0', 90);
+      burst(boss.x, boss.y, '#ffffff', 70);
+      burst(boss.x, boss.y, '#fde047', 60);
+      burst(boss.x, boss.y, '#4ade80', 80);
+      o.flash = 1;
+      for (let i = 0; i < 26; i++) {
+        o.cores.push({ x: boss.x + (Math.random() - 0.5) * 120, y: boss.y + (Math.random() - 0.5) * 120, vx: (Math.random() - 0.5) * 9, vy: (Math.random() - 0.5) * 9 - 2, s: 3 + Math.random() * 8, c: ['#a7f3d0', '#fde047', '#ffffff', '#4ade80'][Math.floor(Math.random() * 4)] });
+      }
+    }
+  } else {
+    if (o.flash > 0) o.flash = Math.max(0, o.flash - 0.02);
+    if (o.t % 5 === 0) burst(boss.x + (Math.random() - 0.5) * 200, boss.y + (Math.random() - 0.5) * 160, ['#a7f3d0', '#fde047', '#4ade80'][Math.floor(Math.random() * 3)], 14);
+    if (o.t % 12 === 0) shake = Math.max(shake, 10);
+    for (let i = o.cores.length - 1; i >= 0; i--) {
+      const c = o.cores[i];
+      c.x += c.vx; c.y += c.vy; c.vy += 0.14;
+      if (c.y > canvas.height) o.cores.splice(i, 1);
+    }
+    if (o.t >= 260) {
+      gameOver = true; win = true;
+      registerBossDefeat();
+      letterShown = true;
+      gaiaOutro = null;
+      boss.deathT = 0;
+      shake = 10;
+    }
+  }
+}
+
+function drawGaiaOutro() {
+  const o = gaiaOutro;
+  if (!o) return;
+  ctx.textAlign = 'center';
+  if (!o.exploded) {
+    const lineIdx = o.t <= 34 ? 0 : o.t <= 70 ? 1 : o.t <= 106 ? 2 : 3;
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.font = 'bold 26px Segoe UI, Arial';
+    ctx.strokeStyle = 'rgba(0,0,0,.85)';
+    ctx.lineWidth = 6;
+    const ty = 150 + Math.sin(o.t * 0.2) * 3;
+    ctx.strokeText('ГАЙЯ: «' + GAIA_TALK[lineIdx] + '»', canvas.width / 2, ty);
+    ctx.fillText('ГАЙЯ: «' + GAIA_TALK[lineIdx] + '»', canvas.width / 2, ty);
+  } else {
+    for (const c of o.cores) {
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = c.c;
+      ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.x + c.y);
+      ctx.fillRect(-c.s / 2, -c.s / 2, c.s, c.s); ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+    const fade = Math.min(1, (o.t - 140) / 26);
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = '#a7f3d0';
+    ctx.font = 'bold 48px Segoe UI, Arial';
+    ctx.strokeStyle = 'rgba(0,0,0,.85)';
+    ctx.lineWidth = 8;
+    ctx.strokeText('ВСЁ ЗЛО ИЗГНАНО!', canvas.width / 2, 190);
+    ctx.fillText('ВСЁ ЗЛО ИЗГНАНО!', canvas.width / 2, 190);
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 30px Segoe UI, Arial';
+    ctx.strokeText('ТЫ ПОБЕДИЛ, ГЕРОЙ!', canvas.width / 2, 240);
+    ctx.fillText('ТЫ ПОБЕДИЛ, ГЕРОЙ!', canvas.width / 2, 240);
+    ctx.globalAlpha = 1;
+  }
+  if (o.flash > 0) {
+    ctx.fillStyle = 'rgba(220,255,230,' + o.flash + ')';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
 
@@ -5413,7 +5650,7 @@ function drawElfBoss() {
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, boss.r * 1.7 + Math.sin(t * 4) * 7, t * 1.4, t * 1.4 + 0.9); ctx.stroke();
   }
-  const dmg = { elf1: drawElf1, elf2: drawElf2, elf3: drawElf3, elf4: drawElf4, elf5: drawElf5, elf6: drawElf6, elf7: drawElf7, elf8: drawElf8, elf9: drawElf9, elf10: drawElf10 };
+  const dmg = { elf1: drawElf1, elf2: drawElf2, elf3: drawElf3, elf4: drawElf4, elf5: drawElf5, elf6: drawElf6, elf7: drawElf7, elf8: drawElf8, elf9: drawElf9, elf10: drawElf10, elf11: drawElf11 };
   if (dmg[boss.id]) dmg[boss.id]();
   if (boss.hitFx > 0) {
     ctx.globalAlpha = Math.min(0.45, 0.45 * (boss.hitFx / 8));
@@ -5709,6 +5946,123 @@ function drawElf10() {
     ctx.strokeStyle = 'rgba(255,77,109,.7)'; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(0, 0, 46, t, t + 1.6); ctx.stroke();
   }
+}
+
+function drawElf11() {
+  const t = performance.now() / 1000;
+  const ph = boss.phase || 1;
+  if (gaiaOutro && gaiaOutro.exploded) {
+    ctx.fillStyle = 'rgba(167,243,208,.9)';
+    ctx.globalAlpha = Math.max(0, 1 - (gaiaOutro.t - 140) / 90);
+    ctx.beginPath(); ctx.arc(0, 0, Math.max(4, 40 - (gaiaOutro.t - 140) * 0.3), 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+  const calm = ph === 1;
+  const veined = ph === 2;
+  const crystal = ph === 3;
+  const amber = ph === 4;
+  const rage = ph === 5;
+  const skin = calm ? '#9fc4a5' : veined ? '#8fbd99' : crystal ? '#7fd9a0' : amber ? '#b8a86e' : '#b98a6b';
+  const stone = calm ? '#6a8f74' : veined ? '#5f8a68' : crystal ? '#4e9a6c' : amber ? '#8f7a4a' : '#7a5a44';
+  const veinC = rage ? '#ff4d6d' : amber ? '#fbbf24' : crystal ? '#a3e635' : veined ? '#86efac' : '#6ee7a0';
+  const eyeC = rage ? '#ff4d6d' : amber ? '#fbbf24' : crystal ? '#fde047' : veined ? '#a7f3d0' : '#fef3c7';
+  const unstable = rage ? 0.5 + 0.5 * Math.abs(Math.sin(t * 6)) : Math.max(0, (ph - 1) * 0.08);
+  if (unstable > 0) ctx.translate((Math.random() - 0.5) * unstable * 7, (Math.random() - 0.5) * unstable * 7);
+
+  // unstable aura
+  const auraR = 120 + Math.sin(t * 3) * (rage ? 16 : 8);
+  ctx.fillStyle = GAIA_COLORS[ph - 1] + '2e';
+  ctx.beginPath(); ctx.arc(0, -6, auraR, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = GAIA_COLORS[ph - 1] + '88';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, -6, auraR, t * 1.6, t * 1.6 + (rage ? 2.4 : 1.1)); ctx.stroke();
+
+  // roots halo
+  ctx.strokeStyle = stone; ctx.lineWidth = 5;
+  for (let i = 0; i < 7; i++) {
+    const a = t * 0.5 + i * 0.9;
+    const rx = Math.cos(a) * 96, ry = -4 + Math.sin(a) * 62;
+    ctx.beginPath(); ctx.moveTo(rx * 0.5, ry * 0.5);
+    ctx.quadraticCurveTo(rx, ry, rx * 1.2, ry + 18);
+    ctx.stroke();
+  }
+
+  // stone gown
+  ctx.fillStyle = stone;
+  ctx.beginPath();
+  ctx.moveTo(-46, 52); ctx.lineTo(-30, -8); ctx.quadraticCurveTo(-14, -22, 0, -20);
+  ctx.quadraticCurveTo(14, -22, 30, -8); ctx.lineTo(46, 52);
+  ctx.closePath(); ctx.fill();
+
+  // gown cracks
+  ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-24, 30); ctx.lineTo(-14, 8); ctx.lineTo(-20, -8);
+  ctx.moveTo(22, 26); ctx.lineTo(14, 6); ctx.lineTo(20, -10);
+  ctx.moveTo(-8, 44); ctx.lineTo(0, 26); ctx.lineTo(8, 44);
+  ctx.stroke();
+
+  // glowing veins
+  if (!calm) {
+    ctx.strokeStyle = veinC; ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.5 + 0.4 * Math.sin(t * 4);
+    ctx.beginPath();
+    ctx.moveTo(-22, 44); ctx.quadraticCurveTo(-10, 20, 0, -6); ctx.quadraticCurveTo(8, 18, 20, 46);
+    ctx.moveTo(-6, 46); ctx.quadraticCurveTo(0, 24, 4, 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // energy core
+  const cg = ctx.createRadialGradient(0, -6, 2, 0, -6, 26);
+  cg.addColorStop(0, rage ? '#ff4d6d' : amber ? '#fde047' : crystal ? '#a7f3d0' : veined ? '#86efac' : '#6ee7a0');
+  cg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = cg;
+  ctx.beginPath(); ctx.arc(0, -6, 22 + Math.sin(t * 4) * (rage ? 6 : 3), 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = rage ? '#ff4d6d' : amber ? '#fbbf24' : '#a7f3d0';
+  ctx.beginPath(); ctx.arc(0, -6, 9 + Math.sin(t * 5) * 2, 0, Math.PI * 2); ctx.fill();
+
+  // arms
+  ctx.strokeStyle = skin; ctx.lineWidth = 12;
+  ctx.beginPath(); ctx.moveTo(-30, -6); ctx.quadraticCurveTo(-54, 6, -52, 30); ctx.moveTo(30, -6); ctx.quadraticCurveTo(54, 6, 52, 30); ctx.stroke();
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(-52, 34, 8, 0, Math.PI * 2); ctx.arc(52, 34, 8, 0, Math.PI * 2); ctx.fill();
+
+  // head
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.moveTo(-20, -56); ctx.lineTo(-15, -92); ctx.lineTo(15, -92); ctx.lineTo(20, -56); ctx.closePath(); ctx.fill();
+
+  // face
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(0, -62, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = eyeC;
+  ctx.beginPath(); ctx.arc(-6, -64, rage ? 4.5 : 3.5, 0, Math.PI * 2); ctx.arc(6, -64, rage ? 4.5 : 3.5, 0, Math.PI * 2); ctx.fill();
+
+  // crown of branches
+  ctx.strokeStyle = stone; ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, -92); ctx.lineTo(0, -112);
+  ctx.moveTo(-12, -90); ctx.lineTo(-22, -102); ctx.lineTo(-26, -116);
+  ctx.moveTo(12, -90); ctx.lineTo(22, -102); ctx.lineTo(26, -116);
+  ctx.stroke();
+  ctx.fillStyle = rage ? '#ff4d6d' : amber ? '#fbbf24' : '#a3e635';
+  for (let i = 0; i < 5; i++) {
+    ctx.save(); ctx.translate(-24 + i * 12, -104); ctx.rotate(i * 0.6 + Math.sin(t + i));
+    ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+
+  // floating leaves / energy motes
+  ctx.fillStyle = GAIA_COLORS[ph - 1];
+  for (let i = 0; i < (rage ? 12 : 7); i++) {
+    const a = t * 1.5 + i * 0.524;
+    const px = Math.cos(a) * (110 + Math.sin(t * 1.8 + i) * 8);
+    const py = -4 + Math.sin(a) * (78 + Math.cos(t * 1.4 + i) * 6);
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 3 + i);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(a);
+    ctx.beginPath(); ctx.ellipse(0, 0, 6, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawEmpressSprite(ph, seated, t) {
@@ -7414,6 +7768,22 @@ function drawDevLetter() {
     'Спасибо за то, что дошёл до конца.',
     '',
     'С любовью, твой разработчик ❤️'
+  ] : boss.id === 'elf11' ? [
+    'Дорогой игрок!',
+    '',
+    'ГАЙЯ ИЗГНАНА! Древняя мать лесов и гор',
+    'закрыла глаза навсегда. Её последний вздох',
+    'прошёл по всем измерениям — и каждое',
+    'из них содрогнулось от освобождения.',
+    '',
+    'Всё зло, что копилось в мирах веками,',
+    'сгорело в её священном пламени. Леса',
+    'снова поют, реки вновь чисты, а тьма',
+    'больше никогда не посмеет поднять голову.',
+    '',
+    'Ты сделал это. Ты — истинный хранитель.',
+    '',
+    'С любовью, твой разработчик ❤️'
   ] : boss.id === 'sky11' ? [
     'Дорогой игрок!',
     '',
@@ -7595,6 +7965,7 @@ function draw() {
   }
 
   if (gameOver) drawGameOver();
+  if (gaiaOutro) drawGaiaOutro();
   drawFloatTexts();
   drawComboHud();
   drawDashCd();
